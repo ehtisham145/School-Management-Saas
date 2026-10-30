@@ -1,6 +1,6 @@
 # Tech Stack
 
-_Decided 2026-10-30. Pin exact versions in `pyproject.toml` / `package.json` at project setup._
+_Decided 2026-10-30. Pin exact versions in `backend/requirements/*.txt` / `package.json` at project setup._
 
 Guiding principles for this project:
 - **One developer + AI agent** → boring, well-documented, popular tools (AI writes better code for them), few moving parts.
@@ -11,7 +11,8 @@ Guiding principles for this project:
 
 | Layer | Choice | Alternative (and when to pick it) |
 |---|---|---|
-| Backend | **Django 5.2 LTS + Django REST Framework**, Python 3.13 | FastAPI — only if the backend becomes a thin API with no need for Django's auth/admin/ORM |
+| Backend | **Django 5.2 LTS + Django REST Framework**, Python 3.11 (same version locally and in the Docker image) | FastAPI — only if the backend becomes a thin API with no need for Django's auth/admin/ORM |
+| Python packages | **pip + venv**, pinned `requirements/{base,dev,prod}.txt` | uv / Poetry — not needed for one developer |
 | API contract | **drf-spectacular** (OpenAPI) → generated TypeScript client | Hand-written fetch wrappers — not worth it |
 | Frontend | **Next.js (App Router) + TypeScript + Tailwind CSS + shadcn/ui** | Vite + React SPA + separate Astro marketing site — if SSR ever becomes a burden |
 | i18n | **next-intl** (frontend), Django i18n (emails/PDFs) | — |
@@ -29,7 +30,8 @@ Guiding principles for this project:
 | Email (sending) | **django-anymail → Amazon SES** | Brevo (300/day free) — fine for week 1; SES once volume grows |
 | Email (mailbox) | **Zoho Mail free** (info@, sales@) | Google Workspace — if the client wants Gmail |
 | Hosting | **Oracle Cloud (OCI) Riyadh `me-riyadh-1`**, 1 Ampere A1 VM | Local Saudi VPS (Wafai Cloud etc.) or AWS Saudi region (launching Dec 2026) |
-| Runtime | **Docker Compose + Caddy** (auto HTTPS) on Ubuntu 24.04 | Nginx + certbot — you know it, but Caddy is less config |
+| Runtime | **Docker Compose + Caddy** (auto HTTPS) on Ubuntu 24.04 — servers only | Nginx + certbot — you know it, but Caddy is less config |
+| Local dev | **Two modes:** laptop without Docker (native Postgres, no Redis), desktop with Docker Desktop (Postgres + Redis containers). See [development.md](development.md) | — |
 | CI/CD | **GitHub Actions → GHCR → SSH deploy** | — |
 | Errors | **Sentry** (free tier, PII scrubbing on) | GlitchTip self-hosted — if no data may leave KSA, even error traces |
 | Uptime | **UptimeRobot / Better Stack free** (external) | — |
