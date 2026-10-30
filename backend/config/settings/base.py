@@ -81,7 +81,7 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 # ---------------------------------------------------------------- Language & time
-LANGUAGE_CODE = "ar"
+LANGUAGE_CODE = "en"
 LANGUAGES = [("ar", "العربية"), ("en", "English")]
 LOCALE_PATHS = [BASE_DIR / "locale"]
 USE_I18N = True
