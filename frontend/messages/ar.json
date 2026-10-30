@@ -2,6 +2,9 @@
   "Home": {
     "title": "نظام إدارة المدارس",
     "subtitle": "منصة واحدة لإدارة مدرستك بالكامل",
-    "switchLanguage": "English"
+    "switchLanguage": "English",
+    "demoTitle": "تسجيل الدخول",
+    "emailPlaceholder": "البريد الإلكتروني",
+    "submit": "متابعة"
   }
 }

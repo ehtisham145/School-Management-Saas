@@ -3,6 +3,7 @@ import { Geist, IBM_Plex_Sans_Arabic } from "next/font/google";
 import { notFound } from "next/navigation";
 import { hasLocale, NextIntlClientProvider } from "next-intl";
 import { setRequestLocale } from "next-intl/server";
+import { DirectionProvider } from "@/components/ui/direction";
 import { routing } from "@/i18n/routing";
 import "../globals.css";
 
@@ -25,15 +26,18 @@ export default async function LocaleLayout({ children, params }: LayoutProps<"/[
   const { locale } = await params;
   if (!hasLocale(routing.locales, locale)) notFound();
   setRequestLocale(locale);
+  const dir = locale === "ar" ? "rtl" : "ltr";
 
   return (
     <html
       lang={locale}
-      dir={locale === "ar" ? "rtl" : "ltr"}
+      dir={dir}
       className={`${geistSans.variable} ${plexArabic.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
-        <NextIntlClientProvider>{children}</NextIntlClientProvider>
+        <DirectionProvider direction={dir}>
+          <NextIntlClientProvider>{children}</NextIntlClientProvider>
+        </DirectionProvider>
       </body>
     </html>
   );
