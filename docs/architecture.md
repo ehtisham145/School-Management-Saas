@@ -168,6 +168,8 @@ Host cron:     nightly pg_dump → encrypted → OCI Object Storage (Jeddah) ; w
 
 Secrets live in a `.env` on the VM (chmod 600) and in GitHub Actions secrets, never in git.
 
+Local development does **not** use the production compose file. Redis is optional locally; the settings switch to in-memory fallbacks when `REDIS_URL` is unset. See [development.md](development.md) and [ADR-0008](decisions/0008-local-development-without-docker.md).
+
 ## 10. Code organization
 
 ```
@@ -191,7 +193,8 @@ lms/
 │   │   └── integrations/       email/, payments/, ai/ adapters
 │   ├── templates/              emails/, pdf/
 │   ├── locale/                 ar/ en/
-│   └── pyproject.toml
+│   ├── requirements/           base.txt, dev.txt, prod.txt   (pip, pinned)
+│   └── pyproject.toml          ruff + pytest config only
 ├── frontend/
 │   ├── src/app/[locale]/
 │   │   ├── (marketing)/        home, features, pricing, demo-request   ← SSG, SEO

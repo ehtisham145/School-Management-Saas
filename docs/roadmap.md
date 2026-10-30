@@ -8,8 +8,9 @@ _Rule for the sprint: **cut features, never security** (isolation, auth, backups
 Goal: one or two real schools can run daily operations.
 
 ### Week 1 — Foundation
-- [ ] Monorepo, Docker Compose (dev), pre-commit (ruff, eslint, prettier)
-- [ ] Django project, settings split, Postgres, Redis, Celery, Channels wired
+- [ ] Monorepo, `CLAUDE.md`, pre-commit (ruff, eslint, prettier), `.env.example`
+- [ ] Local dev in both modes ([development.md](development.md)): laptop without Docker, desktop with `docker-compose.dev.yml` (Postgres + Redis)
+- [ ] Django project, settings split, Postgres, Celery, Channels wired; Redis optional via `REDIS_URL`
 - [ ] `TenantModel`, `TenantMiddleware`, `TenantScopedViewSet`, policies, cross-tenant test fixture
 - [ ] Accounts: User, email/password, username/password, email OTP, TOTP 2FA, axes, throttling
 - [ ] Membership + roles, school switcher
