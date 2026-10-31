@@ -8,14 +8,16 @@ _Rule for the sprint: **cut features, never security** (isolation, auth, backups
 Goal: one or two real schools can run daily operations.
 
 ### Week 1 — Foundation
-- [ ] Monorepo, `CLAUDE.md`, pre-commit (ruff, eslint, prettier), `.env.example`
-- [ ] Local dev in both modes ([development.md](development.md)): laptop without Docker, desktop with `docker-compose.dev.yml` (Postgres + Redis)
-- [ ] Django project, settings split, Postgres, Celery, Channels wired; Redis optional via `REDIS_URL`
+- [x] Monorepo, `CLAUDE.md`, pre-commit (ruff, eslint, prettier), `.env.example`
+- [x] Local dev in both modes ([development.md](development.md)): laptop without Docker, desktop with `infra/docker-compose.dev.yaml` (Postgres + Redis) — desktop not yet verified
+- [x] Django project, settings split, Postgres, ruff + pytest; Redis optional via `REDIS_URL`
+- [ ] Celery app (`config/celery.py`) and Channels ASGI routing wired
 - [ ] `TenantModel`, `TenantMiddleware`, `TenantScopedViewSet`, policies, cross-tenant test fixture
 - [ ] Accounts: User, email/password, username/password, email OTP, TOTP 2FA, axes, throttling
 - [ ] Membership + roles, school switcher
 - [ ] Super Admin: create school + its admin (Django admin is acceptable for week 1)
-- [ ] Next.js app: `[locale]` routing, RTL/LTR layouts, shadcn base, login flows, generated API client
+- [x] Next.js 16 app: `[locale]` routing (next-intl, default `en`), RTL/LTR layouts, Arabic font, shadcn/ui base (RTL), Prettier
+- [ ] Login flows, generated API client
 - [ ] OCI VM provisioned, Caddy, CI pipeline, **staging live**
 
 ### Week 2 — Academics core
