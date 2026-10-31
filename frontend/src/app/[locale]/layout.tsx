@@ -34,7 +34,7 @@ export default async function LocaleLayout({ children, params }: LayoutProps<"/[
       dir={dir}
       className={`${geistSans.variable} ${plexArabic.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">
+      <body className="flex min-h-full flex-col">
         <DirectionProvider direction={dir}>
           <NextIntlClientProvider>{children}</NextIntlClientProvider>
         </DirectionProvider>

@@ -11,4 +11,3 @@ pre-commit>=4.2 # stop the git to commit erro code
 pytest>=8.3
 pytest-django>=4.10  # test cases for django library
 factory-boy>=3.3 # generate fake data
-
