@@ -8,14 +8,14 @@ Two machines, one codebase. The only difference is the `.env` file.
 |---|---|---|
 | Docker | No | Docker Desktop |
 | Python | 3.11 + `venv` + `pip` | 3.11 + `venv` + `pip` |
-| PostgreSQL 17 | Installed natively on Windows | Container from `infra/docker-compose.dev.yml` |
-| Redis | Not used | Container from `infra/docker-compose.dev.yml` |
+| PostgreSQL 17 | Installed natively on Windows | Container from `infra/docker-compose.dev.yaml` |
+| Redis | Not used | Container from `infra/docker-compose.dev.yaml` |
 | Node.js | 24 (npm) | 24 (npm) |
 
 Django, Celery and Next.js run **natively on both machines** (not in Docker), so hot reload stays fast. Docker on the desktop only runs the services.
 
 ### Redis-optional settings
-`config/settings/dev.py` checks `REDIS_URL`:
+`config/settings/base.py` checks `REDIS_URL`:
 
 | | `REDIS_URL` set (desktop, servers) | `REDIS_URL` unset (laptop) |
 |---|---|---|
@@ -28,25 +28,83 @@ Django, Celery and Next.js run **natively on both machines** (not in Docker), so
 
 Production is always Redis + Docker. Laptop-only testing is not enough for changes to background jobs or real-time features; check them on staging.
 
-### First-time setup (outline — exact commands added with the project skeleton)
+### First-time setup
+
+Prerequisites: Git, Python 3.11, Node 24. Laptop: PostgreSQL 17 installed natively. Desktop: Docker Desktop (WSL 2).
+
+**1. Clone**
 ```
-# backend
+git clone https://github.com/ehtisham145/school-management-saas.git
+cd school-management-saas
+```
+
+**2. Database**
+
+Laptop — create the user and database once with psql:
+```
+& "C:\Program Files\PostgreSQL\17\bin\psql.exe" -U postgres
+```
+```sql
+CREATE USER school_saas WITH PASSWORD 'devpass123';
+CREATE DATABASE school_saas OWNER school_saas;
+ALTER USER school_saas CREATEDB;   -- pytest creates a test database
+\q
+```
+
+Desktop — start Postgres + Redis containers (same user/password/db as above):
+```
+docker compose -f infra/docker-compose.dev.yaml up -d
+```
+
+**3. Backend** (PowerShell)
+```
 cd backend
 py -3.11 -m venv .venv
-.venv\Scripts\activate
+.venv\Scripts\Activate.ps1          # if blocked: Set-ExecutionPolicy -Scope CurrentUser RemoteSigned
 pip install -r requirements/dev.txt
-copy .env.example .env          # fill DATABASE_URL; set REDIS_URL only on the desktop
-python manage.py migrate
-python manage.py runserver
-
-# desktop only: services
-docker compose -f infra/docker-compose.dev.yml up -d
-
-# frontend
-cd frontend
-npm install
-npm run dev
+copy .env.example .env
+python -c "from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())"
 ```
+Fill `.env`:
+```
+SECRET_KEY='<generated key, in single quotes>'
+DATABASE_URL=postgres://school_saas:devpass123@localhost:5432/school_saas
+REDIS_URL=redis://localhost:6379/0   # desktop only — leave out on the laptop
+```
+Special characters in the DB password must be URL-encoded in `DATABASE_URL` (`@` → `%40`, `#` → `%23`).
+```
+python manage.py migrate
+pytest
+python manage.py runserver          # http://127.0.0.1:8000
+```
+
+**4. Frontend**
+```
+cd ../frontend
+npm install
+npm run dev                         # http://localhost:3000 → /en or /ar
+```
+
+**5. Git hooks** (from the repo root, with the backend venv active)
+```
+pre-commit install
+pre-commit run --all-files          # first run may "fail" after auto-fixing files; run it again
+```
+
+### Everyday commands
+
+| Where | Command | Purpose |
+|---|---|---|
+| backend | `ruff check . --fix` | Lint + auto-fix |
+| backend | `ruff format .` | Format |
+| backend | `pytest` | Tests |
+| frontend | `npm run lint` | ESLint |
+| frontend | `npm run format` / `npm run format:check` | Prettier write / check |
+| frontend | `npx tsc --noEmit` | Type check |
+| frontend | `npm run build` | Production build (catches errors `dev` hides) |
+| root | `pre-commit run --all-files` | All hooks on every file |
+
+Switching machines: always `git pull` before starting work, and commit + push before leaving.
 
 ## 2. Git workflow
 - `main` is always deployable. No direct commits to `main`.
@@ -72,7 +130,7 @@ test(exams): add cross-tenant tests for marks API
 | `eslint` + `prettier` | TypeScript/React lint + format |
 | `tsc --noEmit` | TypeScript type errors (strict mode) |
 | `pytest` | Backend tests |
-| `pre-commit` | Runs ruff/eslint/prettier before each commit |
+| `pre-commit` | Before each commit: whitespace/EOF fixes, YAML check, large-file and private-key guards, ruff, eslint, prettier (`.pre-commit-config.yaml`) |
 
 CI runs all of these on every PR.
 

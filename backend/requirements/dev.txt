@@ -1,0 +1,13 @@
+-r base.txt
+
+# Asyncrnous dev server (HTTP + WebSocket)
+uvicorn[standard]>=0.34
+
+# Quality
+ruff>=0.11  # package used for remove unused import and maintain code format and style
+pre-commit>=4.2 # stop the git to commit erro code
+
+# Tests
+pytest>=8.3
+pytest-django>=4.10  # test cases for django library
+factory-boy>=3.3 # generate fake data

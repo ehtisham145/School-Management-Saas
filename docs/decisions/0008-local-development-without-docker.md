@@ -9,7 +9,7 @@ Development happens on two machines: an office laptop with 8 GB RAM, where Docke
 ## Decision
 - Docker is **required only on servers** (staging/production) and in CI image builds.
 - Laptop: native PostgreSQL 17, no Redis. Settings fall back to in-memory cache, eager Celery and `InMemoryChannelLayer` when `REDIS_URL` is unset.
-- Desktop: Docker Desktop runs Postgres + Redis via `infra/docker-compose.dev.yml`; the app itself runs natively.
+- Desktop: Docker Desktop runs Postgres + Redis via `infra/docker-compose.dev.yaml`; the app itself runs natively.
 - **Python 3.11** everywhere, including the production Docker image (`python:3.11-slim`), so local and server match. Django 5.2 LTS supports it; Python 3.11 receives security fixes until Oct 2027 — plan an upgrade before then.
 - **pip + venv** with pinned `requirements/{base,dev,prod}.txt`.
 
