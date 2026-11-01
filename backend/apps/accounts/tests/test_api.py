@@ -95,3 +95,18 @@ def test_logout_requires_login_again(api_client, two_schools):
     response = api_client.post("/api/auth/switch-school/", {"membership_id": membership.id})
 
     assert response.status_code in (401, 403)
+
+
+@pytest.mark.django_db
+def test_login_locks_out_after_five_failed_attempts(api_client):
+    User.objects.create_user(username="teacher1", password="correct-pass123")
+
+    for _ in range(5):
+        api_client.post("/api/auth/login/", {"username": "teacher1", "password": "wrong-pass"})
+
+    response = api_client.post(
+        "/api/auth/login/", {"username": "teacher1", "password": "correct-pass123"}
+    )
+
+    assert response.status_code == 401
+    assert response.data["error"]["code"] == "invalid_credentials"
