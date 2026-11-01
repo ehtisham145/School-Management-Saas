@@ -79,6 +79,10 @@ cd ../frontend
 npm install
 npm run dev                         # http://localhost:3000 → /en or /ar
 ```
+`next.config.ts` rewrites `/api/*` to the Django backend so the browser and
+API share an origin locally (same as production, where Caddy does this
+instead). It defaults to `http://127.0.0.1:8000`; copy `.env.example` to
+`.env.local` only if your backend runs somewhere else.
 
 **5. Git hooks** (from the repo root, with the backend venv active)
 ```
@@ -105,7 +109,7 @@ Switching machines: always `git pull` before starting work, and commit + push be
 - `main` is always deployable. No direct commits to `main`.
 - One branch per task: `feature/attendance`, `fix/login-otp`, `docs/...`, `chore/...`.
 - Open a PR, CI must be green, run an AI review, then merge. Delete the branch after merging.
-- Keep PRs small: one feature or one fix.
+- Scope a PR to one complete, working module — not a tiny fragment (e.g. "add a model" alone), and not a sprawling grab-bag either. When two pieces share real infrastructure (e.g. TOTP 2FA and email OTP both need the same Celery/email setup), build them together in one PR rather than splitting purely for size. The bar: after merge, that one thing works end-to-end.
 - Merging to `main` deploys automatically (once CI/CD is set up).
 
 ## 3. Commit messages (Conventional Commits)

@@ -1,10 +1,407 @@
 {
-  "Home": {
-    "title": "School Management System",
-    "subtitle": "One platform to run your whole school",
-    "switchLanguage": "العربية",
-    "demoTitle": "Sign in",
-    "emailPlaceholder": "Email address",
-    "submit": "Continue"
+  "Auth": {
+    "login": {
+      "title": "Sign in",
+      "usernameLabel": "Username",
+      "usernamePlaceholder": "Enter your username",
+      "passwordLabel": "Password",
+      "passwordPlaceholder": "Enter your password",
+      "submit": "Sign in",
+      "submitting": "Signing in...",
+      "errors": {
+        "invalidCredentials": "Incorrect username or password.",
+        "rateLimited": "Too many attempts. Please try again in a few minutes.",
+        "generic": "Something went wrong. Please try again."
+      }
+    },
+    "schoolPicker": {
+      "title": "Choose a school",
+      "description": "Your account is linked to more than one school. Select one to continue.",
+      "errors": {
+        "notFound": "That school could not be selected. Please try again.",
+        "generic": "Something went wrong. Please try again."
+      }
+    }
+  },
+  "Dashboard": {
+    "title": "Dashboard",
+    "welcome": "Signed in as {role} at {school}.",
+    "placeholder": "This is a placeholder dashboard. Real features are coming soon.",
+    "logoutButton": "Log out",
+    "loggingOut": "Logging out..."
+  },
+  "Roles": {
+    "SCHOOL_ADMIN": "School Admin",
+    "PRINCIPAL": "Principal",
+    "TEACHER": "Teacher",
+    "STUDENT": "Student",
+    "PARENT": "Parent"
+  },
+  "Marketing": {
+    "nav": {
+      "brand": "Schoolify",
+      "home": "Home",
+      "features": "Features",
+      "pricing": "Pricing",
+      "about": "About",
+      "contact": "Contact",
+      "cta": "Book a demo",
+      "signIn": "Sign in",
+      "toggleMenu": "Toggle menu"
+    },
+    "common": {
+      "whatsappLabel": "Chat on WhatsApp",
+      "bookDemo": "Book a demo",
+      "talkToUs": "Talk to us"
+    },
+    "footer": {
+      "tagline": "The record your school runs on. Built for private schools in Saudi Arabia.",
+      "productHeading": "Product",
+      "companyHeading": "Company",
+      "talkHeading": "Talk to us",
+      "copyright": "© 2026 Schoolify. All rights reserved.",
+      "demoNote": "Demo content — final copy and branding to follow approval."
+    },
+    "home": {
+      "hero": {
+        "eyebrow": "School operations — Saudi Arabia",
+        "titleLead": "One record for every",
+        "words": [
+          "attendance sheet.",
+          "report card.",
+          "fee receipt.",
+          "parent message.",
+          "timetable change."
+        ],
+        "lede": "Schoolify brings attendance, exams, fees, timetable and messages for your whole school into one bilingual system — built around how private schools in Saudi Arabia actually run their week, not a translated import.",
+        "ctaPrimary": "Book a demo",
+        "ctaSecondary": "See how it works",
+        "statAr": "AR / EN",
+        "statArLabel": "Every screen, both languages",
+        "statHijri": "هـ / م",
+        "statHijriLabel": "Hijri dates beside Gregorian",
+        "statRoles": "5",
+        "statRolesLabel": "Roles, one system each"
+      },
+      "heroCards": {
+        "timetableLabel": "Timetable — Grade 6B",
+        "timetableValue": "Sunday, Period 3",
+        "feesLabel": "Fee statement",
+        "feesValue": "Term 2 — due",
+        "attendanceLabel": "Attendance — today",
+        "attendanceValue": "31 / 32 present"
+      },
+      "trust": {
+        "lead": "Built around how a Saudi private school's week actually runs.",
+        "chips": [
+          "Arabic & English, side by side",
+          "Hijri + Gregorian together",
+          "One login per role",
+          "Sunday–Thursday week"
+        ]
+      },
+      "features": {
+        "eyebrow": "What Schoolify runs",
+        "title": "Every part of the school day, in one record.",
+        "items": [
+          {
+            "title": "Attendance",
+            "description": "Mark a section in under a minute, with the day's pattern visible before you close it."
+          },
+          {
+            "title": "Exams & report cards",
+            "description": "Enter marks once. Report cards, in Arabic and English, assemble themselves at term's end."
+          },
+          {
+            "title": "Fees",
+            "description": "See what's due, paid, or overdue for every student — by grade, section, or family."
+          },
+          {
+            "title": "Timetable",
+            "description": "Build the week once a term. A change to one section never collides with another."
+          },
+          {
+            "title": "Messages",
+            "description": "Announcements reach the right audience — a grade, a section, a family — not everyone."
+          },
+          {
+            "title": "Bilingual by design",
+            "description": "Arabic and English live in the same record, not a translated afterthought."
+          }
+        ]
+      },
+      "how": {
+        "eyebrow": "Getting started",
+        "title": "Three steps, not a migration project.",
+        "steps": [
+          {
+            "title": "Set up your school",
+            "description": "Add your academic year, grades, sections and staff. Takes an afternoon, not a term."
+          },
+          {
+            "title": "Run the week",
+            "description": "Attendance, lessons, fees and messages happen where your staff already are."
+          },
+          {
+            "title": "Close the term",
+            "description": "Report cards and fee statements compile from what's already on record — nothing re-entered."
+          }
+        ]
+      },
+      "quote": {
+        "text": "Before, report cards took our staff a full week to prepare by hand. Now they're ready the same afternoon classes end.",
+        "attribution": "Placeholder Principal — Placeholder School, Riyadh",
+        "sampleNote": "Sample quote for layout — to be replaced with a real one."
+      },
+      "cta": {
+        "title": "Ready to put your school's year in one record?",
+        "description": "Book a short call — see Schoolify with your own school's grades and sections, not a generic demo.",
+        "button": "Book a demo"
+      }
+    },
+    "features": {
+      "hero": {
+        "eyebrow": "Product",
+        "titleLead": "Built to run a",
+        "words": ["Sunday morning.", "exam week.", "fee deadline.", "parent evening.", "report card day."],
+        "lede": "Every module below is part of the same record. Mark attendance in the morning and it is already reflected in the afternoon's absence digest — nothing exported, nothing re-entered."
+      },
+      "gridEyebrow": "Six modules, one record",
+      "gridTitle": "Jump to what your school needs most.",
+      "groups": {
+        "attendance": {
+          "tag": "Attendance",
+          "blurb": "Mark a section in under a minute, pattern visible before you close it.",
+          "title": "Attendance that matches how the day actually runs.",
+          "description": "Teachers mark a section from their own device in under a minute. Admins see today's pattern across the whole school before the first bell has finished ringing.",
+          "bullets": [
+            "Mark a whole section in under a minute",
+            "Daily pattern visible before you close the register",
+            "Parents see same-day absence, not a weekly summary"
+          ]
+        },
+        "exams": {
+          "tag": "Exams & report cards",
+          "blurb": "Enter marks once — report cards assemble themselves.",
+          "title": "Marks entered once. Report cards write themselves.",
+          "description": "Teachers enter marks against the exam structure you set once per term. When the term closes, report cards generate in Arabic and English — no copy-pasting into a template.",
+          "bullets": [
+            "One mark entry, used everywhere it's needed",
+            "Report cards in Arabic and English from the same data",
+            "Grade scales set once per school, reused every term"
+          ]
+        },
+        "fees": {
+          "tag": "Fees",
+          "blurb": "See due, paid and overdue for every student.",
+          "title": "Know what's owed without opening a spreadsheet.",
+          "description": "Fee structures by grade and year, dues tracked per student, and a clear due-paid-overdue view for admins and parents alike — in Saudi riyals, recorded as exact amounts.",
+          "bullets": [
+            "Fee structures set per grade, per academic year",
+            "Due, paid and overdue visible at a glance",
+            "Manual payment recording with a receipt, today"
+          ]
+        },
+        "timetable": {
+          "tag": "Timetable",
+          "blurb": "Build the week once. Conflicts caught as you build.",
+          "title": "Build the week once. Trust it all term.",
+          "description": "Set periods, sections and subjects once per term. Schoolify stops you from double-booking a teacher or a room before the clash ever reaches a classroom.",
+          "bullets": [
+            "A conflict is caught while you're building it, not after",
+            "Every teacher sees only their own week",
+            "Changes to one section never move another"
+          ]
+        },
+        "messages": {
+          "tag": "Messages",
+          "blurb": "The right message to the right audience, every time.",
+          "title": "The right message, to the right audience, every time.",
+          "description": "Send an announcement to a single section, a whole grade, or every parent in the school — and nowhere in between by accident.",
+          "bullets": [
+            "Audience set by grade, section or role",
+            "Parents see messages for their own children only",
+            "No group chats, no broadcast lists to manage"
+          ]
+        },
+        "bilingual": {
+          "tag": "Bilingual by design",
+          "blurb": "Arabic and English in the same record, not translated.",
+          "title": "Arabic and English in the same record.",
+          "description": "Every name, every field, every report card carries both languages from day one — not a translation pass bolted on afterward. Hijri dates sit beside Gregorian ones throughout.",
+          "bullets": [
+            "Arabic and English fields, side by side, everywhere",
+            "Hijri and Gregorian dates shown together",
+            "Right-to-left layout, not a mirrored afterthought"
+          ]
+        }
+      },
+      "cta": {
+        "title": "See these six modules with your own school's data.",
+        "description": "No generic demo account — we set up your actual grades and sections on the call.",
+        "button": "Book a demo"
+      }
+    },
+    "pricing": {
+      "hero": {
+        "eyebrow": "Pricing",
+        "titleLead": "Priced for a",
+        "words": [
+          "50-student school.",
+          "500-student school.",
+          "five-campus network.",
+          "single pilot section."
+        ],
+        "lede": "Every school's year looks different — grade count, sections, staff. Schoolify is quoted per school after a short call, not unlocked feature-by-feature."
+      },
+      "tiers": {
+        "starter": {
+          "name": "Starter",
+          "tagline": "One school, getting started.",
+          "features": [
+            "Attendance, timetable & messages",
+            "Up to 2 academic years of history",
+            "Email support"
+          ],
+          "cta": "Talk to us"
+        },
+        "growth": {
+          "name": "Growth",
+          "tagline": "Most private schools in KSA.",
+          "features": [
+            "Everything in Starter",
+            "Exams, report cards & fees",
+            "Hijri + Gregorian throughout",
+            "Priority WhatsApp support"
+          ],
+          "cta": "Talk to us",
+          "highlightLabel": "Most schools choose this"
+        },
+        "network": {
+          "name": "Network",
+          "tagline": "Multiple campuses, one group.",
+          "features": [
+            "Everything in Growth",
+            "Shared staff across campuses",
+            "Group-level reporting",
+            "A dedicated setup call"
+          ],
+          "cta": "Talk to us"
+        }
+      },
+      "note": "Pricing is quoted per school on a short call — not a generic per-seat rate. Figures above are placeholder tiers, not final prices.",
+      "faqEyebrow": "Before you call",
+      "faqTitle": "What people usually ask first.",
+      "faq": [
+        {
+          "q": "Do you charge per student or per school?",
+          "a": "Per school, based on student count and modules you need — not a per-seat fee that punishes growth."
+        },
+        {
+          "q": "Can we start with one grade before the whole school?",
+          "a": "Yes. Many schools pilot with a single grade or campus for a term before rolling out further."
+        },
+        {
+          "q": "What happens to our data if we leave?",
+          "a": "You get a full export of your school's records. Nothing is held hostage in the system."
+        },
+        {
+          "q": "Is support available in Arabic?",
+          "a": "Yes — WhatsApp and email support both work in Arabic or English, whichever your staff prefer."
+        }
+      ],
+      "cta": {
+        "title": "Get a price for your school, not a price list.",
+        "description": "Tell us your grade count and modules you need — we'll quote it on the call.",
+        "button": "Book a demo"
+      }
+    },
+    "about": {
+      "hero": {
+        "eyebrow": "About",
+        "titleLead": "Built for schools",
+        "words": ["in Riyadh.", "in Jeddah.", "in Dammam.", "across Saudi Arabia."],
+        "lede": "Schoolify started from one question: why does a school's own data — attendance, marks, fees — live in five different spreadsheets instead of one record?"
+      },
+      "story": {
+        "eyebrow": "Why we're building this",
+        "title": "Software that fits the school, not the other way round.",
+        "paragraphs": [
+          "Most school software sold in this region is built for a different school system first, then translated. Fields get relabelled, but the week underneath still assumes a Monday start and a single calendar.",
+          "Schoolify is built around a Sunday–Thursday week, Hijri and Gregorian dates shown together, and Arabic as a first-class language throughout — not a toggle bolted on afterward.",
+          "It's early. We're working directly with a small number of pilot schools in Saudi Arabia to get the daily details right before opening up further."
+        ]
+      },
+      "values": {
+        "eyebrow": "What that means in practice",
+        "title": "Four things we won't compromise on.",
+        "items": [
+          {
+            "title": "Arabic-first, not translated",
+            "description": "Arabic and English are both native throughout the system, built together from the first screen.",
+            "href": "/features"
+          },
+          {
+            "title": "Built around the school week",
+            "description": "Sunday–Thursday, Hijri alongside Gregorian — the calendar your school already runs on.",
+            "href": "/features"
+          },
+          {
+            "title": "Your data stays in Saudi Arabia",
+            "description": "Records and backups are kept in-region, with a clear answer on where they live.",
+            "href": "/contact"
+          },
+          {
+            "title": "One record, every role",
+            "description": "Admin, teacher, student and parent all work from the same record — not five exports.",
+            "href": "/pricing"
+          }
+        ]
+      },
+      "cta": {
+        "title": "Talk to the people building it.",
+        "description": "We're still small enough that you'll talk to the person who wrote the code, not a call center.",
+        "button": "Book a demo"
+      }
+    },
+    "contact": {
+      "hero": {
+        "eyebrow": "Contact",
+        "titleLead": "Talk to us about",
+        "words": ["a demo.", "your school's setup.", "pricing.", "a pilot term."],
+        "lede": "Reach us directly on WhatsApp for the fastest reply, or send a message below and we'll get back to you by email."
+      },
+      "channels": {
+        "whatsapp": {
+          "title": "WhatsApp",
+          "description": "Fastest way to reach us — usually a reply the same day.",
+          "value": "+966 50 956 4607"
+        },
+        "email": {
+          "title": "Email",
+          "description": "Better for longer questions or sharing documents.",
+          "value": "ehtisham2406@gmail.com"
+        }
+      },
+      "form": {
+        "heading": "Send a message",
+        "description": "This opens your email app with the details filled in, ready to send.",
+        "nameLabel": "Your name",
+        "namePlaceholder": "Enter your name",
+        "schoolLabel": "School name",
+        "schoolPlaceholder": "Enter your school's name",
+        "emailLabel": "Your email",
+        "emailPlaceholder": "Enter your email address",
+        "messageLabel": "Message",
+        "messagePlaceholder": "Tell us about your school and what you'd like to see",
+        "submit": "Send message",
+        "planNote": "Regarding the {plan} plan."
+      },
+      "cta": {
+        "title": "Prefer a call to a form?",
+        "description": "Message us on WhatsApp and we'll find a time that works.",
+        "button": "Chat on WhatsApp"
+      }
+    }
   }
 }

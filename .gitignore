@@ -39,3 +39,5 @@ Thumbs.db
 *.log
 npm-debug.log*
 ./vscode
+
+.artifact-tmp
