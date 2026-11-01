@@ -15,10 +15,11 @@ Goal: one or two real schools can run daily operations.
 - [x] `TenantModel`, `TenantMiddleware`, `TenantScopedViewSet`, cross-tenant test fixture (`feature/multi-tenancy`)
 - [ ] `apps/core/policies.py` permission matrix (`can(role, action)`)
 - [x] Accounts: custom `User` model (`apps/accounts`)
-- [ ] Accounts: email/password, username/password, email OTP, TOTP 2FA, axes, throttling
+- [x] Accounts: username/password login + logout (`POST /api/auth/login/`, `/logout/`)
+- [ ] Accounts: email OTP (parents), TOTP 2FA (staff), axes lockout, throttling
 - [x] Membership + roles (`apps/tenancy`)
-- [ ] School switcher (`POST /api/auth/switch-school/`)
-- [ ] Super Admin: create school + its admin (Django admin is acceptable for week 1)
+- [x] School switcher (`POST /api/auth/switch-school/`)
+- [x] Super Admin: create school + its admin (Django admin, `feature/django-admin`)
 - [x] Next.js 16 app: `[locale]` routing (next-intl, default `en`), RTL/LTR layouts, Arabic font, shadcn/ui base (RTL), Prettier
 - [ ] Login flows, generated API client
 - [ ] OCI VM provisioned, Caddy, CI pipeline, **staging live**
