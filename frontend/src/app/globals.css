@@ -137,3 +137,120 @@ html[dir="rtl"] body {
     @apply font-sans;
   }
 }
+
+/*
+ * Marketing site theme: a distinct palette/radius for the public pages,
+ * scoped to `.marketing` so it never leaks into the logged-in app. Reuses
+ * the same token names shadcn components already read (--primary, --card,
+ * etc.) so Button/Card/Input re-skin automatically, plus a few `--mk-*`
+ * tokens for things outside that set (secondary teal accent, the dark CTA
+ * band, eyebrow text).
+ */
+.marketing {
+  --background: #f7f8fa;
+  --foreground: #16294d;
+  --card: #ffffff;
+  --card-foreground: #16294d;
+  --popover: #ffffff;
+  --popover-foreground: #16294d;
+  --primary: #2f5fe0;
+  --primary-foreground: #ffffff;
+  --secondary: #eef1f5;
+  --secondary-foreground: #16294d;
+  --muted: #eef1f5;
+  --muted-foreground: #4c5b73;
+  --accent: #e3eafc;
+  --accent-foreground: #16294d;
+  --border: #e2e5ea;
+  --input: #e2e5ea;
+  --ring: #2f5fe0;
+  --radius: 0.3rem;
+
+  --mk-ink-faint: #8993a6;
+  --mk-accent-ink: #2546b0;
+  --mk-line-strong: #c9cfd9;
+  --mk-teal: #1d9a6c;
+  --mk-teal-soft: #dcf3e8;
+  --mk-band-bg: #16294d;
+  --mk-band-text: #f7f8fa;
+
+  font-family:
+    var(--font-marketing-sans), ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+html[dir="rtl"] .marketing {
+  font-family: var(--font-plex-arabic), sans-serif;
+}
+
+.dark .marketing {
+  --background: #0e1526;
+  --foreground: #eceff5;
+  --card: #16203a;
+  --card-foreground: #eceff5;
+  --popover: #16203a;
+  --popover-foreground: #eceff5;
+  --primary: #5b86ff;
+  --primary-foreground: #0b1730;
+  --secondary: #16203a;
+  --secondary-foreground: #eceff5;
+  --muted: #0a0f1c;
+  --muted-foreground: #b9c0d1;
+  --accent: #1c2c55;
+  --accent-foreground: #eceff5;
+  --border: #243150;
+  --input: #243150;
+  --ring: #5b86ff;
+
+  --mk-ink-faint: #828ba0;
+  --mk-accent-ink: #9db4ff;
+  --mk-line-strong: #35456b;
+  --mk-teal: #3fc996;
+  --mk-teal-soft: #113327;
+  --mk-band-bg: #101b33;
+  --mk-band-text: #eceff5;
+}
+
+.font-display {
+  font-family: var(--font-marketing-serif), ui-serif, Georgia, serif;
+}
+
+.font-marketing-mono {
+  font-family:
+    var(--font-marketing-mono), ui-monospace, "Cascadia Code", "SFMono-Regular", Menlo, monospace;
+}
+
+@keyframes marketing-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes marketing-page-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes marketing-caret {
+  50% {
+    border-color: transparent;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .marketing * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

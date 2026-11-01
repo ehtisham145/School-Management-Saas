@@ -23,7 +23,8 @@ Goal: one or two real schools can run daily operations.
 - [x] School switcher (`POST /api/auth/switch-school/`)
 - [x] Super Admin: create school + its admin (Django admin, `feature/django-admin`)
 - [x] Next.js 16 app: `[locale]` routing (next-intl, default `en`), RTL/LTR layouts, Arabic font, shadcn/ui base (RTL), Prettier
-- [ ] Login flows, generated API client
+- [x] Login flow UI (Next.js): username/password form, multi-school picker, placeholder dashboard + logout (`feature/login-flow`)
+- [ ] Generated API client (OpenAPI)
 - [ ] OCI VM provisioned, Caddy, CI pipeline, **staging live**
 
 ### Week 2 — Academics core
@@ -54,7 +55,8 @@ If week 3 slips, move **homework** to month 2 first, then **messaging** (announc
 ## Phase 1.5 — SaaS layer (Weeks 5–8)
 - [ ] Super Admin UI in Next.js: schools, plans, subscriptions (manual activate/expire), usage overview
 - [ ] Quotation builder → PDF → email to school's business email; quotation status tracking
-- [ ] Public marketing site: home, features, pricing, about, contact, **demo request** → Super Admin inbox + email
+- [x] Public marketing site (Next.js): home, features, pricing, about, contact — bilingual, RTL, scroll/typewriter animations (`feature/marketing-pages`)
+- [ ] Demo-request form wired to a real endpoint → Super Admin inbox + email (contact page currently falls back to a `mailto:` link client-side; no backend endpoint yet)
 - [ ] SEO: metadata, Arabic/English `hreflang`, sitemap, Open Graph, fast static pages
 - [ ] PWA: manifest, service worker, install prompt, Web Push
 - [ ] Privacy policy, terms, DPA template

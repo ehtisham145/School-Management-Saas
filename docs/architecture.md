@@ -199,7 +199,7 @@ lms/
 │   └── pyproject.toml          ruff + pytest config only
 ├── frontend/
 │   ├── src/app/[locale]/
-│   │   ├── (marketing)/        home, features, pricing, demo-request   ← SSG, SEO
+│   │   ├── (marketing)/        home, features, pricing, about, contact   ← SSG
 │   │   ├── (auth)/             login, otp, 2fa
 │   │   ├── (app)/              dashboard, students, attendance, exams, ...  ← logged-in
 │   │   └── (platform)/         super admin

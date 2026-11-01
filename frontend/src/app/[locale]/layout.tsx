@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { hasLocale, NextIntlClientProvider } from "next-intl";
 import { setRequestLocale } from "next-intl/server";
 import { DirectionProvider } from "@/components/ui/direction";
+import { SessionProvider } from "@/features/auth/session-store";
 import { routing } from "@/i18n/routing";
 import "../globals.css";
 
@@ -36,7 +37,9 @@ export default async function LocaleLayout({ children, params }: LayoutProps<"/[
     >
       <body className="flex min-h-full flex-col">
         <DirectionProvider direction={dir}>
-          <NextIntlClientProvider>{children}</NextIntlClientProvider>
+          <NextIntlClientProvider>
+            <SessionProvider>{children}</SessionProvider>
+          </NextIntlClientProvider>
         </DirectionProvider>
       </body>
     </html>
