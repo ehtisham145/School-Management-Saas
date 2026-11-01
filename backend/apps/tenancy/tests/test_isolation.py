@@ -4,20 +4,12 @@ from django.test import RequestFactory
 
 from apps.accounts.models import User
 from apps.tenancy.middleware import TenantMiddleware
-from apps.tenancy.models import Membership, School
+from apps.tenancy.models import Membership
 
 
 def _add_session(request):
     SessionMiddleware(lambda r: None).process_request(request)
     request.session.save()
-
-
-@pytest.fixture
-def two_schools(db):
-    return (
-        School.objects.create(name_en="School A", name_ar="مدرسة أ", code="school-a"),
-        School.objects.create(name_en="School B", name_ar="مدرسة ب", code="school-b"),
-    )
 
 
 @pytest.mark.django_db
