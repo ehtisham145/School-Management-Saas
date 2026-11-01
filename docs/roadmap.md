@@ -16,7 +16,8 @@ Goal: one or two real schools can run daily operations.
 - [ ] `apps/core/policies.py` permission matrix (`can(role, action)`)
 - [x] Accounts: custom `User` model (`apps/accounts`)
 - [x] Accounts: username/password login + logout (`POST /api/auth/login/`, `/logout/`)
-- [ ] Accounts: email OTP (parents), TOTP 2FA (staff), axes lockout, throttling
+- [x] Accounts: login lockout (`django-axes`, 5 attempts/1h cool-off) + throttling (`feature/login-lockout`)
+- [ ] Accounts: email OTP (parents), TOTP 2FA (staff)
 - [x] Membership + roles (`apps/tenancy`)
 - [x] School switcher (`POST /api/auth/switch-school/`)
 - [x] Super Admin: create school + its admin (Django admin, `feature/django-admin`)
