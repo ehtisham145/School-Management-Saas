@@ -12,9 +12,12 @@ Goal: one or two real schools can run daily operations.
 - [x] Local dev fully native on both machines ([development.md](development.md), [ADR-0009](decisions/0009-local-development-fully-native.md)): Postgres 17 installed natively, no Docker, no Redis on either machine
 - [x] Django project, settings split, Postgres, ruff + pytest; Redis optional via `REDIS_URL`
 - [ ] Celery app (`config/celery.py`) and Channels ASGI routing wired
-- [ ] `TenantModel`, `TenantMiddleware`, `TenantScopedViewSet`, policies, cross-tenant test fixture
-- [ ] Accounts: User, email/password, username/password, email OTP, TOTP 2FA, axes, throttling
-- [ ] Membership + roles, school switcher
+- [x] `TenantModel`, `TenantMiddleware`, `TenantScopedViewSet`, cross-tenant test fixture (`feature/multi-tenancy`)
+- [ ] `apps/core/policies.py` permission matrix (`can(role, action)`)
+- [x] Accounts: custom `User` model (`apps/accounts`)
+- [ ] Accounts: email/password, username/password, email OTP, TOTP 2FA, axes, throttling
+- [x] Membership + roles (`apps/tenancy`)
+- [ ] School switcher (`POST /api/auth/switch-school/`)
 - [ ] Super Admin: create school + its admin (Django admin is acceptable for week 1)
 - [x] Next.js 16 app: `[locale]` routing (next-intl, default `en`), RTL/LTR layouts, Arabic font, shadcn/ui base (RTL), Prettier
 - [ ] Login flows, generated API client
