@@ -31,7 +31,7 @@ Guiding principles for this project:
 | Email (mailbox) | **Zoho Mail free** (info@, sales@) | Google Workspace — if the client wants Gmail |
 | Hosting | **Oracle Cloud (OCI) Riyadh `me-riyadh-1`**, 1 Ampere A1 VM | Local Saudi VPS (Wafai Cloud etc.) or AWS Saudi region (launching Dec 2026) |
 | Runtime | **Docker Compose + Caddy** (auto HTTPS) on Ubuntu 24.04 — servers only | Nginx + certbot — you know it, but Caddy is less config |
-| Local dev | **Two modes:** laptop without Docker (native Postgres, no Redis), desktop with Docker Desktop (Postgres + Redis containers). See [development.md](development.md) | — |
+| Local dev | **Fully native on both machines:** PostgreSQL 17 installed natively, no Docker, no Redis. See [development.md](development.md) / [ADR-0009](decisions/0009-local-development-fully-native.md) | — |
 | CI/CD | **GitHub Actions → GHCR → SSH deploy** | — |
 | Errors | **Sentry** (free tier, PII scrubbing on) | GlitchTip self-hosted — if no data may leave KSA, even error traces |
 | Uptime | **UptimeRobot / Better Stack free** (external) | — |

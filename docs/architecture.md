@@ -35,7 +35,9 @@ All of this runs as containers on **one VPS** at launch (see §9).
 ```python
 # apps/core/models.py
 class TenantModel(models.Model):
-    school = models.ForeignKey("tenancy.School", on_delete=models.PROTECT, db_index=True)
+    school = models.ForeignKey(
+        "tenancy.School", on_delete=models.PROTECT, db_index=True
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -168,7 +170,7 @@ Host cron:     nightly pg_dump → encrypted → OCI Object Storage (Jeddah) ; w
 
 Secrets live in a `.env` on the VM (chmod 600) and in GitHub Actions secrets, never in git.
 
-Local development does **not** use the production compose file. Redis is optional locally; the settings switch to in-memory fallbacks when `REDIS_URL` is unset. See [development.md](development.md) and [ADR-0008](decisions/0008-local-development-without-docker.md).
+Local development does **not** use the production compose file. Both machines run fully native (no Docker, no Redis); the settings switch to in-memory fallbacks when `REDIS_URL` is unset. See [development.md](development.md) and [ADR-0009](decisions/0009-local-development-fully-native.md).
 
 ## 10. Code organization
 

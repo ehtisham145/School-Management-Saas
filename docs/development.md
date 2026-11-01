@@ -2,35 +2,35 @@
 
 ## 1. Local environments
 
-Two machines, one codebase. The only difference is the `.env` file.
+Two machines, one codebase, **one setup**: both run native PostgreSQL 17, no Redis. ([ADR-0009](decisions/0009-local-development-fully-native.md), which superseded the earlier laptop/desktop split in [ADR-0008](decisions/0008-local-development-without-docker.md).)
 
 | | Office laptop (8 GB RAM) | Home desktop (16 GB RAM) |
 |---|---|---|
-| Docker | No | Docker Desktop |
+| Docker | No | No (Docker Desktop available but not used for local dev) |
 | Python | 3.11 + `venv` + `pip` | 3.11 + `venv` + `pip` |
-| PostgreSQL 17 | Installed natively on Windows | Container from `infra/docker-compose.dev.yaml` |
-| Redis | Not used | Container from `infra/docker-compose.dev.yaml` |
+| PostgreSQL 17 | Installed natively on Windows | Installed natively on Windows |
+| Redis | Not used | Not used |
 | Node.js | 24 (npm) | 24 (npm) |
 
-Django, Celery and Next.js run **natively on both machines** (not in Docker), so hot reload stays fast. Docker on the desktop only runs the services.
+Django, Celery and Next.js run **natively on both machines**, so hot reload stays fast.
 
 ### Redis-optional settings
 `config/settings/base.py` checks `REDIS_URL`:
 
-| | `REDIS_URL` set (desktop, servers) | `REDIS_URL` unset (laptop) |
+| | `REDIS_URL` set (servers) | `REDIS_URL` unset (both local machines) |
 |---|---|---|
 | Cache | Redis | `LocMemCache` |
 | Celery | Real broker; run a worker | `CELERY_TASK_ALWAYS_EAGER=True` (tasks run inline) |
 | Channels layer | `channels_redis` | `InMemoryChannelLayer` |
 | Sessions | Redis-backed cache + DB | DB |
 
-**Rule:** code must never assume Redis exists in dev. Anything that only works with Redis (e.g. multi-process WebSocket fan-out) is verified on the desktop or on staging before merge.
+**Rule:** code must never assume Redis exists in dev. Anything that only works with Redis (e.g. multi-process WebSocket fan-out, real Celery concurrency) is verified **on staging** before merge — neither local machine exercises it.
 
-Production is always Redis + Docker. Laptop-only testing is not enough for changes to background jobs or real-time features; check them on staging.
+Production is always Redis + Docker.
 
 ### First-time setup
 
-Prerequisites: Git, Python 3.11, Node 24. Laptop: PostgreSQL 17 installed natively. Desktop: Docker Desktop (WSL 2).
+Prerequisites: Git, Python 3.11, Node 24, PostgreSQL 17 installed natively.
 
 **1. Clone**
 ```
@@ -40,7 +40,7 @@ cd school-management-saas
 
 **2. Database**
 
-Laptop — create the user and database once with psql:
+Create the user and database once with psql (same on both machines):
 ```
 & "C:\Program Files\PostgreSQL\17\bin\psql.exe" -U postgres
 ```
@@ -49,11 +49,6 @@ CREATE USER school_saas WITH PASSWORD 'devpass123';
 CREATE DATABASE school_saas OWNER school_saas;
 ALTER USER school_saas CREATEDB;   -- pytest creates a test database
 \q
-```
-
-Desktop — start Postgres + Redis containers (same user/password/db as above):
-```
-docker compose -f infra/docker-compose.dev.yaml up -d
 ```
 
 **3. Backend** (PowerShell)
@@ -69,7 +64,7 @@ Fill `.env`:
 ```
 SECRET_KEY='<generated key, in single quotes>'
 DATABASE_URL=postgres://school_saas:devpass123@localhost:5432/school_saas
-REDIS_URL=redis://localhost:6379/0   # desktop only — leave out on the laptop
+# REDIS_URL left unset on both machines
 ```
 Special characters in the DB password must be URL-encoded in `DATABASE_URL` (`@` → `%40`, `#` → `%23`).
 ```
