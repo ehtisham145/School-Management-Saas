@@ -9,7 +9,7 @@ Goal: one or two real schools can run daily operations.
 
 ### Week 1 — Foundation
 - [x] Monorepo, `CLAUDE.md`, pre-commit (ruff, eslint, prettier), `.env.example`
-- [x] Local dev in both modes ([development.md](development.md)): laptop without Docker, desktop with `infra/docker-compose.dev.yaml` (Postgres + Redis) — desktop not yet verified
+- [x] Local dev fully native on both machines ([development.md](development.md), [ADR-0009](decisions/0009-local-development-fully-native.md)): Postgres 17 installed natively, no Docker, no Redis on either machine
 - [x] Django project, settings split, Postgres, ruff + pytest; Redis optional via `REDIS_URL`
 - [ ] Celery app (`config/celery.py`) and Channels ASGI routing wired
 - [ ] `TenantModel`, `TenantMiddleware`, `TenantScopedViewSet`, policies, cross-tenant test fixture

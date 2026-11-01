@@ -1,0 +1,81 @@
+docker volumes
+We dont store anything inside docker container becuase when we restart the docker container then all the data
+store inside the container is automatically removed 
+
+docker ps 
+This command is used to show only the running container.it show all the details that wahat are the names 
+of container from which image they are created what is their image name and what is their container name 
+on which port container is running.
+
+docker ps -a
+This command show us the status of all containers which are currently present or whetehr stoped.
+
+Ports
+There are three different ports which are often open on a server like port 443 port 80 port 80 just show the 
+frontend of your software and port 443 is used for handling API Calls and backend infrasturtcure. Port 22 is open
+in order to login for you in the server so you can do your work like login signup and all other work
+
+
+docker logs container_name
+This command is used to the logs that what is running inside the docker container.
+
+docker inspect container_name
+This command is used what is present inside docker
+
+docker logs -f --tail 50 container
+This comamnd is used to see only 50 logs inside docker container.
+
+
+docker top container_name
+This command is used to see what are the process which are currently running inside the docker container
+
+
+docker stats container_name
+This command is used to show the live CPU RAM Network Usage inside a docker container.
+
+docker stop container_name
+This command is used to stop the running container.
+
+docker start container_name
+This command is used to start the running container.
+
+docker port container_name
+This command is used to the port number on which container is running
+
+docker diff container_name
+This command is used to what are the different files which have been made inside a container.
+
+
+docker compose -f docker/docker-compose.prod.yml up
+This command is used to run all the docker containers which are present inside the docker image and run them 
+
+docker compose -f docker/docker-compose.prod.yml down
+This command is used to stop all the running containers which are running in background and clear them.
+
+
+docker volume ls
+This command is used to see the persistent data storage inside the docker container
+
+Dockerfile It is used when your app is runnig inside single service single dockerfile is written using the
+following docker commands
+
+FROM: This Commmand choose the base enviroment of your app
+WORKDIR: Create a folder inside container inside which you will run your app
+COPY+RUN: Install Dependencies and COPY 
+CMD: The main command used to run the App.
+
+Docker Compose is like a manager who is mainly used for managing your whole app. In Docker-Compose.yml
+file we can pull images from docker hub and then convert these images into runnnig containers and it is also
+used to convert your project frontend backend separate services convert them into images and then build their
+containers and how to build images of your project and convert it into your container is written in Dockerfile
+and then this file is called in yml file to build the whole app using one file.
+if we don't define the volum in docker compose yaml file inside the db service then every time when you will
+build the image or create container previous data will be delete automatically. So volumes is necessary.
+
+
+
+
+
+
+
+

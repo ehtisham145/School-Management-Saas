@@ -1,0 +1,33 @@
+Jab bhi aap git commit chalate hain, commit hone se pehle Git khud pre-commit chalata hai.
+ Yeh 9 checks karta hai:
+#	Check	Kya dekhta hai
+1	trim trailing whitespace	Line ke aakhir mein faltu spaces, khud hata deta hai
+2	fix end of files	File ke aakhir mein khali line, khud laga deta hai
+3	check yaml	YAML files mein ghalti (jaise abhi : ke baad space wali)
+4	large files	Koi bari file (video, zip) ghalti se na chali jaye
+5	private key	Koi secret key ghalti se commit na ho 🔒
+6	ruff check	Python code mein galtiyan
+7	ruff format	Python code ki formatting
+8	eslint	Frontend code mein galtiyan
+9	prettier	Frontend code ki formatting
+"Skipped" kyun aata hai? Hook sirf badli hui files dekhta hai. Agar aap ne sirf docs badle, to Python aur frontend wale checks ke paas dekhne ko kuch nahi, is liye Skipped. Yeh theek hai.
+
+Natija:
+
+Sab Passed/Skipped → commit ho jata hai ✅
+Koi Failed → commit ruk jata hai ❌, ghalti theek karein, git add ., phir dobara commit
+
+Dont dirty teh main branch always do the code on side branch and then run testcase foramteing before merging it
+with PR.
+
+In this project we are using .pre-commit from github which stop the code to push to main branch if there are errors 
+inside your code
+
+Ruff is used for finding the mistkaes in python code it also remove the formating issues in python code.
+Eslint and prettier is used to find the mistakes in frontend code which is in next js
+Prettier is used fro removeing trailing spaces and formatting issues and Elsint is used for finding the bugs
+
+
+
+Never do the work on main branch which feature you wanna add develop it on feature branch once everything 
+perfect merge it with main branch.

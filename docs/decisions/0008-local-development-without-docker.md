@@ -1,6 +1,6 @@
 # ADR-0008: Local development without mandatory Docker; Python 3.11; pip
 
-- **Status:** Accepted
+- **Status:** Superseded by [ADR-0009](0009-local-development-fully-native.md)
 - **Date:** 2026-10-30
 
 ## Context
