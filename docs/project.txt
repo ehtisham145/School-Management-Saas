@@ -31,3 +31,15 @@ Prettier is used fro removeing trailing spaces and formatting issues and Elsint 
 
 Never do the work on main branch which feature you wanna add develop it on feature branch once everything 
 perfect merge it with main branch.
+
+Run these 6 commands must befire pushing code to main branch or side branch on to the github.
+
+Frontend:
+npx tsc --noEmit
+npm run build
+npm run lint
+
+Backend:
+ruff check .
+ruff format --check .
+pytest -v

@@ -35,7 +35,9 @@ All of this runs as containers on **one VPS** at launch (see §9).
 ```python
 # apps/core/models.py
 class TenantModel(models.Model):
-    school = models.ForeignKey("tenancy.School", on_delete=models.PROTECT, db_index=True)
+    school = models.ForeignKey(
+        "tenancy.School", on_delete=models.PROTECT, db_index=True
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
