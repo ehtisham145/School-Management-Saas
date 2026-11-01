@@ -21,11 +21,7 @@ DJANGO_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
 ]
-THIRD_PARTY_APPS = [
-    "rest_framework",
-    "drf_spectacular",
-    "channels",
-]
+THIRD_PARTY_APPS = ["rest_framework", "drf_spectacular", "channels", "axes"]
 LOCAL_APPS: list[str] = ["apps.accounts", "apps.core", "apps.tenancy"]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
@@ -40,6 +36,7 @@ MIDDLEWARE = [
     "apps.tenancy.middleware.TenantMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "axes.middleware.AxesMiddleware",
 ]
 
 ROOT_URLCONF = "config.urls"
@@ -83,6 +80,15 @@ AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
 ]
 
+# ---------------------------------------------------------------- Login lockout (django-axes)
+AUTHENTICATION_BACKENDS = [
+    "axes.backends.AxesStandaloneBackend",  # must be first
+    "django.contrib.auth.backends.ModelBackend",
+]
+AXES_FAILURE_LIMIT = 5
+AXES_COOLOFF_TIME = 1  # hours
+AXES_LOCKOUT_PARAMETERS = ["username", "ip_address"]
+
 # ---------------------------------------------------------------- Language & time
 LANGUAGE_CODE = "en"
 LANGUAGES = [("ar", "العربية"), ("en", "English")]
@@ -104,6 +110,7 @@ REST_FRAMEWORK = {
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
     "PAGE_SIZE": 25,
+    "DEFAULT_THROTTLE_RATES": {"login": "20/min"},
 }
 SPECTACULAR_SETTINGS = {
     "TITLE": "School Management SaaS API",
