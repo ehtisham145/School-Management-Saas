@@ -11,13 +11,14 @@ Goal: one or two real schools can run daily operations.
 - [x] Monorepo, `CLAUDE.md`, pre-commit (ruff, eslint, prettier), `.env.example`
 - [x] Local dev fully native on both machines ([development.md](development.md), [ADR-0009](decisions/0009-local-development-fully-native.md)): Postgres 17 installed natively, no Docker, no Redis on either machine
 - [x] Django project, settings split, Postgres, ruff + pytest; Redis optional via `REDIS_URL`
-- [ ] Celery app (`config/celery.py`) and Channels ASGI routing wired
+- [x] Celery app (`config/celery.py`) wired, email adapter (`apps/integrations/email`, `feature/totp-2fa`)
+- [ ] Channels ASGI routing wired
 - [x] `TenantModel`, `TenantMiddleware`, `TenantScopedViewSet`, cross-tenant test fixture (`feature/multi-tenancy`)
 - [ ] `apps/core/policies.py` permission matrix (`can(role, action)`)
 - [x] Accounts: custom `User` model (`apps/accounts`)
 - [x] Accounts: username/password login + logout (`POST /api/auth/login/`, `/logout/`)
 - [x] Accounts: login lockout (`django-axes`, 5 attempts/1h cool-off) + throttling (`feature/login-lockout`)
-- [ ] Accounts: email OTP (parents), TOTP 2FA (staff)
+- [x] Accounts: email OTP (parents), TOTP 2FA + email-based reset (staff, `feature/totp-2fa`)
 - [x] Membership + roles (`apps/tenancy`)
 - [x] School switcher (`POST /api/auth/switch-school/`)
 - [x] Super Admin: create school + its admin (Django admin, `feature/django-admin`)

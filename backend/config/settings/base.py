@@ -21,7 +21,14 @@ DJANGO_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
 ]
-THIRD_PARTY_APPS = ["rest_framework", "drf_spectacular", "channels", "axes"]
+THIRD_PARTY_APPS = [
+    "rest_framework",
+    "drf_spectacular",
+    "channels",
+    "axes",
+    "django_otp",
+    "django_otp.plugins.otp_totp",
+]
 LOCAL_APPS: list[str] = ["apps.accounts", "apps.core", "apps.tenancy"]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
@@ -33,6 +40,7 @@ MIDDLEWARE = [
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "django_otp.middleware.OTPMiddleware",
     "apps.tenancy.middleware.TenantMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
@@ -63,7 +71,7 @@ DATABASES = {"default": env.db("DATABASE_URL")}
 DATABASES["default"]["CONN_MAX_AGE"] = 60
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 AUTH_USER_MODEL = "accounts.User"
-
+DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL", default="no-reply@example.com")
 
 # ---------------------------------------------------------------- Passwords
 PASSWORD_HASHERS = [
@@ -110,7 +118,7 @@ REST_FRAMEWORK = {
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
     "PAGE_SIZE": 25,
-    "DEFAULT_THROTTLE_RATES": {"login": "20/min"},
+    "DEFAULT_THROTTLE_RATES": {"login": "20/min", "twofa": "50/min"},
 }
 SPECTACULAR_SETTINGS = {
     "TITLE": "School Management SaaS API",
