@@ -1,11 +1,42 @@
 from django.contrib.auth import authenticate, login, logout
+from django_otp.plugins.otp_totp.models import TOTPDevice
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.throttling import ScopedRateThrottle
 from rest_framework.views import APIView
 
-from apps.accounts.api.serializers import LoginSerializer, SwitchSchoolSerializer
+from apps.accounts.api.serializers import (
+    EmailOTPConfirmSerializer,
+    EmailOTPLoginVerifySerializer,
+    EmailOTPRequestSerializer,
+    LoginSerializer,
+    SwitchSchoolSerializer,
+    TOTPConfirmSerializer,
+)
+from apps.accounts.models import User
+from apps.accounts.services import request_email_otp, verify_email_otp
 from apps.tenancy.selectors import get_switchable_membership, list_active_memberships
+
+
+def _serialize_memberships(memberships):
+    return [
+        {
+            "membership_id": m.id,
+            "role": m.role,
+            "school": {
+                "id": m.school_id,
+                "code": m.school.code,
+                "name_en": m.school.name_en,
+                "name_ar": m.school.name_ar,
+            },
+        }
+        for m in memberships
+    ]
+
+
+def _pending_2fa_user(request):
+    user_id = request.session.get("pending_2fa_user_id")
+    return User.objects.filter(id=user_id).first() if user_id else None
 
 
 class SwitchSchoolView(APIView):
@@ -62,28 +93,175 @@ class LoginView(APIView):
                 status=401,
             )
 
+        if TOTPDevice.objects.filter(user=user, confirmed=True).exists():
+            request.session["pending_2fa_user_id"] = user.id
+            return Response({"requires_2fa": True})
+
         login(request, user)
-        memberships = list_active_memberships(user)
-        return Response(
-            {
-                "memberships": [
-                    {
-                        "membership_id": m.id,
-                        "role": m.role,
-                        "school": {
-                            "id": m.school_id,
-                            "code": m.school.code,
-                            "name_en": m.school.name_en,
-                            "name_ar": m.school.name_ar,
-                        },
+        return Response({"memberships": _serialize_memberships(list_active_memberships(user))})
+
+
+class TOTPVerifyView(APIView):
+    permission_classes = [AllowAny]
+    throttle_classes = [ScopedRateThrottle]
+    throttle_scope = "twofa"
+
+    def post(self, request):
+        serializer = TOTPConfirmSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        user = _pending_2fa_user(request)
+        if user is None:
+            return Response(
+                {"error": {"code": "no_pending_login", "message": "No 2FA login in progress."}},
+                status=400,
+            )
+
+        device = TOTPDevice.objects.filter(user=user, confirmed=True).first()
+        if device is None or not device.verify_token(serializer.validated_data["token"]):
+            return Response(
+                {"error": {"code": "invalid_token", "message": "Invalid code."}}, status=401
+            )
+
+        del request.session["pending_2fa_user_id"]
+        login(request, user, backend="django.contrib.auth.backends.ModelBackend")
+        return Response({"memberships": _serialize_memberships(list_active_memberships(user))})
+
+
+class TOTPResetRequestView(APIView):
+    permission_classes = [AllowAny]
+    throttle_classes = [ScopedRateThrottle]
+    throttle_scope = "twofa"
+
+    def post(self, request):
+        user = _pending_2fa_user(request)
+        if user is None:
+            return Response(
+                {"error": {"code": "no_pending_login", "message": "No 2FA login in progress."}},
+                status=400,
+            )
+        if not user.email:
+            return Response(
+                {
+                    "error": {
+                        "code": "no_email",
+                        "message": "No email on file. Contact your school admin.",
                     }
-                    for m in memberships
-                ]
-            }
-        )
+                },
+                status=400,
+            )
+
+        request_email_otp(user, "totp_reset")
+        return Response(status=204)
+
+
+class TOTPResetConfirmView(APIView):
+    permission_classes = [AllowAny]
+    throttle_classes = [ScopedRateThrottle]
+    throttle_scope = "twofa"
+
+    def post(self, request):
+        serializer = EmailOTPConfirmSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        user = _pending_2fa_user(request)
+        if user is None:
+            return Response(
+                {"error": {"code": "no_pending_login", "message": "No 2FA login in progress."}},
+                status=400,
+            )
+
+        if not verify_email_otp(user, "totp_reset", serializer.validated_data["code"]):
+            return Response(
+                {"error": {"code": "invalid_token", "message": "Invalid code."}}, status=401
+            )
+
+        TOTPDevice.objects.filter(user=user).delete()
+        del request.session["pending_2fa_user_id"]
+        login(request, user, backend="django.contrib.auth.backends.ModelBackend")
+        return Response({"memberships": _serialize_memberships(list_active_memberships(user))})
+
+
+class EmailOTPRequestView(APIView):
+    permission_classes = [AllowAny]
+    throttle_classes = [ScopedRateThrottle]
+    throttle_scope = "twofa"
+
+    def post(self, request):
+        serializer = EmailOTPRequestSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        user = User.objects.filter(email=serializer.validated_data["email"]).first()
+        if user is not None:
+            request_email_otp(user, "login")
+
+        return Response(status=204)
+
+
+class EmailOTPVerifyView(APIView):
+    permission_classes = [AllowAny]
+    throttle_classes = [ScopedRateThrottle]
+    throttle_scope = "twofa"
+
+    def post(self, request):
+        serializer = EmailOTPLoginVerifySerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        user = User.objects.filter(email=serializer.validated_data["email"]).first()
+        if user is None or not verify_email_otp(user, "login", serializer.validated_data["code"]):
+            return Response(
+                {"error": {"code": "invalid_credentials", "message": "Invalid email or code."}},
+                status=401,
+            )
+
+        login(request, user, backend="django.contrib.auth.backends.ModelBackend")
+        return Response({"memberships": _serialize_memberships(list_active_memberships(user))})
 
 
 class LogoutView(APIView):
     def post(self, request):
         logout(request)
+        return Response(status=204)
+
+
+class TOTPSetupView(APIView):
+    def post(self, request):
+        if TOTPDevice.objects.filter(user=request.user, confirmed=True).exists():
+            return Response(
+                {
+                    "error": {
+                        "code": "already_enabled",
+                        "message": "2FA is already enabled. Use the reset flow to replace it.",
+                    }
+                },
+                status=400,
+            )
+        device, _ = TOTPDevice.objects.get_or_create(
+            user=request.user, confirmed=False, defaults={"name": "default"}
+        )
+        return Response({"otpauth_url": device.config_url, "secret": device.bin_key.hex()})
+
+
+class TOTPConfirmView(APIView):
+    throttle_classes = [ScopedRateThrottle]
+    throttle_scope = "twofa"
+
+    def post(self, request):
+        serializer = TOTPConfirmSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        device = TOTPDevice.objects.filter(user=request.user, confirmed=False).first()
+        if device is None:
+            return Response(
+                {"error": {"code": "not_found", "message": "No pending 2FA setup found."}},
+                status=404,
+            )
+
+        if not device.verify_token(serializer.validated_data["token"]):
+            return Response(
+                {"error": {"code": "invalid_token", "message": "Invalid code."}}, status=400
+            )
+
+        device.confirmed = True
+        device.save(update_fields=["confirmed"])
         return Response(status=204)

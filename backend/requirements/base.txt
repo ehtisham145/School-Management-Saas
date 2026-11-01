@@ -15,4 +15,5 @@ channels-redis>=4.2,<5.0
 argon2-cffi>=23.1  # passowrd hasing algorithm
 
 django-axes>=7.0,<8.0  # lockout after repeated failed logins
+django-otp>=1.5,<2.0  # TOTP 2FA devices
 
