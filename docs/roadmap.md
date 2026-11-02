@@ -28,7 +28,8 @@ Goal: one or two real schools can run daily operations.
 - [ ] OCI VM provisioned, Caddy, CI pipeline, **staging live**
 
 ### Week 2 — Academics core
-- [ ] Academic years, terms, grades, sections, subjects
+- [x] Academic years API + Term models and services (`feature/academics`)
+- [ ] Term API, grades, sections, subjects
 - [ ] Users management: teachers, students (bulk import from Excel/CSV), parents + guardianship
 - [ ] Teacher assignments, enrollment
 - [ ] Timetable
