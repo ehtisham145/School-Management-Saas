@@ -31,15 +31,18 @@ export default async function AboutPage({ params }: PageProps<"/[locale]/about">
 
       <section className="mx-auto max-w-4xl px-6 py-20 sm:py-24">
         <Reveal>
-          <span className="inline-flex items-center gap-2 font-marketing-mono text-xs font-medium tracking-[0.14em] text-[var(--mk-accent-ink)] uppercase before:h-px before:w-[1.1em] before:bg-current">
+          <span className="font-marketing-mono inline-flex items-center gap-2 text-xs font-medium tracking-[0.14em] text-[var(--mk-accent-ink)] uppercase before:h-px before:w-[1.1em] before:bg-current">
             {t("story.eyebrow")}
           </span>
-          <h2 className="mt-3 text-balance font-display text-3xl font-semibold text-foreground sm:text-4xl">
+          <h2 className="font-display mt-3 text-3xl font-semibold text-balance text-foreground sm:text-4xl">
             {t("story.title")}
           </h2>
           <div className="mt-6 flex flex-col gap-5">
             {paragraphs.map((paragraph) => (
-              <p key={paragraph} className="max-w-[65ch] text-base leading-relaxed text-muted-foreground">
+              <p
+                key={paragraph}
+                className="max-w-[65ch] text-base leading-relaxed text-muted-foreground"
+              >
                 {paragraph}
               </p>
             ))}
@@ -49,7 +52,11 @@ export default async function AboutPage({ params }: PageProps<"/[locale]/about">
 
       <section className="border-t border-border bg-muted">
         <div className="mx-auto max-w-6xl px-6 py-20 sm:py-24">
-          <SectionHeading eyebrow={t("values.eyebrow")} title={t("values.title")} className="mb-12" />
+          <SectionHeading
+            eyebrow={t("values.eyebrow")}
+            title={t("values.title")}
+            className="mb-12"
+          />
           <div className="grid gap-px overflow-hidden border border-border bg-border sm:grid-cols-2">
             {values.map((value, index) => (
               <FeatureCard
@@ -68,7 +75,7 @@ export default async function AboutPage({ params }: PageProps<"/[locale]/about">
       <section className="bg-[var(--mk-band-bg)] text-[var(--mk-band-text)]">
         <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-8 px-6 py-16 sm:py-20">
           <div>
-            <h2 className="max-w-[20ch] text-balance font-display text-3xl font-semibold text-[var(--mk-band-text)] sm:text-4xl">
+            <h2 className="font-display max-w-[20ch] text-3xl font-semibold text-balance text-[var(--mk-band-text)] sm:text-4xl">
               {t("cta.title")}
             </h2>
             <p className="mt-3 max-w-[42ch] text-[var(--mk-band-text)] opacity-80">

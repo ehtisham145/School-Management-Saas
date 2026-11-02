@@ -11,7 +11,13 @@ type FeatureCardProps = {
   delayMs?: number;
 };
 
-export function FeatureCard({ href, icon: Icon, title, description, delayMs = 0 }: FeatureCardProps) {
+export function FeatureCard({
+  href,
+  icon: Icon,
+  title,
+  description,
+  delayMs = 0,
+}: FeatureCardProps) {
   return (
     <Reveal delayMs={delayMs} className="h-full">
       <Link
@@ -23,7 +29,7 @@ export function FeatureCard({ href, icon: Icon, title, description, delayMs = 0 
         </span>
         <h3 className="font-display text-lg font-semibold text-card-foreground">{title}</h3>
         <p className="max-w-[34ch] text-sm text-muted-foreground">{description}</p>
-        <ArrowIcon className="absolute top-7 end-7 h-4 w-4 text-[var(--mk-ink-faint)] opacity-0 transition-all group-hover:translate-x-[3px] group-hover:-translate-y-[3px] group-hover:opacity-100 rtl:group-hover:-translate-x-[3px] rtl:group-hover:translate-y-[-3px]" />
+        <ArrowIcon className="absolute end-7 top-7 h-4 w-4 text-[var(--mk-ink-faint)] opacity-0 transition-all group-hover:translate-x-[3px] group-hover:-translate-y-[3px] group-hover:opacity-100 rtl:group-hover:-translate-x-[3px] rtl:group-hover:translate-y-[-3px]" />
       </Link>
     </Reveal>
   );

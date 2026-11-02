@@ -66,9 +66,7 @@ export function SchoolPicker({ memberships, locale }: SchoolPickerProps) {
               >
                 <span className="flex flex-col items-start">
                   <span>{schoolName}</span>
-                  <span className="text-xs text-muted-foreground">
-                    {tRoles(membership.role)}
-                  </span>
+                  <span className="text-xs text-muted-foreground">{tRoles(membership.role)}</span>
                 </span>
               </Button>
             </li>

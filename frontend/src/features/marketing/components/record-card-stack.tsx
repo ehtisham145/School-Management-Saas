@@ -23,7 +23,7 @@ export function RecordCardStack({
         <span className="font-marketing-mono text-[0.68rem] tracking-[0.08em] text-[var(--mk-ink-faint)] uppercase">
           {timetableLabel}
         </span>
-        <p className="mt-1 font-display text-base font-semibold text-card-foreground">
+        <p className="font-display mt-1 text-base font-semibold text-card-foreground">
           {timetableValue}
         </p>
         <div className="mt-3 flex flex-col gap-1.5">
@@ -37,7 +37,9 @@ export function RecordCardStack({
         <span className="font-marketing-mono text-[0.68rem] tracking-[0.08em] text-[var(--mk-ink-faint)] uppercase">
           {feesLabel}
         </span>
-        <p className="mt-1 font-display text-base font-semibold text-card-foreground">{feesValue}</p>
+        <p className="font-display mt-1 text-base font-semibold text-card-foreground">
+          {feesValue}
+        </p>
         <div className="mt-3 flex flex-col gap-1.5">
           <span className="block h-1.5 w-[88%] bg-muted" />
           <span className="block h-1.5 w-[55%] bg-muted" />
@@ -54,7 +56,7 @@ export function RecordCardStack({
             <AttendanceIcon className="h-3.5 w-3.5" strokeWidth={2} />
           </span>
         </div>
-        <p className="mt-1 font-display text-base font-semibold text-card-foreground">
+        <p className="font-display mt-1 text-base font-semibold text-card-foreground">
           {attendanceValue}
         </p>
         <div className="mt-3 flex flex-col gap-1.5">

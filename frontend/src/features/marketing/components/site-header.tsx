@@ -26,7 +26,7 @@ export function SiteHeader() {
         <Link
           href="/"
           onClick={() => setOpen(false)}
-          className="flex items-center gap-2 font-display text-xl font-bold text-foreground"
+          className="font-display flex items-center gap-2 text-xl font-bold text-foreground"
         >
           <BrandMark className="h-7 w-7 text-primary" />
           {t("brand")}
@@ -85,7 +85,11 @@ export function SiteHeader() {
               {t(item.key)}
             </Link>
           ))}
-          <Link href="/login" onClick={() => setOpen(false)} className="py-2.5 text-sm font-medium text-foreground">
+          <Link
+            href="/login"
+            onClick={() => setOpen(false)}
+            className="py-2.5 text-sm font-medium text-foreground"
+          >
             {t("signIn")}
           </Link>
           <Link

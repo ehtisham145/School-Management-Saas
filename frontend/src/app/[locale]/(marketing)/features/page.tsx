@@ -83,10 +83,10 @@ export default async function FeaturesPage({ params }: PageProps<"/[locale]/feat
                 <span className="flex h-12 w-12 items-center justify-center rounded-[var(--radius)] border border-[var(--mk-line-strong)] bg-card text-primary">
                   <Icon className="h-6 w-6" />
                 </span>
-                <span className="mt-5 block font-marketing-mono text-xs font-medium tracking-[0.12em] text-[var(--mk-accent-ink)] uppercase">
+                <span className="font-marketing-mono mt-5 block text-xs font-medium tracking-[0.12em] text-[var(--mk-accent-ink)] uppercase">
                   {group.tag}
                 </span>
-                <h2 className="mt-2 max-w-[20ch] text-balance font-display text-2xl font-semibold text-foreground sm:text-3xl">
+                <h2 className="font-display mt-2 max-w-[20ch] text-2xl font-semibold text-balance text-foreground sm:text-3xl">
                   {group.title}
                 </h2>
                 <p className="mt-4 max-w-[48ch] text-muted-foreground">{group.description}</p>
@@ -110,7 +110,7 @@ export default async function FeaturesPage({ params }: PageProps<"/[locale]/feat
       <section className="bg-[var(--mk-band-bg)] text-[var(--mk-band-text)]">
         <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-8 px-6 py-16 sm:py-20">
           <div>
-            <h2 className="max-w-[20ch] text-balance font-display text-3xl font-semibold text-[var(--mk-band-text)] sm:text-4xl">
+            <h2 className="font-display max-w-[20ch] text-3xl font-semibold text-balance text-[var(--mk-band-text)] sm:text-4xl">
               {t("cta.title")}
             </h2>
             <p className="mt-3 max-w-[42ch] text-[var(--mk-band-text)] opacity-80">

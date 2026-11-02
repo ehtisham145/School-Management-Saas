@@ -14,7 +14,7 @@ export async function SiteFooter() {
           <div>
             <Link
               href="/"
-              className="flex items-center gap-2 font-display text-lg font-bold text-foreground"
+              className="font-display flex items-center gap-2 text-lg font-bold text-foreground"
             >
               <BrandMark className="h-6 w-6 text-primary" />
               {tNav("brand")}
@@ -28,10 +28,7 @@ export async function SiteFooter() {
             </h4>
             <ul className="mt-4 flex flex-col gap-2.5">
               <li>
-                <Link
-                  href="/features"
-                  className="text-sm text-muted-foreground hover:text-primary"
-                >
+                <Link href="/features" className="text-sm text-muted-foreground hover:text-primary">
                   {tNav("features")}
                 </Link>
               </li>

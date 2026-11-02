@@ -20,10 +20,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
 
   const clearSession = useCallback(() => setSession(null), []);
 
-  const value = useMemo(
-    () => ({ session, setSession, clearSession }),
-    [session, clearSession],
-  );
+  const value = useMemo(() => ({ session, setSession, clearSession }), [session, clearSession]);
 
   return <SessionContext.Provider value={value}>{children}</SessionContext.Provider>;
 }
