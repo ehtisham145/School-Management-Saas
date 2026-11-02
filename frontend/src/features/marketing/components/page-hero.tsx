@@ -13,10 +13,10 @@ export function PageHero({ eyebrow, titleLead, words, lede, children }: PageHero
   return (
     <section className="border-b border-border">
       <div className="mx-auto max-w-4xl px-6 py-20 sm:py-28">
-        <span className="inline-flex items-center gap-2 font-marketing-mono text-xs font-medium tracking-[0.14em] text-[var(--mk-accent-ink)] uppercase before:h-px before:w-[1.1em] before:bg-current">
+        <span className="font-marketing-mono inline-flex items-center gap-2 text-xs font-medium tracking-[0.14em] text-[var(--mk-accent-ink)] uppercase before:h-px before:w-[1.1em] before:bg-current">
           {eyebrow}
         </span>
-        <h1 className="mt-4 text-balance font-display text-4xl leading-[1.12] font-semibold text-foreground sm:text-5xl">
+        <h1 className="font-display mt-4 text-4xl leading-[1.12] font-semibold text-balance text-foreground sm:text-5xl">
           {titleLead}
           <br />
           <Typewriter words={words} className="text-primary" />

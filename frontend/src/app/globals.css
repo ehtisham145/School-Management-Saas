@@ -175,7 +175,12 @@ html[dir="rtl"] body {
   --mk-band-text: #f7f8fa;
 
   font-family:
-    var(--font-marketing-sans), ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+    var(--font-marketing-sans),
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    "Segoe UI",
+    sans-serif;
 }
 
 html[dir="rtl"] .marketing {

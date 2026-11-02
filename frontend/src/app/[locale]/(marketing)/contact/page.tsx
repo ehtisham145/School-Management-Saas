@@ -9,7 +9,10 @@ import { ChatIcon, MailIcon } from "@/features/marketing/icons";
 
 const PLAN_KEYS = ["starter", "growth", "network"] as const;
 
-export default async function ContactPage({ params, searchParams }: PageProps<"/[locale]/contact">) {
+export default async function ContactPage({
+  params,
+  searchParams,
+}: PageProps<"/[locale]/contact">) {
   const { locale } = await params;
   setRequestLocale(locale);
   const t = await getTranslations("Marketing.contact");
@@ -84,7 +87,7 @@ export default async function ContactPage({ params, searchParams }: PageProps<"/
       <section className="bg-[var(--mk-band-bg)] text-[var(--mk-band-text)]">
         <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-8 px-6 py-16 sm:py-20">
           <div>
-            <h2 className="max-w-[20ch] text-balance font-display text-3xl font-semibold text-[var(--mk-band-text)] sm:text-4xl">
+            <h2 className="font-display max-w-[20ch] text-3xl font-semibold text-balance text-[var(--mk-band-text)] sm:text-4xl">
               {t("cta.title")}
             </h2>
             <p className="mt-3 max-w-[42ch] text-[var(--mk-band-text)] opacity-80">

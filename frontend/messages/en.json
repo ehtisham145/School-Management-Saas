@@ -163,7 +163,13 @@
       "hero": {
         "eyebrow": "Product",
         "titleLead": "Built to run a",
-        "words": ["Sunday morning.", "exam week.", "fee deadline.", "parent evening.", "report card day."],
+        "words": [
+          "Sunday morning.",
+          "exam week.",
+          "fee deadline.",
+          "parent evening.",
+          "report card day."
+        ],
         "lede": "Every module below is part of the same record. Mark attendance in the morning and it is already reflected in the afternoon's absence digest — nothing exported, nothing re-entered."
       },
       "gridEyebrow": "Six modules, one record",
