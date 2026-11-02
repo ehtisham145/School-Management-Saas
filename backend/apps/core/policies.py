@@ -8,6 +8,8 @@ POLICIES = {
     "school.manage": frozenset({Role.SCHOOL_ADMIN}),
     "members.view": frozenset({Role.SCHOOL_ADMIN, Role.PRINCIPAL}),
     "members.manage": frozenset({Role.SCHOOL_ADMIN}),
+    "academics.view": frozenset(Role.values),
+    "academics.manage": frozenset({Role.SCHOOL_ADMIN}),
 }
 
 

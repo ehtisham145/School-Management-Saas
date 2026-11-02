@@ -9,6 +9,7 @@ class TenantScopedViewSet(viewsets.ModelViewSet):
 
     permission_classes = [IsAuthenticated, HasPolicy]
     policies = {}
+    lookup_value_regex = r"\d+"
 
     def get_queryset(self):
         queryset = super().get_queryset().filter(school=self.request.school)

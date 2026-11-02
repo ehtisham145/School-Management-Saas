@@ -29,7 +29,7 @@ THIRD_PARTY_APPS = [
     "django_otp",
     "django_otp.plugins.otp_totp",
 ]
-LOCAL_APPS: list[str] = ["apps.accounts", "apps.core", "apps.tenancy"]
+LOCAL_APPS: list[str] = ["apps.accounts", "apps.academics", "apps.core", "apps.tenancy"]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
 
