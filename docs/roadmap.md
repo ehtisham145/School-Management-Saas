@@ -14,7 +14,7 @@ Goal: one or two real schools can run daily operations.
 - [x] Celery app (`config/celery.py`) wired, email adapter (`apps/integrations/email`, `feature/totp-2fa`)
 - [ ] Channels ASGI routing wired
 - [x] `TenantModel`, `TenantMiddleware`, `TenantScopedViewSet`, cross-tenant test fixture (`feature/multi-tenancy`)
-- [ ] `apps/core/policies.py` permission matrix (`can(role, action)`)
+- [x] `apps/core/policies.py` permission matrix (`can(role, action)`) + `HasPolicy` on `TenantScopedViewSet` (`feature/policies`)
 - [x] Accounts: custom `User` model (`apps/accounts`)
 - [x] Accounts: username/password login + logout (`POST /api/auth/login/`, `/logout/`)
 - [x] Accounts: login lockout (`django-axes`, 5 attempts/1h cool-off) + throttling (`feature/login-lockout`)

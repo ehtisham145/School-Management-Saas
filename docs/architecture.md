@@ -97,6 +97,8 @@ Two questions are asked for every request:
 
 The frontend hides buttons by role for UX only. **The backend is the only authority.**
 
+`TenantScopedViewSet` applies `HasPolicy` by default. Each viewset maps its actions to policies, e.g. `policies = {"list": "members.view", "create": "members.manage"}`. An unmapped action returns 403.
+
 ## 5. Core data model (MVP)
 
 ```
