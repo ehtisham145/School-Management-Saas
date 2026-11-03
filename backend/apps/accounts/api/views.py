@@ -57,6 +57,10 @@ def _login_response(request):
     return Response(_session_payload(request))
 
 
+# The public sign-in endpoints skip session authentication: an old session in the
+# browser must never stop someone from signing in.
+
+
 def _pending_2fa_user(request):
     user_id = request.session.get("pending_2fa_user_id")
     return User.objects.filter(id=user_id).first() if user_id else None
@@ -92,6 +96,7 @@ class SwitchSchoolView(APIView):
 
 
 class LoginView(APIView):
+    authentication_classes = []
     permission_classes = [AllowAny]
     throttle_classes = [ScopedRateThrottle]
     throttle_scope = "login"
@@ -125,6 +130,7 @@ class LoginView(APIView):
 
 
 class TOTPVerifyView(APIView):
+    authentication_classes = []
     permission_classes = [AllowAny]
     throttle_classes = [ScopedRateThrottle]
     throttle_scope = "twofa"
@@ -153,6 +159,7 @@ class TOTPVerifyView(APIView):
 
 
 class TOTPResetRequestView(APIView):
+    authentication_classes = []
     permission_classes = [AllowAny]
     throttle_classes = [ScopedRateThrottle]
     throttle_scope = "twofa"
@@ -180,6 +187,7 @@ class TOTPResetRequestView(APIView):
 
 
 class TOTPResetConfirmView(APIView):
+    authentication_classes = []
     permission_classes = [AllowAny]
     throttle_classes = [ScopedRateThrottle]
     throttle_scope = "twofa"
@@ -207,6 +215,7 @@ class TOTPResetConfirmView(APIView):
 
 
 class EmailOTPRequestView(APIView):
+    authentication_classes = []
     permission_classes = [AllowAny]
     throttle_classes = [ScopedRateThrottle]
     throttle_scope = "twofa"
@@ -223,6 +232,7 @@ class EmailOTPRequestView(APIView):
 
 
 class EmailOTPVerifyView(APIView):
+    authentication_classes = []
     permission_classes = [AllowAny]
     throttle_classes = [ScopedRateThrottle]
     throttle_scope = "twofa"

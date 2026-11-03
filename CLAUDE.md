@@ -20,6 +20,9 @@ Django 5.2 + DRF (Python 3.11) backend, Next.js + TypeScript frontend, PostgreSQ
 7. Vendors (email, payments, AI) only through `apps/integrations/` adapters.
 8. Money is `Decimal`, never float. No secrets in git.
 
+## Design
+The approved look is in `design/` (read `design/PROMPT.md`). Colors, radius and fonts come only from the tokens in `frontend/src/app/globals.css`. Don't add a second visual style.
+
 ## Local environment
 - Two machines: laptop without Docker (native Postgres, no Redis), desktop with Docker Desktop (Postgres + Redis).
 - Never assume Redis exists locally: settings fall back to in-memory when `REDIS_URL` is unset.

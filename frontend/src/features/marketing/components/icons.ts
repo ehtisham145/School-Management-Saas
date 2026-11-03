@@ -1,0 +1,15 @@
+export {
+  CalendarCheck as AttendanceIcon,
+  ChartColumn as PrincipalIcon,
+  Clock as TimetableIcon,
+  CreditCard as FeesIcon,
+  FileText as ExamsIcon,
+  Globe as BilingualIcon,
+  GraduationCap as StudentIcon,
+  Mail as MailIcon,
+  MapPin as LocationIcon,
+  MessageSquareText as MessagesIcon,
+  MonitorPlay as TeacherIcon,
+  ShieldCheck as AdminIcon,
+  UsersRound as ParentIcon,
+} from "lucide-react";

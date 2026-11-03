@@ -79,7 +79,8 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 AUTH_USER_MODEL = "accounts.User"
 DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL", default="no-reply@example.com")
 FRONTEND_URL = env("FRONTEND_URL", default="http://localhost:3000")
-OTP_TOTP_ISSUER = "School Management"
+LEADS_EMAIL = env("LEADS_EMAIL", default="info@lessonlab.me")
+OTP_TOTP_ISSUER = "Lesson Lab"
 
 # ---------------------------------------------------------------- Passwords
 PASSWORD_HASHERS = [
@@ -126,11 +127,11 @@ REST_FRAMEWORK = {
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
     "PAGE_SIZE": 25,
-    "DEFAULT_THROTTLE_RATES": {"login": "20/min", "twofa": "50/min"},
+    "DEFAULT_THROTTLE_RATES": {"login": "20/min", "twofa": "50/min", "leads": "10/hour"},
     "EXCEPTION_HANDLER": "apps.core.exceptions.api_exception_handler",
 }
 SPECTACULAR_SETTINGS = {
-    "TITLE": "School Management SaaS API",
+    "TITLE": "Lesson Lab API",
     "VERSION": "0.1.0",
     "SERVE_INCLUDE_SCHEMA": False,
 }

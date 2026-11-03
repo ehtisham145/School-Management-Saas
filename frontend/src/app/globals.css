@@ -2,260 +2,213 @@
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 
-@custom-variant dark (&:is(.dark *));
+/* Lesson Lab design tokens. Colors are defined here and nowhere else. */
+:root {
+  --navy: #1e3a5f;
+  --navy-hover: #172d4a;
+  --navy-deep: #0f1d31;
+  --navy-soft: #e1eaf3;
+  --navy-line: #c3d4e6;
+  --orange: #f5781e;
+  --orange-hover: #ff8c3a;
+  --orange-text: #b9500c;
+  --orange-soft: #fef0e5;
+  --on-orange: #2a1400;
+  --bg: #ffffff;
+  --bg-tint: #f8fafc;
+  --ink: #0f172a;
+  --ink-soft: #475569;
+  --line: #e2e8f0;
+  --on-dark: #ffffff;
+  --on-dark-soft: #c3d4e6;
+  --on-dark-line: rgb(255 255 255 / 16%);
+  --whatsapp: #25d366;
+  --elevation-soft: 0 18px 44px -24px rgb(15 29 49 / 45%);
+  --elevation-chip: 0 18px 36px -14px rgb(15 29 49 / 55%);
+  --elevation-whatsapp: 0 12px 26px -6px rgb(0 0 0 / 40%);
+
+  /* Names the shared shadcn components read. */
+  --background: var(--bg);
+  --foreground: var(--ink);
+  --card: var(--bg);
+  --card-foreground: var(--ink);
+  --popover: var(--bg);
+  --popover-foreground: var(--ink);
+  --primary: var(--navy);
+  --primary-foreground: var(--on-dark);
+  --secondary: var(--navy-soft);
+  --secondary-foreground: var(--navy);
+  --muted: var(--bg-tint);
+  --muted-foreground: var(--ink-soft);
+  --accent: var(--navy-soft);
+  --accent-foreground: var(--navy);
+  --destructive: #dc2626;
+  --border: var(--line);
+  --input: var(--line);
+  --ring: var(--orange);
+  --radius: 0.625rem;
+}
 
 @theme inline {
+  --breakpoint-sm: 38.75rem;
+  --breakpoint-lg: 65rem;
+
+  --color-navy: var(--navy);
+  --color-navy-hover: var(--navy-hover);
+  --color-navy-deep: var(--navy-deep);
+  --color-navy-soft: var(--navy-soft);
+  --color-navy-line: var(--navy-line);
+  --color-orange: var(--orange);
+  --color-orange-hover: var(--orange-hover);
+  --color-orange-text: var(--orange-text);
+  --color-orange-soft: var(--orange-soft);
+  --color-on-orange: var(--on-orange);
+  --color-bg: var(--bg);
+  --color-bg-tint: var(--bg-tint);
+  --color-ink: var(--ink);
+  --color-ink-soft: var(--ink-soft);
+  --color-line: var(--line);
+  --color-on-dark: var(--on-dark);
+  --color-on-dark-soft: var(--on-dark-soft);
+  --color-on-dark-line: var(--on-dark-line);
+  --color-whatsapp: var(--whatsapp);
+
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --font-sans: var(--font-plex-sans);
   --font-arabic: var(--font-plex-arabic);
   --font-heading: var(--font-sans);
-  --color-sidebar-ring: var(--sidebar-ring);
-  --color-sidebar-border: var(--sidebar-border);
-  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
-  --color-sidebar-accent: var(--sidebar-accent);
-  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
-  --color-sidebar-primary: var(--sidebar-primary);
-  --color-sidebar-foreground: var(--sidebar-foreground);
-  --color-sidebar: var(--sidebar);
-  --color-chart-5: var(--chart-5);
-  --color-chart-4: var(--chart-4);
-  --color-chart-3: var(--chart-3);
-  --color-chart-2: var(--chart-2);
-  --color-chart-1: var(--chart-1);
-  --color-ring: var(--ring);
-  --color-input: var(--input);
-  --color-border: var(--border);
-  --color-destructive: var(--destructive);
-  --color-accent-foreground: var(--accent-foreground);
-  --color-accent: var(--accent);
-  --color-muted-foreground: var(--muted-foreground);
-  --color-muted: var(--muted);
-  --color-secondary-foreground: var(--secondary-foreground);
-  --color-secondary: var(--secondary);
-  --color-primary-foreground: var(--primary-foreground);
-  --color-primary: var(--primary);
-  --color-popover-foreground: var(--popover-foreground);
-  --color-popover: var(--popover);
-  --color-card-foreground: var(--card-foreground);
-  --color-card: var(--card);
+
   --radius-sm: calc(var(--radius) * 0.6);
   --radius-md: calc(var(--radius) * 0.8);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) * 1.4);
   --radius-2xl: calc(var(--radius) * 1.8);
-  --radius-3xl: calc(var(--radius) * 2.2);
-  --radius-4xl: calc(var(--radius) * 2.6);
+  --radius-control: 10px;
+  --radius-btn: 12px;
+  --radius-tile: 13px;
+  --radius-card: 16px;
+  --radius-cta: 22px;
+
+  --shadow-soft: var(--elevation-soft);
+  --shadow-chip: var(--elevation-chip);
+  --shadow-whatsapp: var(--elevation-whatsapp);
+
+  --animate-float: float 6s ease-in-out infinite;
 }
 
-body {
-  font-family: var(--font-sans), sans-serif;
+@keyframes float {
+  50% {
+    translate: 0 -8px;
+  }
 }
 
-html[dir="rtl"] body {
-  font-family: var(--font-arabic), sans-serif;
-}
-
-:root {
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
-  --radius: 0.625rem;
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
-}
-
-.dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+@keyframes caret {
+  50% {
+    opacity: 0;
+  }
 }
 
 @layer base {
   * {
-    @apply border-border outline-ring/50;
-  }
-  body {
-    @apply bg-background text-foreground;
+    @apply border-border;
   }
   html {
-    @apply font-sans;
+    scroll-behavior: smooth;
+    scroll-padding-top: 88px;
+  }
+  body {
+    @apply bg-bg text-ink;
+    font-family: var(--font-plex-sans), system-ui, sans-serif;
+    font-size: 16px;
+    line-height: 1.6;
+  }
+  html[dir="rtl"] body {
+    font-family: var(--font-plex-arabic), var(--font-plex-sans), system-ui, sans-serif;
+  }
+  h1,
+  h2,
+  h3 {
+    font-weight: 700;
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+    text-wrap: balance;
+  }
+  html[dir="rtl"] h1,
+  html[dir="rtl"] h2,
+  html[dir="rtl"] h3 {
+    letter-spacing: 0;
+    line-height: 1.3;
+  }
+  :focus-visible {
+    outline: 3px solid var(--orange);
+    outline-offset: 3px;
+    border-radius: 6px;
   }
 }
 
-/*
- * Marketing site theme: a distinct palette/radius for the public pages,
- * scoped to `.marketing` so it never leaks into the logged-in app. Reuses
- * the same token names shadcn components already read (--primary, --card,
- * etc.) so Button/Card/Input re-skin automatically, plus a few `--mk-*`
- * tokens for things outside that set (secondary teal accent, the dark CTA
- * band, eyebrow text).
- */
-.marketing {
-  --background: #f7f8fa;
-  --foreground: #16294d;
-  --card: #ffffff;
-  --card-foreground: #16294d;
-  --popover: #ffffff;
-  --popover-foreground: #16294d;
-  --primary: #2f5fe0;
-  --primary-foreground: #ffffff;
-  --secondary: #eef1f5;
-  --secondary-foreground: #16294d;
-  --muted: #eef1f5;
-  --muted-foreground: #4c5b73;
-  --accent: #e3eafc;
-  --accent-foreground: #16294d;
-  --border: #e2e5ea;
-  --input: #e2e5ea;
-  --ring: #2f5fe0;
-  --radius: 0.3rem;
-
-  --mk-ink-faint: #8993a6;
-  --mk-accent-ink: #2546b0;
-  --mk-line-strong: #c9cfd9;
-  --mk-teal: #1d9a6c;
-  --mk-teal-soft: #dcf3e8;
-  --mk-band-bg: #16294d;
-  --mk-band-text: #f7f8fa;
-
-  font-family:
-    var(--font-marketing-sans),
-    ui-sans-serif,
-    system-ui,
-    -apple-system,
-    "Segoe UI",
-    sans-serif;
-}
-
-html[dir="rtl"] .marketing {
-  font-family: var(--font-plex-arabic), sans-serif;
-}
-
-.dark .marketing {
-  --background: #0e1526;
-  --foreground: #eceff5;
-  --card: #16203a;
-  --card-foreground: #eceff5;
-  --popover: #16203a;
-  --popover-foreground: #eceff5;
-  --primary: #5b86ff;
-  --primary-foreground: #0b1730;
-  --secondary: #16203a;
-  --secondary-foreground: #eceff5;
-  --muted: #0a0f1c;
-  --muted-foreground: #b9c0d1;
-  --accent: #1c2c55;
-  --accent-foreground: #eceff5;
-  --border: #243150;
-  --input: #243150;
-  --ring: #5b86ff;
-
-  --mk-ink-faint: #828ba0;
-  --mk-accent-ink: #9db4ff;
-  --mk-line-strong: #35456b;
-  --mk-teal: #3fc996;
-  --mk-teal-soft: #113327;
-  --mk-band-bg: #101b33;
-  --mk-band-text: #eceff5;
-}
-
-.font-display {
-  font-family: var(--font-marketing-serif), ui-serif, Georgia, serif;
-}
-
-.font-marketing-mono {
-  font-family:
-    var(--font-marketing-mono), ui-monospace, "Cascadia Code", "SFMono-Regular", Menlo, monospace;
-}
-
-@keyframes marketing-reveal {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
+@layer components {
+  .page-wrap {
+    width: min(1240px, 100%);
+    margin-inline: auto;
+    padding-inline: 16px;
   }
-  to {
-    opacity: 1;
-    transform: translateY(0);
+  @media (min-width: 38.75rem) {
+    .page-wrap {
+      padding-inline: 24px;
+    }
   }
-}
 
-@keyframes marketing-page-in {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
+  /* Fades the hero photo into the page on its calm side, from the demo. */
+  .hero-photo-fade::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: linear-gradient(
+      to right,
+      var(--bg) 0%,
+      rgb(255 255 255 / 94%) 30%,
+      transparent 54%
+    );
   }
-  to {
-    opacity: 1;
-    transform: translateY(0);
+  html[dir="rtl"] .hero-photo-fade::after {
+    background: linear-gradient(to left, var(--bg) 0%, rgb(255 255 255 / 94%) 30%, transparent 54%);
   }
-}
+  @media (max-width: 64.99rem) {
+    .hero-photo-fade::after {
+      display: none;
+    }
+  }
 
-@keyframes marketing-caret {
-  50% {
-    border-color: transparent;
+  .modal-dialog::backdrop {
+    background: rgb(15 29 49 / 60%);
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .marketing * {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+    scroll-behavior: auto !important;
   }
 }

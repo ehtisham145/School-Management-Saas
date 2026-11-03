@@ -1,106 +1,96 @@
 "use client";
 
 import { useState } from "react";
+import { Menu } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { cn } from "cn";
 import { Link, usePathname } from "@/i18n/navigation";
-import { buttonVariants } from "@/components/ui/button";
-import { BrandMark } from "../icons";
+import { DemoButton } from "@/features/leads/components/demo-dialog";
+import { LanguageMenu } from "./language-menu";
+import { Logo } from "./logo";
 
 const NAV_ITEMS = [
-  { href: "/" as const, key: "home" },
-  { href: "/features" as const, key: "features" },
-  { href: "/pricing" as const, key: "pricing" },
-  { href: "/about" as const, key: "about" },
-  { href: "/contact" as const, key: "contact" },
-];
+  { href: "/", key: "home" },
+  { href: "/about", key: "about" },
+  { href: "/lms", key: "lms" },
+  { href: "/pricing", key: "pricing" },
+  { href: "/contact", key: "contact" },
+] as const;
 
 export function SiteHeader() {
   const t = useTranslations("Marketing.nav");
   const pathname = usePathname();
-  const [open, setOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+
+  const closeMenu = () => setMenuOpen(false);
 
   return (
-    <header className="sticky top-0 z-40 border-b border-border bg-background/90 backdrop-blur-sm">
-      <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-6 py-4">
-        <Link
-          href="/"
-          onClick={() => setOpen(false)}
-          className="font-display flex items-center gap-2 text-xl font-bold text-foreground"
-        >
-          <BrandMark className="h-7 w-7 text-primary" />
-          {t("brand")}
+    <header className="sticky top-0 z-30 border-b border-line bg-bg">
+      <div className="page-wrap relative flex h-16 items-center justify-between gap-2 sm:h-[76px] sm:gap-4">
+        <Link href="/" onClick={closeMenu} className="block shrink-0">
+          <Logo priority />
         </Link>
 
-        <nav className="hidden items-center gap-8 md:flex">
+        <nav
+          id="site-nav"
+          aria-label={t("main")}
+          className={cn(
+            "gap-7 text-[14.5px] font-semibold text-ink-soft lg:flex",
+            menuOpen
+              ? "absolute inset-x-0 top-full flex flex-col gap-0.5 border-b border-line bg-bg px-4 py-3 shadow-soft sm:px-6 lg:static lg:flex-row lg:gap-7 lg:border-0 lg:p-0 lg:shadow-none"
+              : "hidden",
+          )}
+        >
           {NAV_ITEMS.map((item) => {
             const active = pathname === item.href;
             return (
               <Link
                 key={item.href}
                 href={item.href}
+                onClick={closeMenu}
+                aria-current={active ? "page" : undefined}
                 className={cn(
-                  "border-b pb-1 text-sm font-medium text-muted-foreground transition-colors hover:border-primary hover:text-foreground",
-                  active ? "border-primary text-foreground" : "border-transparent",
+                  "border-b-2 py-2.5 transition-colors hover:text-navy lg:py-1.5",
+                  "border-transparent",
+                  active && "text-navy lg:border-orange",
                 )}
               >
                 {t(item.key)}
               </Link>
             );
           })}
+          <Link
+            href="/login"
+            onClick={closeMenu}
+            className="py-2.5 text-navy transition-colors sm:hidden"
+          >
+            {t("signIn")}
+          </Link>
         </nav>
 
         <div className="flex items-center gap-2">
+          <LanguageMenu />
           <Link
             href="/login"
-            className="hidden text-sm font-medium text-muted-foreground hover:text-foreground sm:inline-flex"
+            className="hidden rounded-control px-3 py-[9px] text-[14.5px] font-semibold text-navy hover:bg-navy-soft sm:block"
           >
             {t("signIn")}
           </Link>
-          <Link href="/contact" className={cn(buttonVariants(), "hidden sm:inline-flex")}>
+          <DemoButton size="sm" className="hidden sm:inline-flex">
             {t("cta")}
-          </Link>
+          </DemoButton>
           <button
             type="button"
-            className="flex flex-col gap-1.5 p-2 md:hidden"
-            aria-label={t("toggleMenu")}
-            aria-expanded={open}
-            onClick={() => setOpen((value) => !value)}
+            aria-expanded={menuOpen}
+            aria-controls="site-nav"
+            aria-label={menuOpen ? t("closeMenu") : t("menu")}
+            onClick={() => setMenuOpen((value) => !value)}
+            className="flex size-[42px] cursor-pointer items-center justify-center rounded-control border border-line bg-bg text-ink lg:hidden"
           >
-            <span className="block h-0.5 w-5 bg-foreground" />
-            <span className="block h-0.5 w-5 bg-foreground" />
+            <Menu aria-hidden="true" className="size-5" />
           </button>
         </div>
       </div>
-
-      {open && (
-        <nav className="flex flex-col gap-1 border-t border-border bg-background px-6 pb-4 md:hidden">
-          {NAV_ITEMS.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              onClick={() => setOpen(false)}
-              className="py-2.5 text-sm font-medium text-foreground"
-            >
-              {t(item.key)}
-            </Link>
-          ))}
-          <Link
-            href="/login"
-            onClick={() => setOpen(false)}
-            className="py-2.5 text-sm font-medium text-foreground"
-          >
-            {t("signIn")}
-          </Link>
-          <Link
-            href="/contact"
-            onClick={() => setOpen(false)}
-            className={cn(buttonVariants(), "mt-2")}
-          >
-            {t("cta")}
-          </Link>
-        </nav>
-      )}
     </header>
   );
 }

@@ -1,199 +1,204 @@
+import Image from "next/image";
+import { Check } from "lucide-react";
 import { getTranslations, setRequestLocale } from "next-intl/server";
-import { Link } from "@/i18n/navigation";
 import { buttonVariants } from "@/components/ui/button";
-import { cn } from "cn";
-import { Typewriter } from "@/features/marketing/components/typewriter";
-import { Reveal } from "@/features/marketing/components/reveal";
-import { FeatureCard } from "@/features/marketing/components/feature-card";
-import { StepCard } from "@/features/marketing/components/step-card";
-import { SectionHeading } from "@/features/marketing/components/section-heading";
-import { RecordCardStack } from "@/features/marketing/components/record-card-stack";
+import { DemoButton } from "@/features/leads/components/demo-dialog";
 import {
+  CtaBox,
+  FeatureCard,
+  IconTile,
+  Section,
+  SectionHeading,
+  StatusChip,
+} from "@/features/marketing/components/blocks";
+import {
+  AdminIcon,
   AttendanceIcon,
+  BilingualIcon,
   ExamsIcon,
   FeesIcon,
-  TimetableIcon,
   MessagesIcon,
-  BilingualIcon,
-} from "@/features/marketing/icons";
-
-const FEATURE_ICONS = [
-  AttendanceIcon,
-  ExamsIcon,
-  FeesIcon,
+  ParentIcon,
+  PrincipalIcon,
+  StudentIcon,
+  TeacherIcon,
   TimetableIcon,
-  MessagesIcon,
-  BilingualIcon,
-];
-const FEATURE_ANCHORS = [
-  "/features#attendance",
-  "/features#exams",
-  "/features#fees",
-  "/features#timetable",
-  "/features#messages",
-  "/features#bilingual",
-];
+} from "@/features/marketing/components/icons";
+import { Reveal } from "@/features/marketing/components/reveal";
+import { Typewriter } from "@/features/marketing/components/typewriter";
+import { pageMetadata } from "@/i18n/metadata";
 
-type FeatureItem = { title: string; description: string };
-type StepItem = { title: string; description: string };
+const FEATURES = [
+  { icon: AttendanceIcon, title: "att", description: "attD" },
+  { icon: ExamsIcon, title: "exam", description: "examD" },
+  { icon: FeesIcon, title: "fee", description: "feeD" },
+  { icon: TimetableIcon, title: "time", description: "timeD" },
+  { icon: MessagesIcon, title: "msg", description: "msgD" },
+  { icon: BilingualIcon, title: "lang", description: "langD" },
+] as const;
+
+const ROLES = [
+  { icon: AdminIcon, title: "admin", description: "adminD" },
+  { icon: PrincipalIcon, title: "principal", description: "principalD" },
+  { icon: TeacherIcon, title: "teacher", description: "teacherD" },
+  { icon: StudentIcon, title: "student", description: "studentD" },
+  { icon: ParentIcon, title: "parent", description: "parentD" },
+] as const;
+
+const FACTS = ["fact1", "fact2", "fact3"] as const;
+const STRIP = [
+  { key: "a", className: "ps-0 sm:ps-0" },
+  { key: "b", className: "border-s" },
+  { key: "c", className: "border-t ps-0 sm:ps-0 lg:border-s lg:border-t-0 lg:ps-[22px]" },
+  { key: "d", className: "border-s border-t lg:border-t-0" },
+] as const;
+const STEPS = ["s1", "s2", "s3"] as const;
+
+export async function generateMetadata({ params }: PageProps<"/[locale]">) {
+  const { locale } = await params;
+  return pageMetadata(locale, "home", "");
+}
 
 export default async function HomePage({ params }: PageProps<"/[locale]">) {
   const { locale } = await params;
   setRequestLocale(locale);
   const t = await getTranslations("Marketing.home");
 
-  const words = t.raw("hero.words") as string[];
-  const chips = t.raw("trust.chips") as string[];
-  const featureItems = t.raw("features.items") as FeatureItem[];
-  const steps = t.raw("how.steps") as StepItem[];
-
   return (
     <>
-      <section className="relative overflow-hidden border-b border-border">
-        <div className="mx-auto grid max-w-6xl gap-12 px-6 py-20 sm:py-28 lg:grid-cols-[1.08fr_0.92fr] lg:items-center">
-          <div>
-            <span className="font-marketing-mono inline-flex items-center gap-2 text-xs font-medium tracking-[0.14em] text-[var(--mk-accent-ink)] uppercase before:h-px before:w-[1.1em] before:bg-current">
+      <section className="relative flex flex-col overflow-hidden bg-bg lg:block">
+        <div className="page-wrap relative z-[1] pt-11 pb-8 lg:py-[clamp(56px,7vw,96px)]">
+          <div className="max-w-[640px] lg:max-w-[min(47%,540px)]">
+            <span className="inline-flex items-center gap-2 rounded-full bg-orange-soft px-[13px] py-1.5 text-[13px] font-bold text-orange-text">
+              <i aria-hidden="true" className="size-[7px] rounded-full bg-orange" />
               {t("hero.eyebrow")}
             </span>
-            <h1 className="font-display mt-4 text-4xl leading-[1.08] font-semibold text-balance text-foreground sm:text-6xl">
-              {t("hero.titleLead")}
-              <br />
-              <Typewriter words={words} className="text-primary" />
+            <h1 className="mt-5 text-[clamp(36px,4.5vw,58px)] text-navy-deep">
+              {t("hero.title1")}{" "}
+              <Typewriter
+                words={t.raw("hero.words") as string[]}
+                locale={locale}
+                className="text-orange-text"
+              />
             </h1>
-            <p className="mt-6 max-w-[46ch] text-lg text-muted-foreground">{t("hero.lede")}</p>
-
-            <div className="mt-8 flex flex-wrap gap-3">
-              <Link href="/contact" className={buttonVariants({ size: "lg" })}>
-                {t("hero.ctaPrimary")}
-              </Link>
-              <Link href="/features" className={buttonVariants({ variant: "outline", size: "lg" })}>
-                {t("hero.ctaSecondary")}
-              </Link>
+            <p className="mt-[18px] text-[clamp(16px,1.35vw,18px)] text-ink-soft">
+              {t("hero.lede")}
+            </p>
+            <div className="mt-7 flex flex-wrap gap-3">
+              <DemoButton className="flex-[1_1_100%] sm:flex-none">{t("hero.primary")}</DemoButton>
+              <a
+                href="#features"
+                className={buttonVariants({
+                  variant: "outline",
+                  className: "flex-[1_1_100%] sm:flex-none",
+                })}
+              >
+                {t("hero.secondary")}
+              </a>
             </div>
-
-            <div className="mt-10 flex flex-wrap gap-8 border-t border-border pt-7">
-              <div>
-                <b className="font-marketing-mono text-xl text-foreground">{t("hero.statAr")}</b>
-                <p className="mt-1 text-xs text-[var(--mk-ink-faint)]">{t("hero.statArLabel")}</p>
-              </div>
-              <div>
-                <b className="font-marketing-mono text-xl text-foreground">{t("hero.statHijri")}</b>
-                <p className="mt-1 text-xs text-[var(--mk-ink-faint)]">
-                  {t("hero.statHijriLabel")}
-                </p>
-              </div>
-              <div>
-                <b className="font-marketing-mono text-xl text-foreground">{t("hero.statRoles")}</b>
-                <p className="mt-1 text-xs text-[var(--mk-ink-faint)]">
-                  {t("hero.statRolesLabel")}
-                </p>
-              </div>
-            </div>
+            <ul className="mt-[30px] flex flex-wrap gap-x-6 gap-y-2.5 text-sm font-medium text-ink">
+              {FACTS.map((fact) => (
+                <li key={fact} className="inline-flex items-center gap-2">
+                  <Check aria-hidden="true" className="size-[18px] shrink-0 text-orange-text" />
+                  {t(`hero.${fact}`)}
+                </li>
+              ))}
+            </ul>
           </div>
+        </div>
 
-          <RecordCardStack
-            timetableLabel={t("heroCards.timetableLabel")}
-            timetableValue={t("heroCards.timetableValue")}
-            feesLabel={t("heroCards.feesLabel")}
-            feesValue={t("heroCards.feesValue")}
-            attendanceLabel={t("heroCards.attendanceLabel")}
-            attendanceValue={t("heroCards.attendanceValue")}
+        <div className="hero-photo-fade relative aspect-[4/3] sm:aspect-[16/10] lg:absolute lg:inset-0 lg:aspect-auto">
+          <Image
+            src="/brand/hero.jpg"
+            alt={t("hero.alt")}
+            fill
+            priority
+            sizes="100vw"
+            className="object-cover object-[78%_center] lg:object-[center_42%] rtl:-scale-x-100"
+          />
+          <StatusChip
+            chip={{ icon: AttendanceIcon, title: t("hero.chip1a"), sub: t("hero.chip1b") }}
+            tone="navy"
+            className="start-[3%] top-[6%] lg:start-1/2 lg:top-[9%]"
+          />
+          <StatusChip
+            chip={{ icon: ExamsIcon, title: t("hero.chip2a"), sub: t("hero.chip2b") }}
+            tone="orange"
+            className="start-[3%] bottom-[6%] [animation-delay:-3s] lg:start-[37%] lg:bottom-[9%] rtl:lg:start-[49%] rtl:lg:bottom-[4%]"
           />
         </div>
       </section>
 
-      <div className="border-b border-border bg-muted">
-        <div className="mx-auto flex max-w-6xl flex-wrap items-center gap-x-10 gap-y-4 px-6 py-7">
-          <p className="font-display max-w-[30ch] text-base text-muted-foreground">
-            {t("trust.lead")}
-          </p>
-          <ul className="flex flex-wrap gap-2.5">
-            {chips.map((chip) => (
-              <li
-                key={chip}
-                className="font-marketing-mono border border-[var(--mk-line-strong)] bg-card px-3.5 py-1.5 text-xs text-muted-foreground"
-              >
-                {chip}
-              </li>
-            ))}
-          </ul>
-        </div>
-      </div>
-
-      <section className="mx-auto max-w-6xl px-6 py-20 sm:py-28">
-        <SectionHeading
-          eyebrow={t("features.eyebrow")}
-          title={t("features.title")}
-          className="mb-12"
-        />
-        <div className="grid gap-px overflow-hidden border border-border bg-border sm:grid-cols-2 lg:grid-cols-3">
-          {featureItems.map((item, index) => (
-            <FeatureCard
-              key={item.title}
-              href={FEATURE_ANCHORS[index]}
-              icon={FEATURE_ICONS[index]}
-              title={item.title}
-              description={item.description}
-              delayMs={(index % 3) * 90}
-            />
+      <section aria-label={t("hero.eyebrow")} className="bg-navy-deep text-on-dark">
+        <div className="page-wrap grid grid-cols-2 lg:grid-cols-4">
+          {STRIP.map(({ key, className }) => (
+            <div
+              key={key}
+              className={`border-on-dark-line px-3.5 py-[18px] sm:px-[22px] sm:py-6 ${className}`}
+            >
+              <b className="block text-[17px] font-bold">{t(`strip.${key}1`)}</b>
+              <span className="text-[13.5px] text-on-dark-soft">{t(`strip.${key}2`)}</span>
+            </div>
           ))}
         </div>
       </section>
 
-      <section className="border-t border-border bg-muted">
-        <div className="mx-auto max-w-6xl px-6 py-20 sm:py-28">
-          <SectionHeading eyebrow={t("how.eyebrow")} title={t("how.title")} className="mb-12" />
-          <div className="grid gap-px overflow-hidden border border-border bg-border sm:grid-cols-3">
-            {steps.map((step, index) => (
-              <StepCard
-                key={step.title}
-                href="/contact"
-                number={String(index + 1).padStart(2, "0")}
-                title={step.title}
-                description={step.description}
-                delayMs={index * 90}
-              />
-            ))}
-          </div>
+      <Section id="features">
+        <SectionHeading
+          kicker={t("features.kicker")}
+          title={t("features.title")}
+          description={t("features.sub")}
+        />
+        <div className="grid gap-[18px] sm:grid-cols-2 lg:grid-cols-3">
+          {FEATURES.map((feature, index) => (
+            <FeatureCard
+              key={feature.title}
+              icon={feature.icon}
+              index={index}
+              title={t(`f.${feature.title}`)}
+              description={t(`f.${feature.description}`)}
+            />
+          ))}
         </div>
-      </section>
+      </Section>
 
-      <section className="mx-auto max-w-6xl px-6 py-20 sm:py-28">
-        <Reveal>
-          <div className="border border-border bg-card p-8 sm:p-14">
-            <blockquote className="font-display max-w-[46ch] text-xl font-medium text-balance text-foreground sm:text-2xl">
-              &ldquo;{t("quote.text")}&rdquo;
-            </blockquote>
-            <div className="mt-6 flex items-center gap-3">
-              <span className="font-display flex h-9 w-9 items-center justify-center rounded-full bg-[var(--mk-teal-soft)] text-sm font-bold text-[var(--mk-teal)]">
-                P
-              </span>
-              <cite className="text-sm text-muted-foreground not-italic">
-                {t("quote.attribution")}
-              </cite>
-            </div>
-            <p className="font-marketing-mono mt-5 text-xs text-[var(--mk-ink-faint)]">
-              {t("quote.sampleNote")}
-            </p>
-          </div>
-        </Reveal>
-      </section>
-
-      <section className="bg-[var(--mk-band-bg)] text-[var(--mk-band-text)]">
-        <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-8 px-6 py-16 sm:py-20">
-          <div>
-            <h2 className="font-display max-w-[18ch] text-3xl font-semibold text-balance text-[var(--mk-band-text)] sm:text-4xl">
-              {t("cta.title")}
-            </h2>
-            <p className="mt-3 max-w-[42ch] text-[var(--mk-band-text)] opacity-80">
-              {t("cta.description")}
-            </p>
-          </div>
-          <Link href="/contact" className={cn(buttonVariants({ size: "lg" }))}>
-            {t("cta.button")}
-          </Link>
+      <Section tinted>
+        <SectionHeading kicker={t("roles.kicker")} title={t("roles.title")} />
+        <div className="grid grid-cols-2 gap-3.5 sm:grid-cols-3 lg:grid-cols-5">
+          {ROLES.map((role, index) => (
+            <Reveal
+              key={role.title}
+              delayMs={index * 80}
+              className="h-full last:col-span-2 sm:last:col-span-1"
+            >
+              <article className="h-full rounded-[14px] border border-line bg-bg px-[18px] py-[22px]">
+                <IconTile icon={role.icon} index={index} />
+                <h3 className="mt-3 text-base text-ink">{t(`r.${role.title}`)}</h3>
+                <p className="mt-1.5 text-[13.5px] text-ink-soft">{t(`r.${role.description}`)}</p>
+              </article>
+            </Reveal>
+          ))}
         </div>
-      </section>
+      </Section>
+
+      <Section id="how">
+        <SectionHeading kicker={t("how.kicker")} title={t("how.title")} />
+        <ol className="grid gap-[18px] sm:grid-cols-2 lg:grid-cols-3">
+          {STEPS.map((step, index) => (
+            <li key={step}>
+              <Reveal delayMs={index * 110} className="border-t-[3px] border-navy pt-[22px]">
+                <span className="grid size-[38px] place-items-center rounded-full bg-orange font-bold text-on-orange tabular-nums">
+                  {index + 1}
+                </span>
+                <h3 className="mt-4 text-[18.5px] text-ink">{t(`how.${step}`)}</h3>
+                <p className="mt-2 text-[14.8px] text-ink-soft">{t(`how.${step}d`)}</p>
+              </Reveal>
+            </li>
+          ))}
+        </ol>
+      </Section>
+
+      <CtaBox title={t("cta.title")} description={t("cta.sub")} button={t("cta.btn")} />
     </>
   );
 }

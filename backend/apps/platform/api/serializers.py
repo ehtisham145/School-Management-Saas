@@ -1,5 +1,7 @@
+from django.core.validators import RegexValidator
 from rest_framework import serializers
 
+from apps.platform.models import ContactMessage, DemoRequest
 from apps.tenancy.models import School
 
 
@@ -27,3 +29,26 @@ class SchoolSerializer(serializers.ModelSerializer):
         if School.objects.filter(code=code).exists():
             raise serializers.ValidationError("This code is already in use.")
         return code
+
+
+class LeadSerializer(serializers.ModelSerializer):
+    website = serializers.CharField(required=False, allow_blank=True, write_only=True)
+
+
+class DemoRequestSerializer(LeadSerializer):
+    phone = serializers.CharField(
+        required=False,
+        allow_blank=True,
+        max_length=30,
+        validators=[RegexValidator(r"^\+?[0-9][0-9\s-]{5,28}$")],
+    )
+
+    class Meta:
+        model = DemoRequest
+        fields = ["name", "school_name", "email", "phone", "plan", "message", "website"]
+
+
+class ContactMessageSerializer(LeadSerializer):
+    class Meta:
+        model = ContactMessage
+        fields = ["name", "school_name", "email", "message", "website"]

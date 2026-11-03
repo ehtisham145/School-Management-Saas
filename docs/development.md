@@ -92,6 +92,10 @@ pre-commit run --all-files          # first run may "fail" after auto-fixing fil
 
 To use the Super Admin panel at `/platform`, tick **Is platform admin** on your user in Django admin (`createsuperuser` does not set it). The first website login asks you to set up 2FA.
 
+`LEADS_EMAIL` sets who receives Book a demo and Contact form emails (default `info@lessonlab.me`). Locally the email is printed in the Django terminal.
+
+If the frontend build complains about pages that no longer exist, delete the generated `frontend/.next` folder.
+
 ### Everyday commands
 
 | Where | Command | Purpose |
