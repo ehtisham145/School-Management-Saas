@@ -1,6 +1,6 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { LoginForm } from "@/features/auth/components/login-form";
+import { LoginFlow } from "@/features/auth/components/login-flow";
 
 export default async function LoginPage({ params }: PageProps<"/[locale]/login">) {
   const { locale } = await params;
@@ -14,7 +14,7 @@ export default async function LoginPage({ params }: PageProps<"/[locale]/login">
           <CardTitle>{t("title")}</CardTitle>
         </CardHeader>
         <CardContent>
-          <LoginForm />
+          <LoginFlow />
         </CardContent>
       </Card>
     </main>

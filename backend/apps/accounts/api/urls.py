@@ -5,6 +5,7 @@ from apps.accounts.api.views import (
     EmailOTPVerifyView,
     LoginView,
     LogoutView,
+    MeView,
     SwitchSchoolView,
     TOTPConfirmView,
     TOTPResetConfirmView,
@@ -16,6 +17,7 @@ from apps.accounts.api.views import (
 urlpatterns = [
     path("login/", LoginView.as_view(), name="login"),
     path("logout/", LogoutView.as_view(), name="logout"),
+    path("me/", MeView.as_view(), name="me"),
     path("switch-school/", SwitchSchoolView.as_view(), name="switch-school"),
     path("2fa/setup/", TOTPSetupView.as_view(), name="2fa-setup"),
     path("2fa/confirm/", TOTPConfirmView.as_view(), name="2fa-confirm"),
