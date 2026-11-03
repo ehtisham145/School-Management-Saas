@@ -1,14 +1,13 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
+import { Field } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { ApiError } from "@/lib/api";
+import { required, useValidatedForm } from "@/lib/use-validated-form";
 import { login } from "../api";
 import type { LoginResponse } from "../schemas";
-
-type LoginErrorKey = "invalidCredentials" | "rateLimited" | "generic";
 
 type LoginFormProps = {
   onResponse: (response: LoginResponse) => void;
@@ -18,72 +17,47 @@ type LoginFormProps = {
 export function LoginForm({ onResponse, onUseEmailCode }: LoginFormProps) {
   const t = useTranslations("Auth.login");
 
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState<LoginErrorKey | null>(null);
-
-  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    setError(null);
-    setIsSubmitting(true);
-
-    try {
-      onResponse(await login({ username, password }));
-    } catch (err) {
-      if (err instanceof ApiError && err.status === 429) {
-        setError("rateLimited");
-      } else if (err instanceof ApiError && err.code === "invalid_credentials") {
-        setError("invalidCredentials");
-      } else {
-        setError("generic");
+  const form = useValidatedForm({
+    initial: { username: "", password: "" },
+    idPrefix: "",
+    validators: { username: required(150), password: required(4096) },
+    submit: async (values) => onResponse(await login(values)),
+    describeError: (err) => {
+      if (err instanceof ApiError && err.status === 429) return t("errors.rateLimited");
+      if (err instanceof ApiError && err.code === "invalid_credentials") {
+        return t("errors.invalidCredentials");
       }
-    } finally {
-      setIsSubmitting(false);
-    }
-  }
+      return t("errors.generic");
+    },
+  });
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-3">
-      <div className="flex flex-col gap-1.5">
-        <label htmlFor="username" className="text-sm font-medium">
-          {t("usernameLabel")}
-        </label>
+    <form onSubmit={form.handleSubmit} noValidate className="flex flex-col gap-3">
+      <Field id="username" label={t("usernameLabel")} required error={form.errorFor("username")}>
         <Input
-          id="username"
-          name="username"
+          {...form.bind("username")}
           autoComplete="username"
-          required
-          value={username}
-          onChange={(event) => setUsername(event.target.value)}
           placeholder={t("usernamePlaceholder")}
         />
-      </div>
+      </Field>
 
-      <div className="flex flex-col gap-1.5">
-        <label htmlFor="password" className="text-sm font-medium">
-          {t("passwordLabel")}
-        </label>
+      <Field id="password" label={t("passwordLabel")} required error={form.errorFor("password")}>
         <Input
-          id="password"
-          name="password"
+          {...form.bind("password")}
           type="password"
           autoComplete="current-password"
-          required
-          value={password}
-          onChange={(event) => setPassword(event.target.value)}
           placeholder={t("passwordPlaceholder")}
         />
-      </div>
+      </Field>
 
-      {error && (
-        <p role="alert" className="text-sm text-destructive">
-          {t(`errors.${error}`)}
+      {form.formError && (
+        <p role="alert" className="text-sm text-red-700">
+          {form.formError}
         </p>
       )}
 
-      <Button type="submit" disabled={isSubmitting}>
-        {isSubmitting ? t("submitting") : t("submit")}
+      <Button type="submit" loading={form.saving}>
+        {form.saving ? t("submitting") : t("submit")}
       </Button>
 
       <Button type="button" variant="ghost" onClick={onUseEmailCode}>

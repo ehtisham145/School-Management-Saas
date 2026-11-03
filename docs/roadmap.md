@@ -70,8 +70,14 @@ If week 3 slips, move **homework** to month 2 first, then **messaging** (announc
 - [ ] Quotation builder → PDF → email to school's business email; quotation status tracking
 - [x] Public marketing site rebuilt to the approved design (`design/`): Home, About Us, LMS, Pricing (sample prices), Contact, Arabic and English, RTL, language menu (`feature/brand-home-redesign`)
 - [x] Book a demo and Contact forms: saved through `/api/platform/demo-requests/` and `/contact-messages/`, listed in Django admin, emailed to `LEADS_EMAIL`
+- [x] Site effects: typewriter on every page heading, cards slide into place on scroll, status cards on each hero (`feature/brand-home-redesign`)
+- [x] Forms: required-field asterisks, live validation that clears at once, scroll to the first error, Saudi mobile validation on the frontend and backend, compact Book a demo popup (`feature/forms-validation`)
+- [x] Sign in page: two-panel layout, validation on every step, no side image on the 2FA steps
+- [x] SMTP email settings through `.env`; `sendtestemail` ran without an error against the real provider. Inbox delivery and SPF/DKIM/DMARC still to be confirmed
 - [ ] Replace sample prices and plan contents with confirmed ones
-- [ ] SEO: metadata, Arabic/English `hreflang`, sitemap, Open Graph, fast static pages
+- [ ] Translate backend validation and email text into Arabic
+- [x] SEO: page metadata and Arabic/English `hreflang`, server-rendered text
+- [ ] SEO: sitemap, Open Graph images
 - [ ] PWA: manifest, service worker, install prompt, Web Push
 - [ ] Privacy policy, terms, DPA template
 - [ ] Polish from pilot school feedback
@@ -99,7 +105,7 @@ Follow the triggers in [architecture.md §11](architecture.md#11-scaling-path): 
 
 | Date (target) | Milestone |
 |---|---|
-| End of Week 1 | Staging live, login for all roles working |
+| End of Week 1 | Login for all roles working (done). Staging moved: it waits for the client's hosting |
 | End of Week 4 (~early Dec 2026) | MVP in production, pilot school onboarded |
 | End of Month 2 (~early Jan 2027) | Marketing site, quotations, PWA — ready to sell |
 | Month 3 | Hardening complete |

@@ -5,11 +5,11 @@ export function Logo({ className, priority }: { className?: string; priority?: b
   return (
     <Image
       src="/brand/logo.png"
-      width={586}
-      height={190}
+      width={515}
+      height={120}
       alt="Lesson Lab"
       priority={priority}
-      className={cn("h-[46px] w-auto sm:h-[60px]", className)}
+      className={cn("h-[38px] w-auto sm:h-14", className)}
     />
   );
 }

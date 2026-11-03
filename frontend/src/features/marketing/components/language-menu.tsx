@@ -79,7 +79,7 @@ export function LanguageMenu() {
         className="inline-flex h-[42px] cursor-pointer items-center gap-[7px] rounded-control border border-line bg-bg px-[9px] text-sm font-semibold text-ink hover:bg-bg-tint sm:px-3"
       >
         <Globe aria-hidden="true" className="size-[17px]" />
-        <span>{current.name}</span>
+        <span className="hidden sm:inline">{current.name}</span>
         <ChevronDown
           aria-hidden="true"
           className={cn("size-[13px] transition-transform", open && "rotate-180")}

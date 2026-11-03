@@ -82,6 +82,7 @@ class TenantModel(models.Model):
 - Super Admins and active School Admins must use TOTP. Until they set it up, login returns `requires_2fa_setup: true` and `HasPolicy` answers 403 `2fa_setup_required`.
 - `/api/platform/` needs `is_platform_admin` and a session verified with TOTP (`user.is_verified()`), so a password-only Django admin session is refused.
 - A new School Admin gets no password: the Super Admin enters their email, and they sign in with an email code, then set up TOTP.
+- Demo request phone numbers must be Saudi mobiles and are saved as `+9665XXXXXXXX`. The frontend blocks other characters, and the backend checks again.
 - The public Book a demo and Contact forms post to `/api/platform/demo-requests/` and `/api/platform/contact-messages/`. They use no session, are throttled per IP (`leads` scope) and have a honeypot field. The team is emailed at `LEADS_EMAIL` and submissions are listed in Django admin.
 
 ## 4. Authorization (RBAC)
@@ -123,7 +124,7 @@ fees:           FeeHead, FeeStructure(grade, year), FeeDue(student, amount, due_
 communication:  Announcement(audience), Conversation, Message
 notifications:  Notification(user, type, payload, read_at), PushSubscription
 files:          StoredFile(owner, key, mime, size)
-platform:       Plan, Subscription(school), Quotation, DemoRequest        (no school FK scoping — platform-owned)
+platform:       DemoRequest, ContactMessage; later Plan, Subscription(school), Quotation   (no school FK scoping — platform-owned)
 audit:          django-auditlog entries (+ school id, actor, IP)
 ```
 
@@ -192,7 +193,7 @@ lms/
 │   │   ├── core/               TenantModel, TenantScopedViewSet, policies.py, pagination, exceptions
 │   │   ├── accounts/           User, login, email OTP, 2FA
 │   │   ├── tenancy/            School, Membership, middleware, school switch
-│   │   ├── platform/           super admin: plans, subscriptions, quotations, demo requests
+│   │   ├── platform/           super admin APIs, demo requests, contact messages; later plans, subscriptions, quotations
 │   │   ├── academics/          years, terms, grades, sections, subjects, enrollment, guardianship
 │   │   ├── timetable/
 │   │   ├── attendance/
@@ -213,7 +214,8 @@ lms/
 │   │   ├── (auth)/             login, otp, 2fa
 │   │   ├── (app)/              dashboard, students, attendance, exams, ...  ← logged-in
 │   │   └── (platform)/         super admin
-│   ├── src/features/<module>/  components/, hooks/, schemas.ts
+│   ├── src/features/<module>/  components/, api.ts, schemas.ts (auth, leads, marketing, platform)
+│   ├── src/lib/                use-validated-form.ts and the API fetch wrapper
 │   ├── src/components/ui/      shadcn components
 │   ├── src/lib/api/            generated OpenAPI client + fetch wrapper (CSRF, errors)
 │   └── messages/               ar.json, en.json

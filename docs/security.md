@@ -3,21 +3,24 @@
 This system stores **children's personal data** for multiple organisations. A cross-school leak or a breach would end the business. These rules are non-negotiable, even under deadline.
 
 ## 1. Tenant isolation
-- [ ] Every tenant model inherits `TenantModel`; every read goes through a school-scoped selector.
-- [ ] `request.school` comes from the server-side session membership only.
+- [x] Every tenant model inherits `TenantModel`; every read goes through a school-scoped selector.
+- [x] `request.school` comes from the server-side session membership only.
 - [ ] FKs in request bodies are validated to belong to `request.school`.
-- [ ] Every endpoint has a cross-tenant test (expects 404).
+- [x] Every tenant endpoint has a cross-tenant test (expects 404).
 - [ ] Celery tasks re-load objects by `(school_id, id)`, never by `id` alone.
 - [ ] Hardening phase: PostgreSQL Row-Level Security as a second layer.
 
 ## 2. Authentication
-- [ ] Argon2 password hashing; Django password validators on.
-- [ ] `django-axes`: lock after 5 failed attempts (per user + IP), with cool-off.
+- [x] Argon2 password hashing; Django password validators on.
+- [x] `django-axes`: lock after 5 failed attempts (per user + IP), with cool-off.
 - [ ] Email OTP: random 6 digits, stored **hashed**, 10-min expiry, single use, 5 attempts max, resend throttled (e.g. 1/min, 5/hour).
 - [x] TOTP 2FA mandatory for Super Admin and School Admin.
 - [ ] Recovery codes issued once (today a lost device is reset by an email code alone).
 - [ ] Session cookies `HttpOnly; Secure; SameSite=Lax`; session rotated on login and on privilege change; logout invalidates server-side.
-- [ ] Login and OTP endpoints return identical responses for "user not found" and "wrong password".
+- [x] Login and OTP endpoints return identical responses for "user not found" and "wrong password".
+- [x] Email code login can't skip 2FA, and a password-only Django admin session can't use `/api/platform/`.
+- [x] Public sign-in and lead form endpoints use no session, so an old session can't block them. Their protection is throttling; endpoints for signed-in users still require CSRF.
+- [ ] Tighter email code resend limit: today it is only the shared `twofa` throttle (50/min), not the 1/min and 5/hour above.
 
 ## 3. Authorization
 - [ ] Backend enforces every permission; UI hiding is cosmetic only.
@@ -65,7 +68,7 @@ This system stores **children's personal data** for multiple organisations. A cr
 - [ ] SSH key-only, root login disabled, non-standard user, `fail2ban`; ideally SSH reachable only from your IP (OCI security list).
 - [ ] Only ports 80/443 open publicly; Postgres and Redis bound to the Docker network only.
 - [ ] Unattended security upgrades on the VM; monthly image rebuilds for base-image patches.
-- [ ] Secrets in `.env` (chmod 600) and GitHub secrets; never committed. Rotate if leaked.
+- [ ] Secrets in `.env` (chmod 600) and GitHub secrets; never committed. Rotate if leaked. SMTP passwords stay in `.env` only, on every machine.
 - [ ] Backups encrypted (e.g. `age`/`gpg`) before upload; **restore test monthly**.
 - [ ] Dependency scanning: Dependabot + `pip-audit` + `npm audit` in CI.
 

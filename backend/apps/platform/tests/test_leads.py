@@ -55,7 +55,7 @@ def test_demo_request_emails_the_team(api_client, django_capture_on_commit_callb
     assert message.to == ["info@lessonlab.me"]
     assert message.reply_to == [VALID_DEMO["email"]]
     assert "Al Noor School" in message.subject
-    assert "+966 50 123 4567" in message.body
+    assert "+966501234567" in message.body
 
 
 @override_settings(LEADS_EMAIL="sales@example.com")
@@ -85,6 +85,11 @@ def test_line_breaks_cannot_inject_email_headers(api_client, django_capture_on_c
         ("school_name", ""),
         ("email", "not-an-email"),
         ("phone", "abc"),
+        ("phone", "05012abc67"),
+        ("phone", "+923001234567"),
+        ("phone", "0301234567"),
+        ("phone", "050123456"),
+        ("phone", "05012345678"),
         ("plan", "free"),
     ],
 )
@@ -164,3 +169,21 @@ def test_submissions_are_listed_in_django_admin_without_add_permission(rf):
     for model in (DemoRequest, ContactMessage):
         assert model in site._registry
         assert site._registry[model].has_add_permission(rf.get("/")) is False
+
+
+@pytest.mark.parametrize(
+    "phone",
+    ["+966501234567", "966501234567", "0501234567", "501234567", "050 123 4567", "٠٥٠١٢٣٤٥٦٧"],
+)
+def test_saudi_mobile_formats_are_saved_the_same_way(api_client, phone):
+    response = api_client.post(DEMO_URL, {**VALID_DEMO, "phone": phone})
+
+    assert response.status_code == 201
+    assert DemoRequest.objects.get().phone == "+966501234567"
+
+
+def test_phone_is_optional(api_client):
+    response = api_client.post(DEMO_URL, {**VALID_DEMO, "phone": ""})
+
+    assert response.status_code == 201
+    assert DemoRequest.objects.get().phone == ""

@@ -23,8 +23,11 @@ Django 5.2 + DRF (Python 3.11) backend, Next.js + TypeScript frontend, PostgreSQ
 ## Design
 The approved look is in `design/` (read `design/PROMPT.md`). Colors, radius and fonts come only from the tokens in `frontend/src/app/globals.css`. Don't add a second visual style.
 
+## Frontend forms
+Build forms with `useValidatedForm` (`frontend/src/lib/use-validated-form.ts`) and the `Field` component. Required fields show `*`, an error goes as soon as the value is valid, and submitting scrolls to the first error. Check real behaviour in a browser with motion on, and in `npm run dev` as well as a build.
+
 ## Local environment
-- Two machines: laptop without Docker (native Postgres, no Redis), desktop with Docker Desktop (Postgres + Redis).
+- Two machines, one setup: native PostgreSQL 17 and no Redis on both ([ADR-0009](docs/decisions/0009-local-development-fully-native.md)). Docker is only for servers and CI.
 - Never assume Redis exists locally: settings fall back to in-memory when `REDIS_URL` is unset.
 - Python 3.11 + venv + pip (`backend/requirements/*.txt`). Node 24 + npm.
 
