@@ -6,6 +6,7 @@ import type {
   MeResponse,
   SwitchSchoolRequest,
   SwitchSchoolResponse,
+  TotpSetupResponse,
 } from "./schemas";
 
 export function login(body: LoginRequest) {
@@ -29,6 +30,14 @@ export function verifyTotp(token: string) {
     method: "POST",
     body: { token },
   });
+}
+
+export function setupTotp() {
+  return apiFetch<TotpSetupResponse>("/auth/2fa/setup/", { method: "POST" });
+}
+
+export function confirmTotp(token: string) {
+  return apiFetch<void>("/auth/2fa/confirm/", { method: "POST", body: { token } });
 }
 
 export function requestTotpReset() {

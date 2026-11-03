@@ -1,3 +1,4 @@
+from django_otp.plugins.otp_totp.models import TOTPDevice
 from rest_framework import serializers
 from rest_framework.test import APIRequestFactory, force_authenticate
 
@@ -26,6 +27,7 @@ class MembershipViewSet(TenantScopedViewSet):
 
 def _member(school, username, role):
     user = User.objects.create_user(username=username, password="x" * 12)
+    TOTPDevice.objects.create(user=user, name="default", confirmed=True)
     return Membership.objects.create(school=school, user=user, role=role)
 
 

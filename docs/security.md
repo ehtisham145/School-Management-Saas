@@ -14,13 +14,16 @@ This system stores **children's personal data** for multiple organisations. A cr
 - [ ] Argon2 password hashing; Django password validators on.
 - [ ] `django-axes`: lock after 5 failed attempts (per user + IP), with cool-off.
 - [ ] Email OTP: random 6 digits, stored **hashed**, 10-min expiry, single use, 5 attempts max, resend throttled (e.g. 1/min, 5/hour).
-- [ ] TOTP 2FA mandatory for Super Admin and School Admin; recovery codes issued once.
+- [x] TOTP 2FA mandatory for Super Admin and School Admin.
+- [ ] Recovery codes issued once (today a lost device is reset by an email code alone).
 - [ ] Session cookies `HttpOnly; Secure; SameSite=Lax`; session rotated on login and on privilege change; logout invalidates server-side.
 - [ ] Login and OTP endpoints return identical responses for "user not found" and "wrong password".
 
 ## 3. Authorization
 - [ ] Backend enforces every permission; UI hiding is cosmetic only.
-- [ ] Default deny: a new endpoint without an explicit policy fails closed.
+- [x] Default deny on `TenantScopedViewSet`: an action without a policy fails closed.
+- [ ] Default deny for every other endpoint (plain `APIView`s only require login by default).
+- [ ] Django admin requires 2FA or is restricted (`/admin` accepts a password alone; `/api/platform/` already refuses such a session).
 - [ ] Parents see only linked children; teachers only assigned sections (current year).
 - [ ] Super Admin cross-school actions are audit-logged.
 

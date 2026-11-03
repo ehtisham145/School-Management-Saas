@@ -19,7 +19,13 @@ export type LoginRequest = {
 };
 
 export type AuthenticatedResponse = {
+  is_platform_admin: boolean;
+  requires_2fa_setup: boolean;
   memberships: Membership[];
+};
+
+export type TotpSetupResponse = {
+  otpauth_url: string;
 };
 
 export type Requires2faResponse = {
@@ -38,10 +44,9 @@ export type SwitchSchoolResponse = {
   school: School;
 };
 
-export type MeResponse = {
+export type MeResponse = AuthenticatedResponse & {
   username: string;
   active_membership_id: number | null;
-  memberships: Membership[];
 };
 
 export type ActiveSession = {

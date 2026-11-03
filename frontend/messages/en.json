@@ -58,6 +58,19 @@
         "rateLimited": "Too many attempts. Please try again in a few minutes.",
         "generic": "Something went wrong. Please try again."
       }
+    },
+    "totpSetup": {
+      "title": "Set up two-factor authentication",
+      "description": "Your account requires two-factor authentication. Scan this QR code with an authenticator app, such as Google Authenticator or Microsoft Authenticator.",
+      "manualKey": "Can't scan it? Enter this key in the app:",
+      "codeLabel": "Code from the app",
+      "submit": "Turn on",
+      "loading": "Preparing...",
+      "errors": {
+        "invalidCode": "That code is incorrect. Try the latest code from the app.",
+        "rateLimited": "Too many attempts. Please try again in a few minutes.",
+        "generic": "Something went wrong. Please try again."
+      }
     }
   },
   "Dashboard": {
@@ -444,6 +457,48 @@
         "title": "Prefer a call to a form?",
         "description": "Message us on WhatsApp and we'll find a time that works.",
         "button": "Chat on WhatsApp"
+      }
+    }
+  },
+  "Platform": {
+    "title": "Super Admin",
+    "logout": "Log out",
+    "loggingOut": "Logging out...",
+    "schools": {
+      "title": "Schools",
+      "newSchool": "New school",
+      "empty": "No schools yet. Add your first school.",
+      "loading": "Loading schools...",
+      "total": "{count, plural, one {# school} other {# schools}}",
+      "name": "Name",
+      "code": "Code",
+      "status": "Status",
+      "members": "Members",
+      "created": "Created",
+      "active": "Active",
+      "inactive": "Inactive",
+      "previous": "Previous",
+      "next": "Next",
+      "page": "Page {page} of {pages}",
+      "loadFailed": "Couldn't load schools.",
+      "retry": "Try again",
+      "accessDenied": "This page needs a sign-in with two-factor authentication.",
+      "signIn": "Sign in"
+    },
+    "form": {
+      "title": "New school",
+      "description": "The admin receives an email and signs in with an email code. No password is shared.",
+      "nameEn": "School name (English)",
+      "nameAr": "School name (Arabic)",
+      "code": "School code",
+      "codeHint": "Letters, numbers and hyphens, such as al-noor. It can't be changed later.",
+      "adminEmail": "School admin's email",
+      "submit": "Create school",
+      "submitting": "Creating...",
+      "cancel": "Cancel",
+      "success": "{school} was created. The admin has been emailed.",
+      "errors": {
+        "generic": "Something went wrong. Please try again."
       }
     }
   }
