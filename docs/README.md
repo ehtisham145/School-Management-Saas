@@ -14,6 +14,7 @@ One platform, many schools; each school's data is fully isolated.
 | [roadmap.md](roadmap.md) | 4-week MVP plan, then hardening, features, scaling |
 | [development.md](development.md) | Local setup (laptop / desktop), git workflow, commits, PRs, CI, "definition of done" |
 | [decisions/](decisions/) | Architecture Decision Records (ADRs) — one decision per file |
+| [../design/](../design/) | Approved visual design: demo page, brand assets and the frontend brief |
 
 ## Rules for anyone (human or AI agent) writing code here
 

@@ -89,9 +89,17 @@ function LoginSteps() {
     case "email-code":
       return <EmailCodeForm onResponse={handleResponse} onBack={backToPassword} />;
     case "totp":
-      return <TotpForm onAuthenticated={handleAuthenticated} onRestart={backToPassword} />;
+      return (
+        <div data-two-factor>
+          <TotpForm onAuthenticated={handleAuthenticated} onRestart={backToPassword} />
+        </div>
+      );
     case "totp-setup":
-      return <TotpSetupStep response={step.response} onDone={continueToApp} />;
+      return (
+        <div data-two-factor>
+          <TotpSetupStep response={step.response} onDone={continueToApp} />
+        </div>
+      );
     case "choose-school":
       return <SchoolPicker memberships={step.memberships} locale={locale} />;
     case "no-school":

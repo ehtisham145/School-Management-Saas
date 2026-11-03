@@ -80,7 +80,7 @@ export function TotpSetup({ onDone }: { onDone: () => void }) {
 
       {otpauthUrl ? (
         <>
-          <div className="flex justify-center rounded-lg bg-white p-3">
+          <div className="flex min-h-[200px] items-center justify-center rounded-lg bg-white p-3">
             <QRCodeSVG value={otpauthUrl} size={176} />
           </div>
           <div className="text-xs text-muted-foreground">

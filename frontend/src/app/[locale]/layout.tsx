@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, IBM_Plex_Sans_Arabic } from "next/font/google";
+import { IBM_Plex_Sans, IBM_Plex_Sans_Arabic } from "next/font/google";
 import { notFound } from "next/navigation";
 import { hasLocale, NextIntlClientProvider } from "next-intl";
 import { setRequestLocale } from "next-intl/server";
@@ -8,15 +8,20 @@ import { SessionProvider } from "@/features/auth/session-store";
 import { routing } from "@/i18n/routing";
 import "../globals.css";
 
-const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
+const plexSans = IBM_Plex_Sans({
+  variable: "--font-plex-sans",
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+});
 const plexArabic = IBM_Plex_Sans_Arabic({
   variable: "--font-plex-arabic",
   subsets: ["arabic"],
-  weight: ["400", "500", "700"],
+  weight: ["400", "500", "600", "700"],
 });
 
 export const metadata: Metadata = {
-  title: "School Management System",
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000"),
+  title: { default: "Lesson Lab", template: "%s | Lesson Lab" },
 };
 
 export function generateStaticParams() {
@@ -33,7 +38,8 @@ export default async function LocaleLayout({ children, params }: LayoutProps<"/[
     <html
       lang={locale}
       dir={dir}
-      className={`${geistSans.variable} ${plexArabic.variable} h-full antialiased`}
+      data-scroll-behavior="smooth"
+      className={`${plexSans.variable} ${plexArabic.variable} h-full antialiased`}
     >
       <body className="flex min-h-full flex-col">
         <DirectionProvider direction={dir}>

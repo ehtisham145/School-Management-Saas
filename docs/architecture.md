@@ -77,10 +77,12 @@ class TenantModel(models.Model):
 - Same origin (`https://app.<domain>`): Caddy routes `/api` and `/ws` to Django, so there is no CORS. In development the Next.js rewrite does the same job, so `dev.py` lists port 3000 in `CSRF_TRUSTED_ORIGINS`.
 - A user with one active membership has it activated automatically at login. Users with several choose one through `POST /api/auth/switch-school/`.
 - `GET /api/auth/me/` returns the user, memberships and active membership. The frontend uses it to restore the session after a refresh.
+- Public sign-in endpoints skip session authentication, so an old session or a missing CSRF cookie in the browser can't block a login. Endpoints for signed-in users still require CSRF.
 - Email-code login still requires TOTP if the user has a confirmed device.
 - Super Admins and active School Admins must use TOTP. Until they set it up, login returns `requires_2fa_setup: true` and `HasPolicy` answers 403 `2fa_setup_required`.
 - `/api/platform/` needs `is_platform_admin` and a session verified with TOTP (`user.is_verified()`), so a password-only Django admin session is refused.
 - A new School Admin gets no password: the Super Admin enters their email, and they sign in with an email code, then set up TOTP.
+- The public Book a demo and Contact forms post to `/api/platform/demo-requests/` and `/api/platform/contact-messages/`. They use no session, are throttled per IP (`leads` scope) and have a honeypot field. The team is emailed at `LEADS_EMAIL` and submissions are listed in Django admin.
 
 ## 4. Authorization (RBAC)
 

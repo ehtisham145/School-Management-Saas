@@ -1,127 +1,109 @@
-import { Suspense } from "react";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { buttonVariants } from "@/components/ui/button";
-import { PageHero } from "@/features/marketing/components/page-hero";
+import { ContactForm } from "@/features/leads/components/contact-form";
+import { CtaLinkBox, PageHero, Section } from "@/features/marketing/components/blocks";
+import {
+  INFO_EMAIL,
+  SUPPORT_EMAIL,
+  WHATSAPP_NUMBER_DISPLAY,
+  WHATSAPP_URL,
+} from "@/features/marketing/contact-info";
+import { MailIcon, MessagesIcon } from "@/features/marketing/components/icons";
 import { Reveal } from "@/features/marketing/components/reveal";
-import { ContactForm } from "@/features/marketing/components/contact-form";
-import { CONTACT_EMAIL, WHATSAPP_URL } from "@/features/marketing/contact-info";
-import { ChatIcon, MailIcon } from "@/features/marketing/icons";
+import { WhatsAppLogo } from "@/features/marketing/components/whatsapp-float";
+import { pageMetadata } from "@/i18n/metadata";
 
-const PLAN_KEYS = ["starter", "growth", "network"] as const;
+export async function generateMetadata({ params }: PageProps<"/[locale]/contact">) {
+  const { locale } = await params;
+  return pageMetadata(locale, "contact", "/contact");
+}
 
-export default async function ContactPage({
-  params,
-  searchParams,
-}: PageProps<"/[locale]/contact">) {
+export default async function ContactPage({ params }: PageProps<"/[locale]/contact">) {
   const { locale } = await params;
   setRequestLocale(locale);
   const t = await getTranslations("Marketing.contact");
-
-  const words = t.raw("hero.words") as string[];
 
   return (
     <>
       <PageHero
         eyebrow={t("hero.eyebrow")}
         titleLead={t("hero.titleLead")}
-        words={words}
+        words={t.raw("hero.words") as string[]}
         lede={t("hero.lede")}
+        locale={locale}
+        media="photo"
+        chips={[
+          { icon: MessagesIcon, title: t("hero.chip1a"), sub: t("hero.chip1b") },
+          { icon: MailIcon, title: t("hero.chip2a"), sub: t("hero.chip2b") },
+        ]}
       />
 
-      <section className="mx-auto max-w-6xl px-6 pt-16 sm:pt-20">
-        <div className="grid gap-6 sm:grid-cols-2">
-          <Reveal>
+      <Section>
+        <div className="grid gap-8 lg:grid-cols-[1.25fr_1fr] lg:items-start lg:gap-12">
+          <Reveal className="rounded-card border border-line bg-bg p-6 sm:p-8">
+            <h2 className="text-[clamp(24px,2.6vw,30px)] text-navy-deep">{t("formHeading")}</h2>
+            <p className="mt-2 mb-6 text-ink-soft">{t("formDescription")}</p>
+            <ContactForm />
+          </Reveal>
+
+          <Reveal delayMs={120} className="flex flex-col gap-[18px]">
             <a
               href={WHATSAPP_URL}
               target="_blank"
               rel="noopener noreferrer"
-              className="group flex h-full flex-col gap-3 border border-border bg-card p-7 transition-colors hover:bg-accent"
+              className="block rounded-card border border-line bg-bg p-[26px] transition-[transform,box-shadow,border-color] duration-200 hover:-translate-y-[3px] hover:border-navy-line hover:shadow-soft"
             >
-              <span className="flex h-11 w-11 items-center justify-center rounded-[var(--radius)] bg-[var(--mk-teal-soft)] text-[var(--mk-teal)]">
-                <ChatIcon className="h-5 w-5" />
+              <span className="grid size-[46px] place-items-center rounded-full bg-whatsapp text-on-dark">
+                <WhatsAppLogo className="size-[26px]" />
               </span>
-              <h3 className="font-display text-lg font-semibold text-card-foreground">
-                {t("channels.whatsapp.title")}
-              </h3>
-              <p className="text-sm text-muted-foreground">{t("channels.whatsapp.description")}</p>
-              <span dir="ltr" className="font-marketing-mono text-sm text-primary">
-                {t("channels.whatsapp.value")}
-              </span>
+              <h3 className="mt-4 text-[18.5px] text-ink">{t("channels.whatsapp.title")}</h3>
+              <p className="mt-2 text-[14.8px] text-ink-soft">
+                {t("channels.whatsapp.description")}
+              </p>
+              <p className="mt-3 font-semibold text-navy">
+                <bdi>{WHATSAPP_NUMBER_DISPLAY}</bdi>
+              </p>
             </a>
-          </Reveal>
 
-          <Reveal delayMs={90}>
-            <a
-              href={`mailto:${CONTACT_EMAIL}`}
-              className="group flex h-full flex-col gap-3 border border-border bg-card p-7 transition-colors hover:bg-accent"
-            >
-              <span className="flex h-11 w-11 items-center justify-center rounded-[var(--radius)] bg-accent text-primary">
-                <MailIcon className="h-5 w-5" />
+            <div className="rounded-card border border-line bg-bg p-[26px]">
+              <span className="grid size-[46px] place-items-center rounded-tile bg-navy-soft text-navy">
+                <MailIcon aria-hidden="true" className="size-[23px]" />
               </span>
-              <h3 className="font-display text-lg font-semibold text-card-foreground">
-                {t("channels.email.title")}
-              </h3>
-              <p className="text-sm text-muted-foreground">{t("channels.email.description")}</p>
-              <span dir="ltr" className="font-marketing-mono text-sm text-primary">
-                {t("channels.email.value")}
-              </span>
-            </a>
+              <h3 className="mt-4 text-[18.5px] text-ink">{t("channels.email.title")}</h3>
+              <p className="mt-2 text-[14.8px] text-ink-soft">{t("channels.email.description")}</p>
+              <dl className="mt-3 grid gap-2.5 text-[14.8px]">
+                <div>
+                  <dt className="text-ink-soft">{t("channels.email.general")}</dt>
+                  <dd className="font-semibold text-navy">
+                    <a href={`mailto:${INFO_EMAIL}`} className="hover:underline">
+                      <bdi>{INFO_EMAIL}</bdi>
+                    </a>
+                  </dd>
+                </div>
+                <div>
+                  <dt className="text-ink-soft">{t("channels.email.support")}</dt>
+                  <dd className="font-semibold text-navy">
+                    <a href={`mailto:${SUPPORT_EMAIL}`} className="hover:underline">
+                      <bdi>{SUPPORT_EMAIL}</bdi>
+                    </a>
+                  </dd>
+                </div>
+              </dl>
+            </div>
           </Reveal>
         </div>
-      </section>
+      </Section>
 
-      <section className="mx-auto max-w-2xl px-6 py-16 sm:py-20">
-        <Reveal>
-          <h2 className="font-display text-2xl font-semibold text-foreground">
-            {t("form.heading")}
-          </h2>
-          <p className="mt-2 text-sm text-muted-foreground">{t("form.description")}</p>
-          <div className="mt-8">
-            <Suspense fallback={<ContactForm />}>
-              <ContactFormWithPlan searchParams={searchParams} />
-            </Suspense>
-          </div>
-        </Reveal>
-      </section>
-
-      <section className="bg-[var(--mk-band-bg)] text-[var(--mk-band-text)]">
-        <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-8 px-6 py-16 sm:py-20">
-          <div>
-            <h2 className="font-display max-w-[20ch] text-3xl font-semibold text-balance text-[var(--mk-band-text)] sm:text-4xl">
-              {t("cta.title")}
-            </h2>
-            <p className="mt-3 max-w-[42ch] text-[var(--mk-band-text)] opacity-80">
-              {t("cta.description")}
-            </p>
-          </div>
-          <a
-            href={WHATSAPP_URL}
-            target="_blank"
-            rel="noopener noreferrer"
-            className={buttonVariants({ size: "lg" })}
-          >
-            {t("cta.button")}
-          </a>
-        </div>
-      </section>
+      <CtaLinkBox title={t("cta.title")} description={t("cta.description")}>
+        <a
+          href={WHATSAPP_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          className={buttonVariants({ variant: "orange", className: "w-full sm:w-auto" })}
+        >
+          {t("cta.button")}
+        </a>
+      </CtaLinkBox>
     </>
   );
-}
-
-async function ContactFormWithPlan({
-  searchParams,
-}: {
-  searchParams: PageProps<"/[locale]/contact">["searchParams"];
-}) {
-  const resolved = await searchParams;
-  const planParam = typeof resolved.plan === "string" ? resolved.plan : undefined;
-  const plan = PLAN_KEYS.find((key) => key === planParam);
-
-  let planLabel: string | undefined;
-  if (plan) {
-    const tTiers = await getTranslations("Marketing.pricing.tiers");
-    planLabel = tTiers(`${plan}.name`);
-  }
-
-  return <ContactForm planLabel={planLabel} />;
 }

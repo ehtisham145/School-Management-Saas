@@ -31,7 +31,10 @@ This system stores **children's personal data** for multiple organisations. A cr
 - [ ] HTTPS only (Caddy), HSTS on.
 - [ ] Headers: `Content-Security-Policy`, `X-Content-Type-Options: nosniff`, `Referrer-Policy: strict-origin-when-cross-origin`, `frame-ancestors 'none'`.
 - [ ] CSRF protection on all state-changing requests.
-- [ ] DRF throttling on auth, OTP, demo-request and file-upload endpoints.
+- [x] DRF throttling on auth, OTP and demo-request/contact endpoints.
+- [ ] DRF throttling on file-upload endpoints.
+- [ ] Behind Caddy, configure DRF `NUM_PROXIES` so throttling uses the real client IP and `X-Forwarded-For` can't be spoofed.
+- [ ] Decide how long demo requests and contact messages are kept (they hold personal data).
 - [ ] No raw SQL with string formatting; ORM or parameterised queries only.
 - [ ] User-generated HTML (announcements, lesson plans) sanitised server-side (`nh3`) before storing or rendering.
 - [ ] `DEBUG=False`, Django admin on a non-default path, restricted to platform admins + 2FA.

@@ -3,6 +3,7 @@ import re
 from django.core import mail
 from django_otp.oath import totp as generate_totp
 from django_otp.plugins.otp_totp.models import TOTPDevice
+from rest_framework.test import APIClient
 
 from apps.accounts.models import User
 from apps.tenancy.models import Membership
@@ -168,3 +169,51 @@ def test_errors_use_the_standard_format(api_client, two_schools):
     assert invalid.status_code == 400
     assert invalid.data["error"]["code"] == "validation_error"
     assert "name" in invalid.data["error"]["fields"]
+
+
+def test_login_works_when_browser_still_has_an_old_session(two_schools):
+    school_a, _ = two_schools
+    Membership.objects.create(school=school_a, user=_user(), role=Role.TEACHER)
+    client = APIClient(enforce_csrf_checks=True)
+    assert _login(client).status_code == 200
+
+    # Real CSRF checks are on and no token is sent, as with an expired cookie.
+    response = _login(client)
+
+    assert response.status_code == 200
+    assert client.get("/api/academics/years/").status_code == 200
+
+
+def test_login_as_another_user_replaces_the_old_session(two_schools):
+    school_a, school_b = two_schools
+    first = Membership.objects.create(school=school_a, user=_user("first"), role=Role.TEACHER)
+    second = Membership.objects.create(school=school_b, user=_user("second"), role=Role.TEACHER)
+    client = APIClient(enforce_csrf_checks=True)
+
+    _login(client, "first")
+    assert client.session["active_membership_id"] == first.id
+    _login(client, "second")
+
+    assert client.session["active_membership_id"] == second.id
+    assert client.get("/api/auth/me/").data["username"] == "second"
+
+
+def test_wrong_password_with_an_old_session_still_fails(two_schools):
+    school_a, _ = two_schools
+    Membership.objects.create(school=school_a, user=_user(), role=Role.TEACHER)
+    client = APIClient(enforce_csrf_checks=True)
+    _login(client)
+
+    response = client.post("/api/auth/login/", {"username": "user1", "password": "wrong-pass-123"})
+
+    assert response.status_code == 401
+    assert response.data["error"]["code"] == "invalid_credentials"
+
+
+def test_logout_still_requires_a_csrf_token(two_schools):
+    school_a, _ = two_schools
+    Membership.objects.create(school=school_a, user=_user(), role=Role.TEACHER)
+    client = APIClient(enforce_csrf_checks=True)
+    _login(client)
+
+    assert client.post("/api/auth/logout/").status_code == 403

@@ -68,8 +68,9 @@ If week 3 slips, move **homework** to month 2 first, then **messaging** (announc
 ## Phase 1.5 — SaaS layer (Weeks 5–8)
 - [ ] Super Admin panel additions: plans, subscriptions (manual activate/expire), usage overview (schools list and onboarding moved to Week 1)
 - [ ] Quotation builder → PDF → email to school's business email; quotation status tracking
-- [x] Public marketing site (Next.js): home, features, pricing, about, contact — bilingual, RTL, scroll/typewriter animations (`feature/marketing-pages`)
-- [ ] Demo-request form wired to a real endpoint → Super Admin inbox + email (contact page currently falls back to a `mailto:` link client-side; no backend endpoint yet)
+- [x] Public marketing site rebuilt to the approved design (`design/`): Home, About Us, LMS, Pricing (sample prices), Contact, Arabic and English, RTL, language menu (`feature/brand-home-redesign`)
+- [x] Book a demo and Contact forms: saved through `/api/platform/demo-requests/` and `/contact-messages/`, listed in Django admin, emailed to `LEADS_EMAIL`
+- [ ] Replace sample prices and plan contents with confirmed ones
 - [ ] SEO: metadata, Arabic/English `hreflang`, sitemap, Open Graph, fast static pages
 - [ ] PWA: manifest, service worker, install prompt, Web Push
 - [ ] Privacy policy, terms, DPA template

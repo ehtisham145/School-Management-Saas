@@ -1,0 +1,485 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Lesson Lab Home</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* Layout: a bright full-width school photo with the pitch in its calm side, then quiet white sections; E-Numerak's navy with the logo's orange. */
+:root{
+  color-scheme:light;
+  --navy:#1e3a5f; --navy-hover:#172d4a; --navy-deep:#0f1d31; --navy-soft:#e1eaf3; --navy-line:#c3d4e6;
+  --orange:#F5781E; --orange-hover:#FF8C3A; --orange-text:#B9500C; --orange-soft:#FEF0E5; --orange-on-dark:#FFB27A; --on-orange:#2A1400;
+  --bg:#FFFFFF; --bg-tint:#f8fafc; --ink:#0f172a; --ink-soft:#475569; --line:#e2e8f0;
+  --on-dark:#FFFFFF; --on-dark-soft:#c3d4e6; --on-dark-line:rgba(255,255,255,.16);
+  --radius:16px; --shadow:0 18px 44px -24px rgba(15,29,49,.45);
+  --font:"IBM Plex Sans","IBM Plex Sans Arabic",system-ui,sans-serif;
+  --gutter:24px;
+}
+html[lang="ar"]{--font:"IBM Plex Sans Arabic","IBM Plex Sans",system-ui,sans-serif}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:88px}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font);font-size:16px;line-height:1.6;-webkit-font-smoothing:antialiased}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:31;background:var(--bg)}
+a{color:inherit;text-decoration:none}
+img,svg{display:block}
+.wrap{width:min(1240px,100%);margin-inline:auto;padding-left:max(var(--gutter),env(safe-area-inset-left,0px));padding-right:max(var(--gutter),env(safe-area-inset-right,0px))}
+h1,h2,h3,p{margin:0}
+h1,h2,h3{line-height:1.15;letter-spacing:-.02em;text-wrap:balance}
+html[lang="ar"] h1,html[lang="ar"] h2,html[lang="ar"] h3{letter-spacing:0;line-height:1.3}
+:focus-visible{outline:3px solid var(--orange);outline-offset:3px;border-radius:6px}
+
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:48px;padding:0 22px;border-radius:12px;font:inherit;font-weight:700;font-size:15px;border:1.5px solid transparent;cursor:pointer;transition:transform .15s,background .15s,border-color .15s}
+.btn:hover{transform:translateY(-1px)}
+.btn-primary{background:var(--navy);color:var(--on-dark)}
+.btn-primary:hover{background:var(--navy-hover)}
+.btn-orange{background:var(--orange);color:var(--on-orange)}
+.btn-orange:hover{background:var(--orange-hover)}
+.btn-outline{background:var(--bg);color:var(--navy);border-color:var(--navy-line)}
+.btn-outline:hover{border-color:var(--navy);background:var(--navy-soft)}
+.btn-sm{min-height:42px;padding:0 16px;font-size:14px;border-radius:10px}
+
+/* Header */
+.header{position:sticky;top:env(safe-area-inset-top,0px);z-index:30;background:var(--bg);border-bottom:1px solid var(--line)}
+.header-in{display:flex;align-items:center;justify-content:space-between;gap:16px;height:76px}
+.brand{display:block;flex:none}
+.brand img{height:50px;width:auto}
+.nav{display:flex;gap:28px;font-size:14.5px;font-weight:600;color:var(--ink-soft)}
+.nav a{padding-block:6px;border-bottom:2px solid transparent;transition:color .15s}
+.nav a:hover{color:var(--navy)}
+.nav a.on{color:var(--navy);border-color:var(--orange)}
+.header-actions{display:flex;align-items:center;gap:8px}
+.nav-signin{display:none}
+.signin{font-size:14.5px;font-weight:600;padding:9px 12px;border-radius:10px;color:var(--navy)}
+.signin:hover{background:var(--navy-soft)}
+
+.lang{position:relative}
+.lang-btn{display:inline-flex;align-items:center;gap:7px;height:42px;padding:0 12px;background:var(--bg);border:1px solid var(--line);border-radius:10px;color:var(--ink);font:inherit;font-size:14px;font-weight:600;cursor:pointer}
+.lang-btn:hover{background:var(--bg-tint)}
+.lang-btn svg{width:17px;height:17px}
+.lang-btn .chev{width:13px;height:13px;transition:transform .15s}
+.lang-btn[aria-expanded="true"] .chev{transform:rotate(180deg)}
+.lang-menu{position:absolute;inset-inline-end:0;top:calc(100% + 8px);min-width:172px;padding:6px;margin:0;list-style:none;background:var(--bg);color:var(--ink);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow)}
+.lang-menu button{display:flex;width:100%;align-items:center;justify-content:space-between;gap:12px;padding:10px 12px;background:none;border:0;border-radius:8px;font:inherit;font-size:14.5px;font-weight:500;color:inherit;cursor:pointer;text-align:start}
+.lang-menu button:hover{background:var(--navy-soft)}
+.lang-menu button[aria-checked="true"]{font-weight:700;color:var(--navy)}
+.lang-menu .tick{visibility:hidden;color:var(--orange-text)}
+.lang-menu button[aria-checked="true"] .tick{visibility:visible}
+.menu-toggle{display:none;width:42px;height:42px;align-items:center;justify-content:center;background:var(--bg);border:1px solid var(--line);border-radius:10px;color:var(--ink);cursor:pointer}
+
+/* Hero: the photo's people sit opposite the text, so Arabic mirrors the photo. */
+.hero{position:relative;overflow:hidden;background:var(--bg)}
+.hero-media{position:absolute;inset:0}
+.hero-media img{width:100%;height:100%;object-fit:cover;object-position:center 42%}
+html[dir="rtl"] .hero-media img{transform:scaleX(-1)}
+.hero-media::after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(to right,#fff 0%,rgba(255,255,255,.94) 30%,rgba(255,255,255,0) 54%)}
+html[dir="rtl"] .hero-media::after{background:linear-gradient(to left,#fff 0%,rgba(255,255,255,.94) 30%,rgba(255,255,255,0) 54%)}
+.hero-in{position:relative;z-index:1;padding-block:clamp(56px,7vw,96px)}
+.hero-copy{max-width:min(47%,540px)}
+.eyebrow{display:inline-flex;align-items:center;gap:8px;padding:6px 13px;border-radius:999px;background:var(--orange-soft);color:var(--orange-text);font-size:13px;font-weight:700}
+.eyebrow i{width:7px;height:7px;border-radius:50%;background:var(--orange)}
+.hero h1{margin-top:20px;font-size:clamp(36px,4.5vw,58px);font-weight:700;color:var(--navy-deep)}
+.hero h1 em{font-style:normal;color:var(--orange-text)}
+.lede{margin-top:18px;font-size:clamp(16px,1.35vw,18px);color:var(--ink-soft)}
+.hero-cta{display:flex;flex-wrap:wrap;gap:12px;margin-top:28px}
+.facts{display:flex;flex-wrap:wrap;gap:10px 24px;margin:30px 0 0;padding:0;list-style:none;font-size:14px;font-weight:500;color:var(--ink)}
+.facts li{display:inline-flex;align-items:center;gap:8px}
+.facts svg{width:18px;height:18px;color:var(--orange-text);flex:none}
+.chip-card{position:absolute;z-index:1;display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--bg);color:var(--ink);border-radius:14px;box-shadow:0 18px 36px -14px rgba(15,29,49,.55);font-size:13px;animation:float 6s ease-in-out infinite}
+@keyframes float{50%{translate:0 -8px}}
+.chip-card b{display:block;font-size:14px;font-weight:700;white-space:nowrap}
+.chip-card span.sub{display:block;color:var(--ink-soft);font-size:12px;white-space:nowrap}
+.chip-ico{display:grid;place-items:center;width:34px;height:34px;border-radius:10px;flex:none}
+.chip-ico svg{width:18px;height:18px}
+.chip-1{top:9%;inset-inline-start:50%}
+.chip-2{bottom:9%;inset-inline-start:37%;animation-delay:-3s}
+
+/* Trust strip */
+.strip{background:var(--navy-deep);color:var(--on-dark)}
+.strip-in{display:grid;grid-template-columns:repeat(4,1fr)}
+.strip-item{padding:24px 22px;border-inline-start:1px solid var(--on-dark-line)}
+.strip-item:first-child{border-inline-start:0;padding-inline-start:0}
+.strip-item b{display:block;font-size:17px;font-weight:700}
+.strip-item span{font-size:13.5px;color:var(--on-dark-soft)}
+
+/* Sections */
+.section{padding-block:clamp(64px,8vw,104px)}
+.sec-head{max-width:640px;margin-bottom:44px}
+.kicker{font-size:13.5px;font-weight:700;color:var(--orange-text);margin-bottom:10px}
+.sec-head h2{font-size:clamp(28px,3.4vw,42px);font-weight:700;color:var(--navy-deep)}
+.sec-head p:not(.kicker){margin-top:12px;color:var(--ink-soft);font-size:16.5px}
+
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+.card{padding:26px;background:var(--bg);border:1px solid var(--line);border-radius:var(--radius);transition:transform .18s,box-shadow .18s,border-color .18s}
+.card:hover{transform:translateY(-3px);box-shadow:var(--shadow);border-color:var(--navy-line)}
+.card h3{margin-top:16px;font-size:18.5px;font-weight:700}
+.card p{margin-top:8px;font-size:14.8px;color:var(--ink-soft)}
+.ico{display:grid;place-items:center;width:46px;height:46px;border-radius:13px}
+.ico svg{width:23px;height:23px}
+.t-navy{background:var(--navy-soft);color:var(--navy)}
+.t-orange{background:var(--orange-soft);color:var(--orange-text)}
+
+/* Roles */
+.roles{background:var(--bg-tint)}
+.roles-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:14px}
+.role{padding:22px 18px;background:var(--bg);border-radius:14px;border:1px solid var(--line)}
+.role h3{font-size:16px;font-weight:700;margin-top:12px}
+.role p{font-size:13.5px;color:var(--ink-soft);margin-top:6px}
+.role .ico{width:40px;height:40px;border-radius:11px}
+.role .ico svg{width:20px;height:20px}
+
+/* Steps */
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;counter-reset:s;margin:0;padding:0;list-style:none}
+.step{padding-block-start:22px;border-top:3px solid var(--navy)}
+.step::before{counter-increment:s;content:counter(s);display:grid;place-items:center;width:38px;height:38px;border-radius:50%;background:var(--orange);color:var(--on-orange);font-weight:700}
+.step h3{margin-top:16px;font-size:18.5px;font-weight:700}
+.step p{margin-top:8px;font-size:14.8px;color:var(--ink-soft)}
+
+/* CTA */
+.cta{padding-bottom:clamp(64px,8vw,104px)}
+.cta-box{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:24px;padding:clamp(30px,5vw,54px);border-radius:22px;background:var(--navy-deep);color:var(--on-dark)}
+.cta-box>div{flex:1 1 320px;min-width:0}
+.cta-box h2{font-size:clamp(26px,3vw,38px);font-weight:700;max-width:20ch}
+.cta-box p{margin-top:10px;color:var(--on-dark-soft);max-width:46ch}
+
+/* Footer */
+.footer{background:var(--navy-deep);color:var(--on-dark-soft);font-size:14.5px}
+.footer-in{display:grid;grid-template-columns:1.6fr 1fr 1fr 1.4fr;gap:32px;padding-block:56px 36px}
+.footer-logo{display:inline-block;padding:10px 14px;background:var(--bg);border-radius:12px}
+.footer-logo img{height:44px;width:auto}
+.footer h3{font-size:14px;color:var(--on-dark);margin-bottom:12px;font-weight:700;letter-spacing:0}
+.footer ul{margin:0;padding:0;list-style:none;display:grid;gap:8px}
+.footer a:hover{color:var(--on-dark)}
+.footer .tag{margin-top:14px;max-width:34ch}
+.copyright{padding-block:18px;border-top:1px solid var(--on-dark-line);font-size:13px}
+
+/* WhatsApp */
+.wa{position:fixed;bottom:calc(22px + env(safe-area-inset-bottom,0px));inset-inline-end:22px;z-index:40;display:grid;place-items:center;width:58px;height:58px;border-radius:50%;background:#25D366;box-shadow:0 12px 26px -6px rgba(0,0,0,.4);transition:transform .15s}
+.wa:hover{transform:scale(1.07)}
+.wa svg{width:32px;height:32px;fill:#fff}
+
+@media (max-width:1040px){
+  .nav{display:none}
+  .menu-toggle{display:inline-flex}
+  .nav.open{display:flex;position:absolute;top:100%;inset-inline:0;flex-direction:column;gap:2px;padding:12px 24px 18px;background:var(--bg);border-bottom:1px solid var(--line);box-shadow:var(--shadow)}
+  .nav.open a{padding:10px 0;border:0}
+  .hero{display:flex;flex-direction:column}
+  .hero-in{padding-block:44px 32px}
+  .hero-copy{max-width:640px}
+  .hero-media{position:relative;inset:auto;aspect-ratio:16/10}
+  .hero-media::after{display:none}
+  .hero-media img{object-position:78% center}
+  .chip-1{top:6%;inset-inline-start:3%}
+  .chip-2{bottom:6%;inset-inline-start:3%}
+  .strip-in{grid-template-columns:repeat(2,1fr)}
+  .strip-item,.strip-item:first-child{padding-inline-start:22px}
+  .strip-item:nth-child(odd){border-inline-start:0;padding-inline-start:0}
+  .strip-item:nth-child(n+3){border-top:1px solid var(--on-dark-line)}
+  .grid,.steps{grid-template-columns:repeat(2,1fr)}
+  .roles-grid{grid-template-columns:repeat(3,1fr)}
+  .footer-in{grid-template-columns:1fr 1fr}
+}
+@media (max-width:620px){
+  :root{--gutter:16px}
+  .header-in{height:64px;gap:8px}
+  .brand img{height:38px}
+  .nav.open{padding-inline:16px}
+  .signin,.header-demo{display:none}
+  .nav.open .nav-signin{display:block}
+  .lang-btn{padding:0 9px}
+  .grid,.steps{grid-template-columns:1fr}
+  .roles-grid{grid-template-columns:repeat(2,1fr)}
+  .role:last-child{grid-column:1/-1}
+  .hero-cta .btn{flex:1 1 100%}
+  .hero-media{aspect-ratio:4/3}
+  .chip-card{padding:7px 10px;gap:7px;border-radius:11px}
+  .chip-card b{font-size:12px}
+  .chip-card span.sub{font-size:10.5px}
+  .chip-ico{width:26px;height:26px;border-radius:8px}
+  .chip-ico svg{width:14px;height:14px}
+  .strip-item{padding:18px 14px}
+  .footer-in{gap:26px}
+  .footer-brand,.footer-talk{grid-column:1/-1}
+  .cta-box .btn{width:100%}
+  .wa{width:54px;height:54px;bottom:calc(16px + env(safe-area-inset-bottom,0px));inset-inline-end:16px}
+}
+@media (prefers-reduced-motion:reduce){
+  *{animation:none!important;transition:none!important;scroll-behavior:auto!important}
+}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="check" viewBox="0 0 24 24"><path d="m5 12.5 4.5 4.5L19 7.5" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-att" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="17" rx="3"/><path d="M8 2.500v3M16 2.500v3M8.500 13l2.500 2.500 4.500-5"/></g></symbol>
+  <symbol id="i-exam" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h9l4 4v14H6z"/><path d="M14.500 3v4.500H19M9.500 12.500h6M9.500 16.500h4"/></g></symbol>
+  <symbol id="i-fee" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="18" height="13" rx="3"/><path d="M3 10.500h18M7 15h3.500"/></g></symbol>
+  <symbol id="i-time" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5.500l3.500 2"/></g></symbol>
+  <symbol id="i-msg" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6.500A2.500 2.500 0 0 1 6.500 4h11A2.500 2.500 0 0 1 20 6.500v7.500a2.500 2.500 0 0 1-2.500 2.500H10L5.500 20v-3.500A2.500 2.500 0 0 1 4 14z"/><path d="M8.500 9h7M8.500 12.500h4.500"/></g></symbol>
+  <symbol id="i-lang" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.500 2.600 3.800 5.600 3.800 9s-1.300 6.400-3.800 9c-2.500-2.600-3.800-5.600-3.800-9S9.500 5.600 12 3z"/></g></symbol>
+  <symbol id="i-chev" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6" fill="none" stroke="currentColor" stroke-width="2.400" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-admin" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 4.500 6v5.500c0 4.500 3.100 7.800 7.500 9.500 4.400-1.700 7.500-5 7.500-9.500V6z"/><path d="m9 12 2 2 4-4"/></g></symbol>
+  <symbol id="i-principal" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10M10 20V4M16 20v-7M21 20H3"/></g></symbol>
+  <symbol id="i-teacher" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4M7.500 9h9M7.500 12h5"/></g></symbol>
+  <symbol id="i-student" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m2.500 9.500 9.500-5 9.500 5-9.500 5z"/><path d="M6.500 12v4.500c1.600 1.400 3.500 2 5.500 2s3.900-.6 5.500-2V12"/></g></symbol>
+  <symbol id="i-parent" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.500"/><path d="M2.500 20c.5-3.800 3-6 6.500-6s6 2.200 6.500 6"/><circle cx="17.500" cy="10" r="2.500"/><path d="M17.500 15c2.200 0 3.700 1.300 4 3.500"/></g></symbol>
+</svg>
+
+<header class="header">
+  <div class="wrap header-in">
+    <a class="brand" href="#top"><img src="assets/logo.png" width="596" height="200" alt="Lesson Lab"></a>
+    <nav class="nav" id="nav" aria-label="Main">
+      <a class="on" href="#top" data-t="nav.home"></a>
+      <a href="#features" data-t="nav.features"></a>
+      <a href="#how" data-t="nav.how"></a>
+      <a href="#contact" data-t="nav.contact"></a>
+      <a class="nav-signin" href="#top" data-t="nav.signIn"></a>
+    </nav>
+    <div class="header-actions">
+      <div class="lang">
+        <button class="lang-btn" id="langBtn" type="button" aria-haspopup="menu" aria-expanded="false" aria-controls="langMenu" data-t-label="lang.label">
+          <svg aria-hidden="true"><use href="#i-lang"/></svg>
+          <span id="langCurrent"></span>
+          <svg class="chev" aria-hidden="true"><use href="#i-chev"/></svg>
+        </button>
+        <ul class="lang-menu" id="langMenu" role="menu" hidden>
+          <li role="none"><button type="button" role="menuitemradio" data-lang="en" aria-checked="true" lang="en">English <svg class="tick" width="16" height="16" aria-hidden="true"><use href="#check"/></svg></button></li>
+          <li role="none"><button type="button" role="menuitemradio" data-lang="ar" aria-checked="false" lang="ar">العربية <svg class="tick" width="16" height="16" aria-hidden="true"><use href="#check"/></svg></button></li>
+        </ul>
+      </div>
+      <a class="signin" href="#top" data-t="nav.signIn"></a>
+      <a class="btn btn-primary btn-sm header-demo" href="#contact" data-t="nav.cta"></a>
+      <button class="menu-toggle" id="menuToggle" type="button" aria-expanded="false" aria-controls="nav">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+      </button>
+    </div>
+  </div>
+</header>
+
+<main id="top">
+  <section class="hero">
+    <div class="wrap hero-in">
+      <div class="hero-copy">
+        <span class="eyebrow"><i></i><span data-t="hero.eyebrow"></span></span>
+        <h1><span data-t="hero.title1"></span> <em data-t="hero.title2"></em></h1>
+        <p class="lede" data-t="hero.lede"></p>
+        <div class="hero-cta">
+          <a class="btn btn-primary" href="#contact" data-t="hero.primary"></a>
+          <a class="btn btn-outline" href="#features" data-t="hero.secondary"></a>
+        </div>
+        <ul class="facts">
+          <li><svg aria-hidden="true"><use href="#check"/></svg><span data-t="hero.fact1"></span></li>
+          <li><svg aria-hidden="true"><use href="#check"/></svg><span data-t="hero.fact2"></span></li>
+          <li><svg aria-hidden="true"><use href="#check"/></svg><span data-t="hero.fact3"></span></li>
+        </ul>
+      </div>
+    </div>
+    <div class="hero-media">
+      <img src="assets/hero.jpg" width="1800" height="1005" alt="" data-t-alt="hero.alt">
+      <div class="chip-card chip-1" aria-hidden="true">
+        <span class="chip-ico t-navy"><svg><use href="#i-att"/></svg></span>
+        <div><b data-t="hero.chip1a"></b><span class="sub" data-t="hero.chip1b"></span></div>
+      </div>
+      <div class="chip-card chip-2" aria-hidden="true">
+        <span class="chip-ico t-orange"><svg><use href="#i-exam"/></svg></span>
+        <div><b data-t="hero.chip2a"></b><span class="sub" data-t="hero.chip2b"></span></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="strip" aria-label="Highlights">
+    <div class="wrap strip-in">
+      <div class="strip-item"><b data-t="strip.a1"></b><span data-t="strip.a2"></span></div>
+      <div class="strip-item"><b data-t="strip.b1"></b><span data-t="strip.b2"></span></div>
+      <div class="strip-item"><b data-t="strip.c1"></b><span data-t="strip.c2"></span></div>
+      <div class="strip-item"><b data-t="strip.d1"></b><span data-t="strip.d2"></span></div>
+    </div>
+  </section>
+
+  <section class="section" id="features">
+    <div class="wrap">
+      <div class="sec-head">
+        <p class="kicker" data-t="features.kicker"></p>
+        <h2 data-t="features.title"></h2>
+        <p data-t="features.sub"></p>
+      </div>
+      <div class="grid">
+        <article class="card"><span class="ico t-navy"><svg aria-hidden="true"><use href="#i-att"/></svg></span><h3 data-t="f.att"></h3><p data-t="f.attD"></p></article>
+        <article class="card"><span class="ico t-orange"><svg aria-hidden="true"><use href="#i-exam"/></svg></span><h3 data-t="f.exam"></h3><p data-t="f.examD"></p></article>
+        <article class="card"><span class="ico t-navy"><svg aria-hidden="true"><use href="#i-fee"/></svg></span><h3 data-t="f.fee"></h3><p data-t="f.feeD"></p></article>
+        <article class="card"><span class="ico t-orange"><svg aria-hidden="true"><use href="#i-time"/></svg></span><h3 data-t="f.time"></h3><p data-t="f.timeD"></p></article>
+        <article class="card"><span class="ico t-navy"><svg aria-hidden="true"><use href="#i-msg"/></svg></span><h3 data-t="f.msg"></h3><p data-t="f.msgD"></p></article>
+        <article class="card"><span class="ico t-orange"><svg aria-hidden="true"><use href="#i-lang"/></svg></span><h3 data-t="f.lang"></h3><p data-t="f.langD"></p></article>
+      </div>
+    </div>
+  </section>
+
+  <section class="section roles">
+    <div class="wrap">
+      <div class="sec-head">
+        <p class="kicker" data-t="roles.kicker"></p>
+        <h2 data-t="roles.title"></h2>
+      </div>
+      <div class="roles-grid">
+        <article class="role"><span class="ico t-navy"><svg aria-hidden="true"><use href="#i-admin"/></svg></span><h3 data-t="r.admin"></h3><p data-t="r.adminD"></p></article>
+        <article class="role"><span class="ico t-orange"><svg aria-hidden="true"><use href="#i-principal"/></svg></span><h3 data-t="r.principal"></h3><p data-t="r.principalD"></p></article>
+        <article class="role"><span class="ico t-navy"><svg aria-hidden="true"><use href="#i-teacher"/></svg></span><h3 data-t="r.teacher"></h3><p data-t="r.teacherD"></p></article>
+        <article class="role"><span class="ico t-orange"><svg aria-hidden="true"><use href="#i-student"/></svg></span><h3 data-t="r.student"></h3><p data-t="r.studentD"></p></article>
+        <article class="role"><span class="ico t-navy"><svg aria-hidden="true"><use href="#i-parent"/></svg></span><h3 data-t="r.parent"></h3><p data-t="r.parentD"></p></article>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="how">
+    <div class="wrap">
+      <div class="sec-head">
+        <p class="kicker" data-t="how.kicker"></p>
+        <h2 data-t="how.title"></h2>
+      </div>
+      <ol class="steps">
+        <li class="step"><h3 data-t="how.s1"></h3><p data-t="how.s1d"></p></li>
+        <li class="step"><h3 data-t="how.s2"></h3><p data-t="how.s2d"></p></li>
+        <li class="step"><h3 data-t="how.s3"></h3><p data-t="how.s3d"></p></li>
+      </ol>
+    </div>
+  </section>
+
+  <section class="cta" id="contact">
+    <div class="wrap">
+      <div class="cta-box">
+        <div>
+          <h2 data-t="cta.title"></h2>
+          <p data-t="cta.sub"></p>
+        </div>
+        <a class="btn btn-orange" href="https://wa.me/966509564607" target="_blank" rel="noopener noreferrer" data-t="cta.btn"></a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="footer">
+  <div class="wrap">
+    <div class="footer-in">
+      <div class="footer-brand">
+        <a class="footer-logo" href="#top"><img src="assets/logo.png" width="596" height="200" alt="Lesson Lab"></a>
+        <p class="tag" data-t="footer.tag"></p>
+      </div>
+      <div>
+        <h3 data-t="footer.product"></h3>
+        <ul>
+          <li><a href="#features" data-t="nav.features"></a></li>
+          <li><a href="#how" data-t="nav.how"></a></li>
+        </ul>
+      </div>
+      <div>
+        <h3 data-t="footer.company"></h3>
+        <ul>
+          <li><a href="#top" data-t="footer.about"></a></li>
+          <li><a href="#contact" data-t="nav.contact"></a></li>
+        </ul>
+      </div>
+      <div class="footer-talk">
+        <h3 data-t="footer.talk"></h3>
+        <ul>
+          <li><span data-t="footer.general"></span>: <a href="mailto:info@lessonlab.me"><bdi>info@lessonlab.me</bdi></a></li>
+          <li><span data-t="footer.support"></span>: <a href="mailto:support@lessonlab.me"><bdi>support@lessonlab.me</bdi></a></li>
+          <li><a href="https://wa.me/966509564607" target="_blank" rel="noopener noreferrer"><bdi>+966 50 956 4607</bdi></a></li>
+        </ul>
+      </div>
+    </div>
+    <p class="copyright" data-t="footer.copy"></p>
+  </div>
+</footer>
+
+<a class="wa" href="https://wa.me/966509564607" target="_blank" rel="noopener noreferrer" data-t-label="whatsapp">
+  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+</a>
+
+<script>
+const T = {
+  en: {
+    "lang.label":"Choose language","lang.name":"English","nav.home":"Home","nav.features":"Features","nav.how":"How it works","nav.contact":"Contact","nav.signIn":"Sign in","nav.cta":"Book a demo","nav.menu":"Open menu","nav.close":"Close menu",
+    "hero.eyebrow":"School management for Saudi Arabia","hero.title1":"Run your whole school","hero.title2":"from one place.","hero.lede":"Attendance, exams, fees, timetables and parent messages, together in one bilingual system built for how private schools in Saudi Arabia actually work.","hero.primary":"Book a demo","hero.secondary":"Explore features","hero.fact1":"Arabic and English","hero.fact2":"Hijri and Gregorian dates","hero.fact3":"Data hosted in Saudi Arabia","hero.alt":"A school administrator and a teacher smiling at a dashboard on a laptop, with students walking in the corridor behind them","hero.chip1a":"Attendance marked","hero.chip1b":"Grade 6B, today","hero.chip2a":"Report cards ready","hero.chip2b":"Term 1",
+    "strip.a1":"Two languages","strip.a2":"Full Arabic, right to left","strip.b1":"Five roles","strip.b2":"Each sees only what they need","strip.c1":"Sunday to Thursday","strip.c2":"Follows the Saudi school week","strip.d1":"Separate by school","strip.d2":"Every school's data stays private",
+    "features.kicker":"Everything in one system","features.title":"The whole school day, without the paperwork","features.sub":"Your staff enter information once, and it reaches everyone who needs it.",
+    "f.att":"Attendance","f.attD":"Mark a section in under a minute and keep parents informed the same day.","f.exam":"Exams and report cards","f.examD":"Enter marks once, then produce report cards in Arabic and English.","f.fee":"Fees","f.feeD":"See what is due, paid and overdue for every student, with receipts ready to print.","f.time":"Timetable","f.timeD":"Plan classes, subjects and teachers for the week in one clear schedule.","f.msg":"Announcements and messages","f.msgD":"Reach a whole school, one grade or one family, and keep teachers and parents connected.","f.lang":"Truly bilingual","f.langD":"Every screen works in Arabic and English, with Hijri dates beside Gregorian.",
+    "roles.kicker":"Made for everyone at school","roles.title":"The right view for each person",
+    "r.admin":"School admin","r.adminD":"Manages users, classes, fees and settings.","r.principal":"Principal","r.principalD":"Follows attendance, results and staff at a glance.","r.teacher":"Teacher","r.teacherD":"Takes attendance, enters marks and sets homework.","r.student":"Student","r.studentD":"Checks the timetable, homework and results.","r.parent":"Parent","r.parentD":"Follows their own children and talks to teachers.",
+    "how.kicker":"Getting started","how.title":"Up and running in three steps","how.s1":"We set up your school","how.s1d":"Add your academic year, grades, classes and staff with our help.","how.s2":"Your staff run the week","how.s2d":"Attendance, lessons, fees and messages all happen in one place.","how.s3":"Close the term with ease","how.s3d":"Report cards and fee statements come from what is already recorded.",
+    "cta.title":"See Lesson Lab with your own school","cta.sub":"Book a short call and we will walk you through it using your grades and classes.","cta.btn":"Book a demo",
+    "footer.tag":"School management built for private schools in Saudi Arabia.","footer.product":"Product","footer.company":"Company","footer.about":"About","footer.talk":"Talk to us","footer.general":"General","footer.support":"Support","footer.copy":"© 2026 Lesson Lab. All rights reserved.","whatsapp":"Chat on WhatsApp"
+  },
+  ar: {
+    "lang.label":"اختر اللغة","lang.name":"العربية","nav.home":"الرئيسية","nav.features":"المميزات","nav.how":"كيف يعمل","nav.contact":"تواصل معنا","nav.signIn":"تسجيل الدخول","nav.cta":"احجز عرضًا توضيحيًا","nav.menu":"فتح القائمة","nav.close":"إغلاق القائمة",
+    "hero.eyebrow":"إدارة المدارس في المملكة العربية السعودية","hero.title1":"أدِر مدرستك بالكامل","hero.title2":"من مكان واحد.","hero.lede":"الحضور والاختبارات والرسوم والجداول ورسائل أولياء الأمور، معًا في نظام واحد ثنائي اللغة، مصمم على الطريقة التي تعمل بها المدارس الأهلية في السعودية فعليًا.","hero.primary":"احجز عرضًا توضيحيًا","hero.secondary":"استكشف المميزات","hero.fact1":"العربية والإنجليزية","hero.fact2":"التاريخ الهجري والميلادي","hero.fact3":"البيانات مستضافة في السعودية","hero.alt":"مسؤولة مدرسة ومعلم يبتسمان أمام لوحة معلومات على حاسوب محمول، وخلفهما طلاب يسيرون في الممر","hero.chip1a":"تم تسجيل الحضور","hero.chip1b":"الصف السادس ب، اليوم","hero.chip2a":"كشوف الدرجات جاهزة","hero.chip2b":"الفصل الدراسي الأول",
+    "strip.a1":"لغتان","strip.a2":"عربية كاملة من اليمين إلى اليسار","strip.b1":"خمسة أدوار","strip.b2":"يرى كل شخص ما يحتاجه فقط","strip.c1":"من الأحد إلى الخميس","strip.c2":"يتبع الأسبوع الدراسي السعودي","strip.d1":"فصل بين المدارس","strip.d2":"بيانات كل مدرسة تبقى خاصة بها",
+    "features.kicker":"كل شيء في نظام واحد","features.title":"يوم المدرسة كاملًا، دون عناء الأوراق","features.sub":"يُدخل موظفوك المعلومة مرة واحدة، فتصل إلى كل من يحتاجها.",
+    "f.att":"الحضور والغياب","f.attD":"سجّل حضور الفصل في أقل من دقيقة وأبلغ أولياء الأمور في اليوم نفسه.","f.exam":"الاختبارات وكشوف الدرجات","f.examD":"أدخل الدرجات مرة واحدة، ثم أصدر كشوف الدرجات بالعربية والإنجليزية.","f.fee":"الرسوم الدراسية","f.feeD":"اطّلع على المستحق والمدفوع والمتأخر لكل طالب، مع إيصالات جاهزة للطباعة.","f.time":"الجدول الدراسي","f.timeD":"خطط الفصول والمواد والمعلمين للأسبوع في جدول واحد واضح.","f.msg":"الإعلانات والرسائل","f.msgD":"تواصل مع المدرسة كلها أو صف واحد أو عائلة واحدة، وأبقِ المعلمين وأولياء الأمور على اتصال.","f.lang":"ثنائي اللغة بحق","f.langD":"كل شاشة تعمل بالعربية والإنجليزية، مع التاريخ الهجري بجانب الميلادي.",
+    "roles.kicker":"مصمم لكل من في المدرسة","roles.title":"الواجهة المناسبة لكل شخص",
+    "r.admin":"مسؤول المدرسة","r.adminD":"يدير المستخدمين والفصول والرسوم والإعدادات.","r.principal":"مدير المدرسة","r.principalD":"يتابع الحضور والنتائج والموظفين بنظرة سريعة.","r.teacher":"المعلم","r.teacherD":"يسجل الحضور ويدخل الدرجات ويحدد الواجبات.","r.student":"الطالب","r.studentD":"يطلع على الجدول والواجبات والنتائج.","r.parent":"ولي الأمر","r.parentD":"يتابع أبناءه ويتواصل مع المعلمين.",
+    "how.kicker":"البداية","how.title":"ابدأ العمل في ثلاث خطوات","how.s1":"نُعدّ مدرستك معك","how.s1d":"أضف العام الدراسي والصفوف والفصول والموظفين بمساعدتنا.","how.s2":"يدير موظفوك الأسبوع","how.s2d":"الحضور والدروس والرسوم والرسائل كلها في مكان واحد.","how.s3":"أغلق الفصل الدراسي بسهولة","how.s3d":"تصدر كشوف الدرجات والرسوم مما هو مسجَّل بالفعل.",
+    "cta.title":"شاهد Lesson Lab ببيانات مدرستك","cta.sub":"احجز مكالمة قصيرة وسنعرض لك النظام بصفوف وفصول مدرستك.","cta.btn":"احجز عرضًا توضيحيًا",
+    "footer.tag":"نظام إدارة مدرسية مصمم للمدارس الأهلية في المملكة العربية السعودية.","footer.product":"المنتج","footer.company":"الشركة","footer.about":"من نحن","footer.talk":"تواصل معنا","footer.general":"عام","footer.support":"الدعم الفني","footer.copy":"© 2026 Lesson Lab. جميع الحقوق محفوظة.","whatsapp":"تواصل عبر واتساب"
+  }
+};
+const LANG_KEY = "lessonlab-lang";
+const langBtn = document.getElementById("langBtn"), langMenu = document.getElementById("langMenu");
+const nav = document.getElementById("nav"), toggle = document.getElementById("menuToggle");
+let currentLang = "en";
+function readSavedLang(){ try { return localStorage.getItem(LANG_KEY); } catch { return null; } }
+function saveLang(lang){ try { localStorage.setItem(LANG_KEY, lang); } catch {} }
+function syncToggleLabel(){
+  const open = nav.classList.contains("open");
+  toggle.setAttribute("aria-expanded", String(open));
+  toggle.setAttribute("aria-label", T[currentLang][open ? "nav.close" : "nav.menu"]);
+}
+function closeMenu(returnFocus){
+  if (langMenu.hidden) return;
+  langMenu.hidden = true;
+  langBtn.setAttribute("aria-expanded","false");
+  if (returnFocus) langBtn.focus();
+}
+function setLang(lang){
+  currentLang = lang;
+  const d = T[lang];
+  document.documentElement.lang = lang;
+  document.documentElement.dir = lang === "ar" ? "rtl" : "ltr";
+  document.querySelectorAll("[data-t]").forEach(el => { el.textContent = d[el.dataset.t]; });
+  document.querySelectorAll("[data-t-label]").forEach(el => el.setAttribute("aria-label", d[el.dataset.tLabel]));
+  document.querySelectorAll("[data-t-alt]").forEach(el => { el.alt = d[el.dataset.tAlt]; });
+  document.getElementById("langCurrent").textContent = d["lang.name"];
+  langMenu.querySelectorAll("[data-lang]").forEach(b => b.setAttribute("aria-checked", String(b.dataset.lang === lang)));
+  syncToggleLabel();
+}
+langBtn.addEventListener("click", e => {
+  e.stopPropagation();
+  const open = langMenu.hidden;
+  langMenu.hidden = !open;
+  langBtn.setAttribute("aria-expanded", String(open));
+  if (open) langMenu.querySelector('[aria-checked="true"]').focus();
+});
+langMenu.addEventListener("click", e => {
+  e.stopPropagation();
+  const b = e.target.closest("[data-lang]");
+  if (b) { setLang(b.dataset.lang); saveLang(b.dataset.lang); closeMenu(true); }
+});
+langMenu.addEventListener("keydown", e => {
+  if (e.key !== "ArrowDown" && e.key !== "ArrowUp") return;
+  e.preventDefault();
+  const items = [...langMenu.querySelectorAll("[data-lang]")];
+  const step = e.key === "ArrowDown" ? 1 : -1;
+  items[(items.indexOf(document.activeElement) + step + items.length) % items.length].focus();
+});
+document.addEventListener("click", () => closeMenu(false));
+document.addEventListener("keydown", e => { if (e.key === "Escape") closeMenu(true); });
+toggle.addEventListener("click", () => { nav.classList.toggle("open"); syncToggleLabel(); });
+nav.addEventListener("click", e => { if (e.target.closest("a")) { nav.classList.remove("open"); syncToggleLabel(); } });
+const urlLang = new URLSearchParams(location.search).get("lang");
+const startLang = urlLang || readSavedLang();
+setLang(startLang === "ar" ? "ar" : "en");
+</script>
+</body>
+</html>
