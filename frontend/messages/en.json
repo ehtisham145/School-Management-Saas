@@ -34,7 +34,7 @@
       "codeLabel": "6-digit code",
       "sendCode": "Send code",
       "verify": "Sign in",
-      "codeSent": "If {email} is registered, a code is on its way. Check your inbox.",
+      "codeSent": "If <email></email> is registered, a code is on its way. Check your inbox.",
       "changeEmail": "Use a different email",
       "usePassword": "Sign in with a password",
       "errors": {
@@ -156,7 +156,13 @@
         "chip1b": "Grade 6B, today",
         "chip2a": "Report cards ready",
         "chip2b": "Term 1",
-        "words": ["from one place.", "without paperwork.", "in two languages."]
+        "words": [
+          "Welcome to Lesson Lab",
+          "Run your whole school from one place.",
+          "Run your whole school without paperwork.",
+          "Run your whole school in two languages."
+        ],
+        "highlights": ["Lesson Lab", "from one place.", "without paperwork.", "in two languages."]
       },
       "strip": {
         "a1": "Two languages",
@@ -540,18 +546,19 @@
       "name": "Your full name",
       "school": "Your school's name",
       "email": "name@school.com",
-      "phone": "+966 5X XXX XXXX",
+      "phone": "05X XXX XXXX",
       "demoMessage": "Number of students, grades, or questions",
       "message": "How can we help?"
     },
     "errors": {
       "required": "This field is required.",
       "email": "Enter a valid email address.",
-      "phone": "Enter a valid phone number.",
+      "phone": "Enter a valid Saudi mobile number, such as 05X XXX XXXX.",
       "tooLong": "This is too long.",
       "invalid": "Please check this field.",
       "rateLimited": "Too many requests. Please try again later.",
-      "generic": "We couldn't send this. Check your connection and try again."
+      "generic": "We couldn't send this. Check your connection and try again.",
+      "code": "Enter the 6-digit code."
     },
     "demo": {
       "title": "Book a demo",
@@ -559,14 +566,14 @@
       "submit": "Request a demo",
       "submitting": "Sending...",
       "successTitle": "Request received",
-      "successBody": "Thank you, {name}. We will contact you at {email}.",
+      "successBody": "Thank you, <name></name>. We will contact you at <email></email>.",
       "close": "Close"
     },
     "contact": {
       "submit": "Send message",
       "submitting": "Sending...",
       "successTitle": "Message sent",
-      "successBody": "Thank you, {name}. We will reply to {email}.",
+      "successBody": "Thank you, <name></name>. We will reply to <email></email>.",
       "another": "Send another message"
     }
   }

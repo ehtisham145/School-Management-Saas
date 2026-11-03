@@ -74,11 +74,10 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
               {t("hero.eyebrow")}
             </span>
             <h1 className="mt-5 text-[clamp(36px,4.5vw,58px)] text-navy-deep">
-              {t("hero.title1")}{" "}
               <Typewriter
                 words={t.raw("hero.words") as string[]}
+                highlights={t.raw("hero.highlights") as string[]}
                 locale={locale}
-                className="text-orange-text"
               />
             </h1>
             <p className="mt-[18px] text-[clamp(16px,1.35vw,18px)] text-ink-soft">

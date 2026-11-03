@@ -7,14 +7,14 @@ import { Button } from "@/components/ui/button";
 import { Field } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { email, optional, required, useValidatedForm } from "@/lib/use-validated-form";
 import { createContactMessage } from "../api";
-import { email, optional, required, useLeadForm } from "../use-lead-form";
 import { Honeypot } from "./honeypot";
 
 function ContactFields({ onSent }: { onSent: (sent: { name: string; email: string }) => void }) {
   const t = useTranslations("Leads");
 
-  const form = useLeadForm({
+  const form = useValidatedForm({
     initial: { name: "", school_name: "", email: "", message: "", website: "" },
     validators: {
       name: required(120),
@@ -31,7 +31,7 @@ function ContactFields({ onSent }: { onSent: (sent: { name: string; email: strin
   return (
     <form onSubmit={form.handleSubmit} noValidate className="relative flex flex-col gap-4">
       <div className="grid gap-4 sm:grid-cols-2">
-        <Field id="lead-name" label={t("fields.name")} error={form.errorFor("name")}>
+        <Field id="lead-name" label={t("fields.name")} required error={form.errorFor("name")}>
           <Input {...form.bind("name")} autoComplete="name" placeholder={t("placeholders.name")} />
         </Field>
         <Field
@@ -46,7 +46,7 @@ function ContactFields({ onSent }: { onSent: (sent: { name: string; email: strin
           />
         </Field>
       </div>
-      <Field id="lead-email" label={t("fields.email")} error={form.errorFor("email")}>
+      <Field id="lead-email" label={t("fields.email")} required error={form.errorFor("email")}>
         <Input
           {...form.bind("email")}
           type="email"
@@ -56,7 +56,12 @@ function ContactFields({ onSent }: { onSent: (sent: { name: string; email: strin
           className="rtl:text-end"
         />
       </Field>
-      <Field id="lead-message" label={t("fields.message")} error={form.errorFor("message")}>
+      <Field
+        id="lead-message"
+        label={t("fields.message")}
+        required
+        error={form.errorFor("message")}
+      >
         <Textarea {...form.bind("message")} rows={5} placeholder={t("placeholders.message")} />
       </Field>
       <Honeypot label={t("fields.website")} {...form.bind("website")} id="lead-website" />

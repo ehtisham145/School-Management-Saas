@@ -38,10 +38,10 @@ export function Modal({ open, onClose, title, description, closeLabel, children 
       onClick={(event) => {
         if (event.target === ref.current) onClose();
       }}
-      className="modal-dialog m-auto w-[calc(100%-32px)] max-w-[520px] rounded-card bg-bg p-0 text-ink shadow-soft"
+      className="modal-dialog m-auto w-[calc(100%-32px)] max-w-[600px] rounded-card bg-bg p-0 text-ink shadow-soft"
     >
-      <div className="max-h-[calc(100dvh-48px)] overflow-y-auto p-6 sm:p-7">
-        <div className="mb-5 flex items-start justify-between gap-4">
+      <div className="max-h-[calc(100dvh-48px)] overflow-y-auto p-5 sm:p-6">
+        <div className="mb-4 flex items-start justify-between gap-4">
           <div>
             <h2 id="modal-title" className="text-xl text-navy-deep">
               {title}

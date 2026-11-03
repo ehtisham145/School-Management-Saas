@@ -14,11 +14,9 @@ and docs/roadmap.md before guiding me. Then run `git status`, `git log --oneline
 `git branch -a` and tell me where we are.
 
 HOW WE WORK:
-- I type all code and run all commands MYSELF so I learn. Do NOT edit project files unless I
-  explicitly ask (you may offer to do docs-only updates).
-- Guide ONE step at a time: the command or code to paste + a short "why" (small table ok).
-  Then wait for my output.
-- After each step, verify my files with read-only commands and point out mistakes.
+- You write the backend and frontend code. Every API needs tests, and existing features must keep working.
+- Don't commit or push; give me the commands, and I merge the PRs.
+- Before saying something works, run tests, lint and a real browser check, and tell me what you didn't check.
 - When I paste an error, find the root cause and explain it simply.
 - Talk to me in Roman Urdu, short and simple. Code, docs and commit messages in English
   (Conventional Commits).
@@ -27,13 +25,14 @@ HOW WE WORK:
 - One branch + one PR per day. Before the PR: ruff check, ruff format, pytest, npm run lint,
   npm run build, and update docs per the "Keep docs in sync" table in CLAUDE.md.
 
-MACHINE: <laptop: no Docker, native Postgres, no Redis>  OR  <desktop: Docker Desktop, Postgres +
-Redis via infra/docker-compose.dev.yaml, REDIS_URL set in backend/.env>
+MACHINE: laptop or desktop. Both use native Postgres, no Docker and no Redis locally.
 ```
 
 ---
 
 ## Part B — Day prompts
+
+**Status (2026-11-03):** Days 2 to 4 are done, plus the Lesson Lab website and forms. Day 5 is waiting on the client's hosting, except CI, which is done. Next is the app layout and Academic Year screen, so see [roadmap.md](roadmap.md) before using these older prompts.
 
 ### Day 2 — Multi-tenancy
 ```

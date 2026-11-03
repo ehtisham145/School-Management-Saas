@@ -14,8 +14,9 @@ Guiding principles for this project:
 | Backend | **Django 5.2 LTS + Django REST Framework**, Python 3.11 (same version locally and in the Docker image) | FastAPI — only if the backend becomes a thin API with no need for Django's auth/admin/ORM |
 | Python packages | **pip + venv**, pinned `requirements/{base,dev,prod}.txt` | uv / Poetry — not needed for one developer |
 | API contract | **drf-spectacular** (OpenAPI) → generated TypeScript client | Hand-written fetch wrappers — not worth it |
-| Frontend | **Next.js (App Router) + TypeScript + Tailwind CSS + shadcn/ui** | Vite + React SPA + separate Astro marketing site — if SSR ever becomes a burden |
+| Frontend | **Next.js (App Router) + TypeScript + Tailwind CSS + shadcn/ui (Base UI)**, with `lucide-react` icons, IBM Plex Sans and IBM Plex Sans Arabic | Vite + React SPA + separate Astro marketing site — if SSR ever becomes a burden |
 | i18n | **next-intl** (frontend), Django i18n (emails/PDFs) | — |
+| 2FA QR code | **qrcode.react**, loaded only on the setup step | — |
 | Database | **PostgreSQL 17** | — (no serious alternative for this workload) |
 | Multi-tenancy | **Shared schema, `school_id` on every tenant row** | `django-tenants` (schema per school) — if a large customer demands stronger isolation or per-school customisation |
 | Cache / broker | **Redis 7** (or Valkey) | — |
@@ -27,7 +28,7 @@ Guiding principles for this project:
 | PDF | **WeasyPrint** (handles Arabic shaping + RTL) with Arabic fonts | Headless Chromium (Playwright) — if layouts get very complex |
 | File storage | **OCI Object Storage (S3-compatible) via django-storages**, private bucket + presigned URLs | Local disk volume — acceptable for the first days only |
 | Search | **PostgreSQL full-text + pg_trgm** | Meilisearch — at 100K+ users if name search gets slow |
-| Email (sending) | **django-anymail → Amazon SES** | Brevo (300/day free) — fine for week 1; SES once volume grows |
+| Email (sending) | **SMTP through Django**, settings in `.env`, behind `apps/integrations/email` | `django-anymail` + Amazon SES or Brevo, if volume or delivery becomes a problem |
 | Email (mailbox) | **Zoho Mail free** (info@, sales@) | Google Workspace — if the client wants Gmail |
 | Hosting | **Oracle Cloud (OCI) Riyadh `me-riyadh-1`**, 1 Ampere A1 VM | Local Saudi VPS (Wafai Cloud etc.) or AWS Saudi region (launching Dec 2026) |
 | Runtime | **Docker Compose + Caddy** (auto HTTPS) on Ubuntu 24.04 — servers only | Nginx + certbot — you know it, but Caddy is less config |

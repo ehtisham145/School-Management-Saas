@@ -1,12 +1,15 @@
 from django.core.exceptions import ImproperlyConfigured
 
 from .base import *  # noqa: F403
-from .base import REDIS_URL, env
+from .base import EMAIL_HOST, REDIS_URL, env
 
 DEBUG = False
 
 if not REDIS_URL:
     raise ImproperlyConfigured("REDIS_URL is required in production")
+
+if not EMAIL_HOST:
+    raise ImproperlyConfigured("EMAIL_HOST is required in production")
 
 CSRF_TRUSTED_ORIGINS = env.list("CSRF_TRUSTED_ORIGINS")
 

@@ -62,7 +62,7 @@ export function SiteHeader() {
           <Link
             href="/login"
             onClick={closeMenu}
-            className="py-2.5 text-navy transition-colors sm:hidden"
+            className="py-2.5 text-navy transition-colors lg:hidden"
           >
             {t("signIn")}
           </Link>
@@ -72,7 +72,7 @@ export function SiteHeader() {
           <LanguageMenu />
           <Link
             href="/login"
-            className="hidden rounded-control px-3 py-[9px] text-[14.5px] font-semibold text-navy hover:bg-navy-soft sm:block"
+            className="hidden rounded-control px-3 py-[9px] text-[14.5px] font-semibold text-navy hover:bg-navy-soft lg:block"
           >
             {t("signIn")}
           </Link>

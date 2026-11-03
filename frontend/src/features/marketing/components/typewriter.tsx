@@ -3,8 +3,8 @@
 import { useEffect, useState } from "react";
 import { cn } from "cn";
 
-const TYPE_MS = 70;
-const DELETE_MS = 35;
+const TYPE_MS = 60;
+const DELETE_MS = 25;
 const HOLD_MS = 2200;
 const GAP_MS = 300;
 
@@ -15,6 +15,8 @@ function toCharacters(word: string, locale: string) {
 
 type TypewriterProps = {
   words: string[];
+  /** The part of each word shown in the accent color. */
+  highlights?: string[];
   locale: string;
   className?: string;
 };
@@ -24,12 +26,13 @@ type TypewriterProps = {
  * one is reserved and the page never jumps while typing. The server renders the
  * first word in full for search engines and for people who prefer less motion.
  */
-export function Typewriter({ words, locale, className }: TypewriterProps) {
+export function Typewriter({ words, highlights, locale, className }: TypewriterProps) {
   const [wordIndex, setWordIndex] = useState(0);
   const [length, setLength] = useState<number | null>(null);
   const [deleting, setDeleting] = useState(true);
 
-  const characters = toCharacters(words[wordIndex], locale);
+  const word = words[wordIndex];
+  const characters = toCharacters(word, locale);
   const shown = length ?? characters.length;
 
   useEffect(() => {
@@ -67,17 +70,28 @@ export function Typewriter({ words, locale, className }: TypewriterProps) {
     return () => window.clearTimeout(timer);
   }, [characters.length, deleting, length, shown, wordIndex, words.length]);
 
+  const typed = characters.slice(0, shown).join("");
+  const highlight = highlights?.[wordIndex];
+  const start = highlight ? word.indexOf(highlight) : -1;
+
   return (
     <span className={cn("grid max-w-full", className)}>
       <span className="sr-only">{words[0]}</span>
-      {words.map((word) => (
-        <span key={word} aria-hidden="true" className="invisible col-start-1 row-start-1">
-          {word}
+      {words.map((item) => (
+        <span key={item} aria-hidden="true" className="invisible col-start-1 row-start-1">
+          {item}
         </span>
       ))}
       <span aria-hidden="true" className="col-start-1 row-start-1">
-        {characters.slice(0, shown).join("")}
-        <span className="ms-0.5 inline-block h-[0.85em] w-[3px] translate-y-[0.08em] animate-[caret_1s_steps(1)_infinite] bg-current" />
+        {start < 0 ? (
+          typed
+        ) : (
+          <>
+            {typed.slice(0, start)}
+            <span className="text-orange-text">{typed.slice(start)}</span>
+          </>
+        )}
+        <span className="ms-0.5 inline-block h-[0.85em] w-[3px] translate-y-[0.08em] animate-[caret_1s_steps(1)_infinite] bg-orange-text" />
       </span>
     </span>
   );

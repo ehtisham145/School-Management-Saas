@@ -1,35 +1,28 @@
 "use client";
 
+import type { ComponentProps } from "react";
+import { Field } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 
-type CodeInputProps = {
+type CodeInputProps = ComponentProps<typeof Input> & {
   id: string;
   label: string;
-  value: string;
-  onChange: (value: string) => void;
+  error?: string;
 };
 
-export function CodeInput({ id, label, value, onChange }: CodeInputProps) {
+export function CodeInput({ id, label, error, ...props }: CodeInputProps) {
   return (
-    <div className="flex flex-col gap-1.5">
-      <label htmlFor={id} className="text-sm font-medium">
-        {label}
-      </label>
+    <Field id={id} label={label} required error={error}>
       <Input
         id={id}
-        name={id}
         dir="ltr"
         inputMode="numeric"
         autoComplete="one-time-code"
-        pattern="[0-9]{6}"
-        minLength={6}
         maxLength={6}
-        required
         autoFocus
         className="text-center tracking-widest"
-        value={value}
-        onChange={(event) => onChange(event.target.value.replace(/\D/g, ""))}
+        {...props}
       />
-    </div>
+    </Field>
   );
 }

@@ -11,7 +11,7 @@ Every external service is accessed through a small interface in `backend/apps/in
 
 | Kind | MVP implementation | Later options |
 |---|---|---|
-| Email | `django-anymail` → Amazon SES (Brevo acceptable at first) | KSA-based provider if a customer requires it |
+| Email | Django SMTP, settings in `.env` | `django-anymail` with Amazon SES or Brevo; a KSA-based provider if a customer requires it |
 | Payments | `ManualPaymentProvider` (record cash/bank transfer, issue receipt) | Moyasar / HyperPay / Tap (Mada, Apple Pay, STC Pay) |
 | AI (Phase 3) | Hosted LLM API provider | Self-hosted model on a GPU server, only if API cost exceeds ~$300/month |
 
