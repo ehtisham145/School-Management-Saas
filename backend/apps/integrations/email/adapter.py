@@ -9,3 +9,17 @@ def send_otp_email(to_email, code):
         from_email=settings.DEFAULT_FROM_EMAIL,
         recipient_list=[to_email],
     )
+
+
+def send_school_admin_welcome_email(to_email, school_name):
+    login_url = f"{settings.FRONTEND_URL}/login"
+    send_mail(
+        subject=f"Your {school_name} account is ready",
+        message=(
+            f"You are now the administrator of {school_name}.\n\n"
+            f'To sign in, open {login_url}, choose "Sign in with an email code" '
+            f"and enter this email address. You will then set up two-factor authentication."
+        ),
+        from_email=settings.DEFAULT_FROM_EMAIL,
+        recipient_list=[to_email],
+    )

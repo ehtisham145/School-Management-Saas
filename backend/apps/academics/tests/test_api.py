@@ -1,6 +1,7 @@
 from datetime import date
 
 import pytest
+from django_otp.plugins.otp_totp.models import TOTPDevice
 from rest_framework.test import APIClient
 
 from apps.academics.models import AcademicYear
@@ -15,6 +16,7 @@ VALID_YEAR = {"name": "2026-2027", "start_date": "2026-08-01", "end_date": "2027
 def _client_for(school, username, role):
     user = User.objects.create_user(username=username, password="x" * 12)
     membership = Membership.objects.create(school=school, user=user, role=role)
+    TOTPDevice.objects.create(user=user, name="default", confirmed=True)
     client = APIClient()
     client.force_login(user, backend="django.contrib.auth.backends.ModelBackend")
     session = client.session

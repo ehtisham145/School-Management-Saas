@@ -1,36 +1,23 @@
 "use client";
 
-import { useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
-import { useRouter } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { logout } from "../api";
 import { useSession } from "../session-store";
+import { useLogout } from "../use-logout";
 
 export function DashboardView() {
   const t = useTranslations("Dashboard");
   const tRoles = useTranslations("Roles");
   const locale = useLocale();
-  const router = useRouter();
-  const { session, clearSession } = useSession();
-  const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const { session } = useSession();
+  const { handleLogout, isLoggingOut } = useLogout();
 
   if (!session) {
     return null;
   }
 
   const schoolName = locale === "ar" ? session.school.name_ar : session.school.name_en;
-
-  async function handleLogout() {
-    setIsLoggingOut(true);
-    try {
-      await logout();
-    } finally {
-      clearSession();
-      router.push("/login");
-    }
-  }
 
   return (
     <main className="flex flex-1 flex-col items-center justify-center gap-6 p-8">

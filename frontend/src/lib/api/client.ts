@@ -48,6 +48,11 @@ export async function apiFetch<T>(path: string, options: ApiFetchOptions = {}): 
   const method = options.method ?? "GET";
   const headers = new Headers({ Accept: "application/json" });
 
+  // Backend messages follow the language of the page, not the browser's.
+  if (typeof document !== "undefined" && document.documentElement.lang) {
+    headers.set("Accept-Language", document.documentElement.lang);
+  }
+
   if (options.body !== undefined) {
     headers.set("Content-Type", "application/json");
   }

@@ -28,10 +28,11 @@ Goal: one or two real schools can run daily operations.
 - [x] CI pipeline: GitHub Actions runs backend and frontend checks on every PR (`chore/ci`)
 
 **Next, in this order** (Super Admin panel moved up from Phase 1.5 so school onboarding can be shown to the client, decided 2026-11-03):
-- [ ] 2FA setup page (`/2fa/setup/`, `/2fa/confirm/`) and mandatory 2FA for Super Admins and School Admins
-- [ ] Super Admin login on the website: login and `/me` identify `is_platform_admin`, redirect to `/platform`
-- [ ] Super Admin APIs (`/api/platform/schools/`): list schools, create a school + its admin, audit logged, other roles denied
-- [ ] Super Admin panel (Next.js `/platform`): schools list and new-school form, Arabic + English
+- [x] 2FA setup page (`/2fa/setup/`, `/2fa/confirm/`) and mandatory 2FA for Super Admins and School Admins (`feature/platform-panel`)
+- [x] Super Admin login on the website: login and `/me` identify `is_platform_admin`, redirect to `/platform`
+- [x] Super Admin APIs (`/api/platform/schools/`): list schools, create a school + its admin, other roles denied. Actions go to the application log for now; move to `django-auditlog` with the Week 4 audit item
+- [ ] Django admin (`/admin`) still accepts a password alone: require 2FA there or restrict it before launch
+- [x] Super Admin panel (Next.js `/platform`): schools list and new-school form, Arabic + English
 - [ ] App layout (sidebar, top bar) + Academic Year screen
 - [ ] Generated API client (OpenAPI), with the first screen that benefits from typed APIs
 

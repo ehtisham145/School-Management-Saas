@@ -29,7 +29,13 @@ THIRD_PARTY_APPS = [
     "django_otp",
     "django_otp.plugins.otp_totp",
 ]
-LOCAL_APPS: list[str] = ["apps.accounts", "apps.academics", "apps.core", "apps.tenancy"]
+LOCAL_APPS: list[str] = [
+    "apps.accounts",
+    "apps.academics",
+    "apps.core",
+    "apps.platform",
+    "apps.tenancy",
+]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
 
@@ -72,6 +78,8 @@ DATABASES["default"]["CONN_MAX_AGE"] = 60
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 AUTH_USER_MODEL = "accounts.User"
 DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL", default="no-reply@example.com")
+FRONTEND_URL = env("FRONTEND_URL", default="http://localhost:3000")
+OTP_TOTP_ISSUER = "School Management"
 
 # ---------------------------------------------------------------- Passwords
 PASSWORD_HASHERS = [

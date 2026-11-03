@@ -90,6 +90,8 @@ pre-commit install
 pre-commit run --all-files          # first run may "fail" after auto-fixing files; run it again
 ```
 
+To use the Super Admin panel at `/platform`, tick **Is platform admin** on your user in Django admin (`createsuperuser` does not set it). The first website login asks you to set up 2FA.
+
 ### Everyday commands
 
 | Where | Command | Purpose |

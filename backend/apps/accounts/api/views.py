@@ -1,4 +1,6 @@
 from django.contrib.auth import authenticate, login, logout
+from django.db import transaction
+from django_otp import login as otp_login
 from django_otp.plugins.otp_totp.models import TOTPDevice
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
@@ -14,6 +16,7 @@ from apps.accounts.api.serializers import (
     TOTPConfirmSerializer,
 )
 from apps.accounts.models import User
+from apps.accounts.selectors import needs_2fa_setup
 from apps.accounts.services import request_email_otp, verify_email_otp
 from apps.tenancy.selectors import get_switchable_membership, list_active_memberships
 
@@ -42,8 +45,16 @@ def _active_memberships(request):
     return memberships
 
 
+def _session_payload(request):
+    return {
+        "is_platform_admin": request.user.is_platform_admin,
+        "requires_2fa_setup": needs_2fa_setup(request.user),
+        "memberships": _serialize_memberships(_active_memberships(request)),
+    }
+
+
 def _login_response(request):
-    return Response({"memberships": _serialize_memberships(_active_memberships(request))})
+    return Response(_session_payload(request))
 
 
 def _pending_2fa_user(request):
@@ -137,6 +148,7 @@ class TOTPVerifyView(APIView):
 
         del request.session["pending_2fa_user_id"]
         login(request, user, backend="django.contrib.auth.backends.ModelBackend")
+        otp_login(request, device)
         return _login_response(request)
 
 
@@ -236,15 +248,14 @@ class EmailOTPVerifyView(APIView):
 
 class MeView(APIView):
     def get(self, request):
-        memberships = _active_memberships(request)
+        payload = _session_payload(request)
         active_id = request.session.get("active_membership_id")
+        active_ids = {m["membership_id"] for m in payload["memberships"]}
         return Response(
             {
                 "username": request.user.username,
-                "active_membership_id": (
-                    active_id if any(m.id == active_id for m in memberships) else None
-                ),
-                "memberships": _serialize_memberships(memberships),
+                "active_membership_id": active_id if active_id in active_ids else None,
+                **payload,
             }
         )
 
@@ -267,9 +278,14 @@ class TOTPSetupView(APIView):
                 },
                 status=400,
             )
-        device, _ = TOTPDevice.objects.get_or_create(
-            user=request.user, confirmed=False, defaults={"name": "default"}
-        )
+        # Locks the user row so a double submit can't create two pending devices.
+        with transaction.atomic():
+            User.objects.select_for_update().get(pk=request.user.pk)
+            device = TOTPDevice.objects.filter(user=request.user, confirmed=False).first()
+            if device is None:
+                device = TOTPDevice.objects.create(
+                    user=request.user, confirmed=False, name="default"
+                )
         return Response({"otpauth_url": device.config_url, "secret": device.bin_key.hex()})
 
 
@@ -295,4 +311,5 @@ class TOTPConfirmView(APIView):
 
         device.confirmed = True
         device.save(update_fields=["confirmed"])
+        otp_login(request, device)
         return Response(status=204)

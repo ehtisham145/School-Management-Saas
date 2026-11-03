@@ -78,6 +78,9 @@ class TenantModel(models.Model):
 - A user with one active membership has it activated automatically at login. Users with several choose one through `POST /api/auth/switch-school/`.
 - `GET /api/auth/me/` returns the user, memberships and active membership. The frontend uses it to restore the session after a refresh.
 - Email-code login still requires TOTP if the user has a confirmed device.
+- Super Admins and active School Admins must use TOTP. Until they set it up, login returns `requires_2fa_setup: true` and `HasPolicy` answers 403 `2fa_setup_required`.
+- `/api/platform/` needs `is_platform_admin` and a session verified with TOTP (`user.is_verified()`), so a password-only Django admin session is refused.
+- A new School Admin gets no password: the Super Admin enters their email, and they sign in with an email code, then set up TOTP.
 
 ## 4. Authorization (RBAC)
 
