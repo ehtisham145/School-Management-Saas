@@ -12,13 +12,50 @@
         "invalidCredentials": "Incorrect username or password.",
         "rateLimited": "Too many attempts. Please try again in a few minutes.",
         "generic": "Something went wrong. Please try again."
-      }
+      },
+      "useEmailCode": "Sign in with an email code"
     },
     "schoolPicker": {
       "title": "Choose a school",
       "description": "Your account is linked to more than one school. Select one to continue.",
       "errors": {
         "notFound": "That school could not be selected. Please try again.",
+        "generic": "Something went wrong. Please try again."
+      }
+    },
+    "noSchool": "Your account isn't linked to an active school. Please contact your school admin.",
+    "session": {
+      "loading": "Loading...",
+      "loadFailed": "Couldn't load your account. Check your connection.",
+      "retry": "Try again"
+    },
+    "emailCode": {
+      "emailLabel": "Email address",
+      "codeLabel": "6-digit code",
+      "sendCode": "Send code",
+      "verify": "Sign in",
+      "codeSent": "If {email} is registered, a code is on its way. Check your inbox.",
+      "changeEmail": "Use a different email",
+      "usePassword": "Sign in with a password",
+      "errors": {
+        "invalidCode": "That code is incorrect or has expired.",
+        "rateLimited": "Too many attempts. Please try again in a few minutes.",
+        "generic": "Something went wrong. Please try again."
+      }
+    },
+    "totp": {
+      "description": "Enter the 6-digit code from your authenticator app.",
+      "resetDescription": "We emailed you a 6-digit code. Entering it signs you in and turns off two-factor authentication.",
+      "codeLabel": "Authenticator code",
+      "resetCodeLabel": "Email code",
+      "verify": "Verify",
+      "lostDevice": "I can't access my authenticator",
+      "backToLogin": "Back to sign in",
+      "errors": {
+        "invalidCode": "That code is incorrect.",
+        "expired": "Your sign-in expired. Please start again.",
+        "noEmail": "No email is on file. Please contact your school admin.",
+        "rateLimited": "Too many attempts. Please try again in a few minutes.",
         "generic": "Something went wrong. Please try again."
       }
     }

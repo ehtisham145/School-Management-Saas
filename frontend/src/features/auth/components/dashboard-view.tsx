@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
@@ -15,12 +15,6 @@ export function DashboardView() {
   const router = useRouter();
   const { session, clearSession } = useSession();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
-
-  useEffect(() => {
-    if (session === null) {
-      router.replace("/login");
-    }
-  }, [session, router]);
 
   if (!session) {
     return null;

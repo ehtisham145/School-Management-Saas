@@ -11,10 +11,8 @@ type SessionContextValue = {
 
 const SessionContext = createContext<SessionContextValue | null>(null);
 
-// In-memory only: set on login/switch-school, read by the placeholder
-// dashboard. A hard refresh on /dashboard loses it and redirects to /login,
-// which is correct for now since there's no "who am I" endpoint yet to
-// rehydrate from the session cookie.
+// In-memory copy of the server session: set on login/switch-school, and
+// restored from GET /api/auth/me/ by RequireSession after a page refresh.
 export function SessionProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<ActiveSession | null>(null);
 

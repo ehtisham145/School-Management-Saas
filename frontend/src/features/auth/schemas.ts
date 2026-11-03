@@ -18,9 +18,15 @@ export type LoginRequest = {
   password: string;
 };
 
-export type LoginResponse = {
+export type AuthenticatedResponse = {
   memberships: Membership[];
 };
+
+export type Requires2faResponse = {
+  requires_2fa: true;
+};
+
+export type LoginResponse = AuthenticatedResponse | Requires2faResponse;
 
 export type SwitchSchoolRequest = {
   membership_id: number;
@@ -32,8 +38,22 @@ export type SwitchSchoolResponse = {
   school: School;
 };
 
+export type MeResponse = {
+  username: string;
+  active_membership_id: number | null;
+  memberships: Membership[];
+};
+
 export type ActiveSession = {
   membershipId: number;
   role: Role;
   school: School;
 };
+
+export function toActiveSession(membership: Membership): ActiveSession {
+  return {
+    membershipId: membership.membership_id,
+    role: membership.role,
+    school: membership.school,
+  };
+}

@@ -74,7 +74,10 @@ class TenantModel(models.Model):
 - Sessions: Django DB/Redis sessions, cookie `HttpOnly; Secure; SameSite=Lax`, 12h idle timeout for staff, longer for parents on PWA.
 - Passwords: Argon2, Django password validators, `django-axes` lockout after repeated failures.
 - CSRF: Django CSRF cookie + `X-CSRFToken` header from the Next.js client.
-- Same origin (`https://app.<domain>`): Caddy routes `/api` and `/ws` to Django, so there is no CORS.
+- Same origin (`https://app.<domain>`): Caddy routes `/api` and `/ws` to Django, so there is no CORS. In development the Next.js rewrite does the same job, so `dev.py` lists port 3000 in `CSRF_TRUSTED_ORIGINS`.
+- A user with one active membership has it activated automatically at login. Users with several choose one through `POST /api/auth/switch-school/`.
+- `GET /api/auth/me/` returns the user, memberships and active membership. The frontend uses it to restore the session after a refresh.
+- Email-code login still requires TOTP if the user has a confirmed device.
 
 ## 4. Authorization (RBAC)
 

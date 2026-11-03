@@ -1,29 +1,27 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
-import { useLocale, useTranslations } from "next-intl";
-import { useRouter } from "@/i18n/navigation";
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ApiError } from "@/lib/api";
 import { login } from "../api";
-import type { Membership } from "../schemas";
-import { useSession } from "../session-store";
-import { SchoolPicker } from "./school-picker";
+import type { LoginResponse } from "../schemas";
 
 type LoginErrorKey = "invalidCredentials" | "rateLimited" | "generic";
 
-export function LoginForm() {
+type LoginFormProps = {
+  onResponse: (response: LoginResponse) => void;
+  onUseEmailCode: () => void;
+};
+
+export function LoginForm({ onResponse, onUseEmailCode }: LoginFormProps) {
   const t = useTranslations("Auth.login");
-  const router = useRouter();
-  const locale = useLocale();
-  const { setSession } = useSession();
 
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<LoginErrorKey | null>(null);
-  const [memberships, setMemberships] = useState<Membership[] | null>(null);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -31,20 +29,7 @@ export function LoginForm() {
     setIsSubmitting(true);
 
     try {
-      const response = await login({ username, password });
-
-      if (response.memberships.length === 1) {
-        const membership = response.memberships[0];
-        setSession({
-          membershipId: membership.membership_id,
-          role: membership.role,
-          school: membership.school,
-        });
-        router.push("/dashboard");
-        return;
-      }
-
-      setMemberships(response.memberships);
+      onResponse(await login({ username, password }));
     } catch (err) {
       if (err instanceof ApiError && err.status === 429) {
         setError("rateLimited");
@@ -56,10 +41,6 @@ export function LoginForm() {
     } finally {
       setIsSubmitting(false);
     }
-  }
-
-  if (memberships) {
-    return <SchoolPicker memberships={memberships} locale={locale} />;
   }
 
   return (
@@ -103,6 +84,10 @@ export function LoginForm() {
 
       <Button type="submit" disabled={isSubmitting}>
         {isSubmitting ? t("submitting") : t("submit")}
+      </Button>
+
+      <Button type="button" variant="ghost" onClick={onUseEmailCode}>
+        {t("useEmailCode")}
       </Button>
     </form>
   );

@@ -34,6 +34,18 @@ def _serialize_memberships(memberships):
     ]
 
 
+def _active_memberships(request):
+    """Activates the membership automatically when the user has only one school."""
+    memberships = list(list_active_memberships(request.user))
+    if len(memberships) == 1:
+        request.session["active_membership_id"] = memberships[0].id
+    return memberships
+
+
+def _login_response(request):
+    return Response({"memberships": _serialize_memberships(_active_memberships(request))})
+
+
 def _pending_2fa_user(request):
     user_id = request.session.get("pending_2fa_user_id")
     return User.objects.filter(id=user_id).first() if user_id else None
@@ -98,7 +110,7 @@ class LoginView(APIView):
             return Response({"requires_2fa": True})
 
         login(request, user)
-        return Response({"memberships": _serialize_memberships(list_active_memberships(user))})
+        return _login_response(request)
 
 
 class TOTPVerifyView(APIView):
@@ -125,7 +137,7 @@ class TOTPVerifyView(APIView):
 
         del request.session["pending_2fa_user_id"]
         login(request, user, backend="django.contrib.auth.backends.ModelBackend")
-        return Response({"memberships": _serialize_memberships(list_active_memberships(user))})
+        return _login_response(request)
 
 
 class TOTPResetRequestView(APIView):
@@ -179,7 +191,7 @@ class TOTPResetConfirmView(APIView):
         TOTPDevice.objects.filter(user=user).delete()
         del request.session["pending_2fa_user_id"]
         login(request, user, backend="django.contrib.auth.backends.ModelBackend")
-        return Response({"memberships": _serialize_memberships(list_active_memberships(user))})
+        return _login_response(request)
 
 
 class EmailOTPRequestView(APIView):
@@ -214,8 +226,27 @@ class EmailOTPVerifyView(APIView):
                 status=401,
             )
 
+        if TOTPDevice.objects.filter(user=user, confirmed=True).exists():
+            request.session["pending_2fa_user_id"] = user.id
+            return Response({"requires_2fa": True})
+
         login(request, user, backend="django.contrib.auth.backends.ModelBackend")
-        return Response({"memberships": _serialize_memberships(list_active_memberships(user))})
+        return _login_response(request)
+
+
+class MeView(APIView):
+    def get(self, request):
+        memberships = _active_memberships(request)
+        active_id = request.session.get("active_membership_id")
+        return Response(
+            {
+                "username": request.user.username,
+                "active_membership_id": (
+                    active_id if any(m.id == active_id for m in memberships) else None
+                ),
+                "memberships": _serialize_memberships(memberships),
+            }
+        )
 
 
 class LogoutView(APIView):

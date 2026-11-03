@@ -24,8 +24,19 @@ Goal: one or two real schools can run daily operations.
 - [x] Super Admin: create school + its admin (Django admin, `feature/django-admin`)
 - [x] Next.js 16 app: `[locale]` routing (next-intl, default `en`), RTL/LTR layouts, Arabic font, shadcn/ui base (RTL), Prettier
 - [x] Login flow UI (Next.js): username/password form, multi-school picker, placeholder dashboard + logout (`feature/login-flow`)
-- [ ] Generated API client (OpenAPI)
-- [ ] OCI VM provisioned, Caddy, CI pipeline, **staging live**
+- [x] Login flow UI: email code and 2FA verify/reset steps, session restored after refresh via `GET /api/auth/me/`, only school activated automatically, standard API error format (`fix/login-active-school`)
+- [x] CI pipeline: GitHub Actions runs backend and frontend checks on every PR (`chore/ci`)
+
+**Next, in this order** (Super Admin panel moved up from Phase 1.5 so school onboarding can be shown to the client, decided 2026-11-03):
+- [ ] 2FA setup page (`/2fa/setup/`, `/2fa/confirm/`) and mandatory 2FA for Super Admins and School Admins
+- [ ] Super Admin login on the website: login and `/me` identify `is_platform_admin`, redirect to `/platform`
+- [ ] Super Admin APIs (`/api/platform/schools/`): list schools, create a school + its admin, audit logged, other roles denied
+- [ ] Super Admin panel (Next.js `/platform`): schools list and new-school form, Arabic + English
+- [ ] App layout (sidebar, top bar) + Academic Year screen
+- [ ] Generated API client (OpenAPI), with the first screen that benefits from typed APIs
+
+**Waiting on the client's hosting:**
+- [ ] OCI VM provisioned, Caddy, **staging live**. Needed at least 1 week before launch, because Redis, Celery workers and WebSockets can only be verified there ([ADR-0009](decisions/0009-local-development-fully-native.md))
 
 ### Week 2 — Academics core
 - [x] Academic years API + Term models and services (`feature/academics`)
@@ -54,7 +65,7 @@ Goal: one or two real schools can run daily operations.
 If week 3 slips, move **homework** to month 2 first, then **messaging** (announcements stay).
 
 ## Phase 1.5 — SaaS layer (Weeks 5–8)
-- [ ] Super Admin UI in Next.js: schools, plans, subscriptions (manual activate/expire), usage overview
+- [ ] Super Admin panel additions: plans, subscriptions (manual activate/expire), usage overview (schools list and onboarding moved to Week 1)
 - [ ] Quotation builder → PDF → email to school's business email; quotation status tracking
 - [x] Public marketing site (Next.js): home, features, pricing, about, contact — bilingual, RTL, scroll/typewriter animations (`feature/marketing-pages`)
 - [ ] Demo-request form wired to a real endpoint → Super Admin inbox + email (contact page currently falls back to a `mailto:` link client-side; no backend endpoint yet)
