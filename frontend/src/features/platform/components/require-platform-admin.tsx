@@ -7,21 +7,25 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { me } from "@/features/auth/api";
 import { TotpSetup } from "@/features/auth/components/totp-setup";
-import { useLogout } from "@/features/auth/use-logout";
+import type { MeResponse } from "@/features/auth/schemas";
+import { PlatformUserProvider } from "../platform-user";
+import { PlatformShell } from "./platform-shell";
 
-type GuardState = "loading" | "totp-setup" | "ready" | "failed";
+type GuardState =
+  | { name: "loading" }
+  | { name: "totp-setup" }
+  | { name: "ready"; user: MeResponse }
+  | { name: "failed" };
 
 export function RequirePlatformAdmin({ children }: { children: ReactNode }) {
-  const t = useTranslations("Platform");
   const tSession = useTranslations("Auth.session");
   const router = useRouter();
 
-  const [guard, setGuard] = useState<GuardState>("loading");
+  const [guard, setGuard] = useState<GuardState>({ name: "loading" });
   const [attempt, setAttempt] = useState(0);
-  const { handleLogout, isLoggingOut } = useLogout();
 
   const reload = useCallback(() => {
-    setGuard("loading");
+    setGuard({ name: "loading" });
     setAttempt((current) => current + 1);
   }, []);
 
@@ -35,9 +39,9 @@ export function RequirePlatformAdmin({ children }: { children: ReactNode }) {
         if (!result.is_platform_admin) {
           router.replace("/dashboard");
         } else if (result.requires_2fa_setup) {
-          setGuard("totp-setup");
+          setGuard({ name: "totp-setup" });
         } else {
-          setGuard("ready");
+          setGuard({ name: "ready", user: result });
         }
       })
       .catch((err: { status?: number }) => {
@@ -46,7 +50,7 @@ export function RequirePlatformAdmin({ children }: { children: ReactNode }) {
         if (err.status === 401 || err.status === 403) {
           router.replace("/login");
         } else {
-          setGuard("failed");
+          setGuard({ name: "failed" });
         }
       });
 
@@ -55,7 +59,7 @@ export function RequirePlatformAdmin({ children }: { children: ReactNode }) {
     };
   }, [router, attempt]);
 
-  if (guard === "totp-setup") {
+  if (guard.name === "totp-setup") {
     return (
       <main className="flex flex-1 flex-col items-center justify-center p-8">
         <Card className="w-full max-w-sm">
@@ -67,7 +71,7 @@ export function RequirePlatformAdmin({ children }: { children: ReactNode }) {
     );
   }
 
-  if (guard === "failed") {
+  if (guard.name === "failed") {
     return (
       <main className="flex flex-1 flex-col items-center justify-center gap-3 p-8">
         <p role="alert" className="text-sm text-destructive">
@@ -80,7 +84,7 @@ export function RequirePlatformAdmin({ children }: { children: ReactNode }) {
     );
   }
 
-  if (guard === "loading") {
+  if (guard.name === "loading") {
     return (
       <main className="flex flex-1 items-center justify-center p-8">
         <p className="text-sm text-muted-foreground">{tSession("loading")}</p>
@@ -89,14 +93,8 @@ export function RequirePlatformAdmin({ children }: { children: ReactNode }) {
   }
 
   return (
-    <div className="flex flex-1 flex-col">
-      <header className="flex items-center justify-between gap-3 border-b border-border px-4 py-3 sm:px-6">
-        <span className="font-semibold">{t("title")}</span>
-        <Button variant="ghost" onClick={handleLogout} disabled={isLoggingOut}>
-          {isLoggingOut ? t("loggingOut") : t("logout")}
-        </Button>
-      </header>
-      <main className="mx-auto w-full max-w-5xl flex-1 p-4 sm:p-6">{children}</main>
-    </div>
+    <PlatformUserProvider user={guard.user}>
+      <PlatformShell user={guard.user}>{children}</PlatformShell>
+    </PlatformUserProvider>
   );
 }

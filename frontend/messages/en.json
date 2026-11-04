@@ -56,22 +56,39 @@
         "expired": "Your sign-in expired. Please start again.",
         "noEmail": "No email is on file. Please contact your school admin.",
         "rateLimited": "Too many attempts. Please try again in a few minutes.",
-        "generic": "Something went wrong. Please try again."
+        "generic": "Something went wrong. Please try again.",
+        "wait": "Too many wrong codes. Please wait {seconds, plural, one {# second} other {# seconds}} and try again."
       }
     },
     "totpSetup": {
       "title": "Set up two-factor authentication",
-      "description": "Your account requires two-factor authentication. Scan this QR code with an authenticator app, such as Google Authenticator or Microsoft Authenticator.",
-      "manualKey": "Can't scan it? Enter this key in the app:",
+      "stepsLabel": "Setup progress",
+      "stepScan": "Scan QR code",
+      "stepVerify": "Enter code",
+      "stepDone": "completed",
+      "scanTitle": "Scan the QR code",
+      "scanDescription": "Open an authenticator app, such as Google Authenticator or Microsoft Authenticator, and scan this code with it.",
+      "qrLabel": "QR code to scan with your authenticator app",
+      "manualToggle": "Can't scan it? Enter a key instead",
+      "manualHelp": "Type this key into your authenticator app:",
+      "copy": "Copy",
+      "copied": "Copied",
+      "scanned": "I've scanned the QR code",
+      "retry": "Try again",
+      "verifyTitle": "Enter the 6-digit code",
+      "verifyDescription": "Your authenticator app now shows a 6-digit code. Enter it here to finish. The code changes every 30 seconds.",
       "codeLabel": "Code from the app",
-      "submit": "Turn on",
+      "submit": "Verify and continue",
+      "back": "Back to QR code",
       "loading": "Preparing...",
       "errors": {
         "invalidCode": "That code is incorrect. Try the latest code from the app.",
         "rateLimited": "Too many attempts. Please try again in a few minutes.",
-        "generic": "Something went wrong. Please try again."
+        "generic": "Something went wrong. Please try again.",
+        "wait": "Too many wrong codes. Please wait {seconds, plural, one {# second} other {# seconds}} and try again."
       }
-    }
+    },
+    "schoolInactive": "Your school's account is currently inactive. Please contact Lesson Lab support."
   },
   "Dashboard": {
     "title": "Dashboard",
@@ -503,7 +520,48 @@
       "loadFailed": "Couldn't load schools.",
       "retry": "Try again",
       "accessDenied": "This page needs a sign-in with two-factor authentication.",
-      "signIn": "Sign in"
+      "signIn": "Sign in",
+      "subtitle": "Every school on the platform, and whether it is active.",
+      "searchLabel": "Search by name, code or city",
+      "filterLabel": "Filter by status",
+      "all": "All",
+      "noResults": "No schools match this search.",
+      "location": "Location",
+      "students": "Students",
+      "admin": "School admin",
+      "actions": "Actions",
+      "activate": "Activate",
+      "deactivate": "Deactivate",
+      "created_notice": "School {code} was created. The admin has been emailed.",
+      "dismiss": "Dismiss",
+      "confirm": {
+        "deactivateTitle": "Deactivate {school}?",
+        "deactivateBody": "Everyone at this school loses access at once, including anyone signed in now. No data is deleted, and you can activate the school again at any time.",
+        "activateTitle": "Activate {school}?",
+        "activateBody": "Everyone at this school can sign in again and their data is available as before.",
+        "failed": "Couldn't change the school's status. Please try again."
+      },
+      "detail": {
+        "title": "School details",
+        "sectionSchool": "School",
+        "sectionContact": "Contact",
+        "sectionLegal": "Legal",
+        "sectionAdmin": "School admin",
+        "stages": "Education stages",
+        "type": "School type",
+        "email": "Email",
+        "phone": "Phone",
+        "region": "Region",
+        "city": "City",
+        "address": "Address",
+        "crNumber": "Commercial registration number",
+        "moeLicense": "Ministry of Education license number",
+        "students": "Estimated students",
+        "members": "Accounts on the platform",
+        "adminName": "Name",
+        "adminEmail": "Email",
+        "adminPhone": "Mobile"
+      }
     },
     "form": {
       "title": "New school",
@@ -511,7 +569,7 @@
       "nameEn": "School name (English)",
       "nameAr": "School name (Arabic)",
       "code": "School code",
-      "codeHint": "Letters, numbers and hyphens, such as al-noor. It can't be changed later.",
+      "codeHint": "Such as al-noor. It can't be changed later.",
       "adminEmail": "School admin's email",
       "submit": "Create school",
       "submitting": "Creating...",
@@ -519,6 +577,164 @@
       "success": "{school} was created. The admin has been emailed.",
       "errors": {
         "generic": "Something went wrong. Please try again."
+      }
+    },
+    "nav": {
+      "label": "Main menu",
+      "dashboard": "Dashboard",
+      "demoRequests": "Demo requests",
+      "schools": "Schools",
+      "open": "Open menu",
+      "close": "Close menu"
+    },
+    "profileMenu": {
+      "label": "Account menu",
+      "profile": "My profile"
+    },
+    "common": {
+      "loading": "Loading...",
+      "loadFailed": "Couldn't load this page.",
+      "retry": "Try again",
+      "accessDenied": "This page needs a sign-in with two-factor authentication.",
+      "signIn": "Sign in",
+      "previous": "Previous",
+      "next": "Next",
+      "page": "Page {page} of {pages}",
+      "view": "View",
+      "viewAll": "View all",
+      "close": "Close",
+      "cancel": "Cancel",
+      "notProvided": "Not provided",
+      "search": "Search"
+    },
+    "dashboard": {
+      "title": "Dashboard",
+      "subtitle": "How schools and demo requests stand today.",
+      "totalSchools": "Total schools",
+      "activeSchools": "Active schools",
+      "inactiveSchools": "Inactive schools",
+      "newDemoRequests": "New demo requests",
+      "pipeline": "Demo request pipeline",
+      "pipelineTotal": "{count, plural, one {# request in total} other {# requests in total}}",
+      "pipelineEmpty": "No demo requests yet.",
+      "recentDemoRequests": "Latest demo requests",
+      "recentSchools": "Latest schools",
+      "noRecentSchools": "No schools yet."
+    },
+    "demoRequests": {
+      "title": "Demo requests",
+      "subtitle": "People who booked a demo on the website.",
+      "searchLabel": "Search by name, school, email or phone",
+      "all": "All",
+      "status": {
+        "new": "New",
+        "contacted": "Contacted",
+        "demo_scheduled": "Demo scheduled",
+        "converted": "Converted",
+        "rejected": "Rejected"
+      },
+      "columns": {
+        "contact": "Contact",
+        "school": "School",
+        "plan": "Plan",
+        "status": "Status",
+        "received": "Received",
+        "actions": "Actions"
+      },
+      "empty": "No demo requests yet.",
+      "emptyDescription": "Requests appear here as soon as someone books a demo on the website.",
+      "noResults": "No demo requests match this search.",
+      "detail": {
+        "title": "Demo request",
+        "email": "Email",
+        "phone": "Phone",
+        "school": "School",
+        "plan": "Plan",
+        "message": "Message",
+        "received": "Received",
+        "noPlan": "No plan chosen",
+        "noMessage": "No message",
+        "statusLabel": "Status",
+        "statusConvertedHint": "A school was created from this request: {code}",
+        "statusSetByCreating": "To convert a request, use Create school.",
+        "notesLabel": "Internal notes",
+        "notesPlaceholder": "Call summary, next step, demo date...",
+        "notesHint": "Only platform admins can see these.",
+        "save": "Save changes",
+        "saving": "Saving...",
+        "createSchool": "Create school",
+        "saved": "The demo request was updated."
+      }
+    },
+    "profile": {
+      "title": "My profile",
+      "subtitle": "Your platform admin account.",
+      "fullName": "Full name",
+      "username": "Username",
+      "email": "Email",
+      "role": "Role",
+      "roleValue": "Platform admin",
+      "twoFactor": "Two-factor authentication",
+      "twoFactorOn": "On"
+    },
+    "options": {
+      "type": {
+        "boys": "Boys",
+        "girls": "Girls",
+        "mixed": "Mixed"
+      },
+      "stage": {
+        "kindergarten": "Kindergarten",
+        "primary": "Primary",
+        "intermediate": "Intermediate",
+        "secondary": "Secondary"
+      },
+      "region": {
+        "riyadh": "Riyadh",
+        "makkah": "Makkah",
+        "madinah": "Madinah",
+        "eastern": "Eastern Province",
+        "qassim": "Qassim",
+        "asir": "Asir",
+        "tabuk": "Tabuk",
+        "hail": "Hail",
+        "northern_borders": "Northern Borders",
+        "jazan": "Jazan",
+        "najran": "Najran",
+        "al_bahah": "Al Bahah",
+        "al_jawf": "Al Jawf"
+      }
+    },
+    "formPage": {
+      "subtitle": "Fields marked * are required. The admin receives an email and signs in with an email code. No password is shared.",
+      "fromDemo": "Filled in from the demo request by {name}. Creating this school marks the request as converted.",
+      "back": "Back to schools",
+      "demoUnavailable": "This demo request couldn't be loaded.",
+      "demoAlreadyConverted": "A school was already created from this demo request.",
+      "sectionSchool": "School details",
+      "sectionContact": "Contact and location",
+      "sectionAdmin": "School admin",
+      "type": "School type",
+      "typePlaceholder": "Choose a type",
+      "stages": "Education stages",
+      "email": "School email",
+      "phone": "School phone",
+      "phoneHint": "Such as 011 234 5678.",
+      "region": "Region",
+      "regionPlaceholder": "Choose a region",
+      "city": "City",
+      "address": "Address",
+      "crNumber": "Commercial registration number",
+      "moeLicense": "Education license number",
+      "students": "Estimated number of students",
+      "adminName": "Admin's full name",
+      "adminPhone": "Admin's mobile",
+      "adminPhoneHint": "Such as 05X XXX XXXX.",
+      "errors": {
+        "codeTaken": "This code isn't available. Choose another one.",
+        "demoConverted": "A school was already created from this demo request.",
+        "generic": "Something went wrong. Please try again.",
+        "emailTaken": "This email is already registered. Use a different one."
       }
     }
   },
@@ -558,7 +774,16 @@
       "invalid": "Please check this field.",
       "rateLimited": "Too many requests. Please try again later.",
       "generic": "We couldn't send this. Check your connection and try again.",
-      "code": "Enter the 6-digit code."
+      "code": "Enter the 6-digit code.",
+      "digits": "Only numbers are allowed here.",
+      "phoneCharacters": "Only numbers, +, spaces and dashes are allowed here.",
+      "slugCharacters": "Only English letters, numbers and hyphens are allowed here.",
+      "saudiPhone": "Enter a valid Saudi mobile or landline number.",
+      "students": "Enter a number from 1 to 100,000.",
+      "englishName": "Enter the name in English letters.",
+      "arabicName": "Enter the name in Arabic letters.",
+      "slug": "Use English letters, numbers and hyphens only.",
+      "registrationNumber": "Use only letters, numbers, spaces, - and /."
     },
     "demo": {
       "title": "Book a demo",
@@ -576,5 +801,13 @@
       "successBody": "Thank you, <name></name>. We will reply to <email></email>.",
       "another": "Send another message"
     }
+  },
+  "Welcome": {
+    "goodMorning": "Good morning",
+    "goodAfternoon": "Good afternoon",
+    "goodEvening": "Good evening",
+    "welcomeBack": "Welcome back",
+    "withName": "{greeting}, {name}",
+    "skip": "Skip"
   }
 }

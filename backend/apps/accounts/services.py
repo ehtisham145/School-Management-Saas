@@ -1,3 +1,4 @@
+import math
 import secrets
 from datetime import timedelta
 
@@ -6,6 +7,20 @@ from django.utils import timezone
 
 from apps.accounts.models import EmailOTP
 from apps.accounts.tasks import send_otp_email_task
+
+
+def totp_wait_seconds(device):
+    """How long until django-otp will check a code again, after wrong ones. 0 means now.
+
+    While this is above 0 it refuses every code, including the correct one.
+    """
+    allowed, details = device.verify_is_allowed()
+    if allowed:
+        return 0
+    locked_until = details.get("locked_until")
+    if locked_until is None:
+        return 1
+    return max(1, math.ceil((locked_until - timezone.now()).total_seconds()))
 
 
 def request_email_otp(user, purpose):

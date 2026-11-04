@@ -41,7 +41,10 @@ export function TotpForm({ onAuthenticated, onRestart }: TotpFormProps) {
       const verify = isReset ? confirmTotpReset : verifyTotp;
       onAuthenticated(await verify(values.code));
     },
-    describeError: (err) => t(`errors.${toErrorKey(err)}`),
+    describeError: (err) =>
+      err instanceof ApiError && err.code === "totp_wait"
+        ? t("errors.wait", { seconds: err.retryAfter ?? 1 })
+        : t(`errors.${toErrorKey(err)}`),
   });
 
   async function startReset() {

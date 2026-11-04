@@ -33,7 +33,12 @@ Goal: one or two real schools can run daily operations.
 - [x] Super Admin APIs (`/api/platform/schools/`): list schools, create a school + its admin, other roles denied. Actions go to the application log for now; move to `django-auditlog` with the Week 4 audit item
 - [ ] Django admin (`/admin`) still accepts a password alone: require 2FA there or restrict it before launch
 - [x] Super Admin panel (Next.js `/platform`): schools list and new-school form, Arabic + English
-- [ ] App layout (sidebar, top bar) + Academic Year screen
+- [x] Super Admin panel layout: sidebar, top bar with language and profile menus, dashboard, profile page (`feature/platform-admin-panel`)
+- [x] Super Admin demo requests: list, search, status pipeline, notes, create a school from a request
+- [x] Super Admin schools: list, search, active and inactive counts, details, activate and deactivate (a deactivated school's users lose access)
+- [x] New school form: onboarding details, field validation, live warnings on number fields, scroll to the first error
+- [x] Welcome reveal after a fresh sign-in: greeting, panels sliding apart, Skip and Esc, reduced motion, Arabic and English
+- [ ] School app layout (sidebar, top bar) + Academic Year screen
 - [ ] Generated API client (OpenAPI), with the first screen that benefits from typed APIs
 
 **Waiting on the client's hosting:**

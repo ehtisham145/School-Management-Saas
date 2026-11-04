@@ -12,6 +12,7 @@ htmlcov/
 # Django
 backend/media/
 backend/staticfiles/
+backend/.email-previews/
 *.sqlite3
 
 # Node / Next.js

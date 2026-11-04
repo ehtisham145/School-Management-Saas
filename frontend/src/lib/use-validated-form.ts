@@ -4,10 +4,31 @@ import { useState, type ChangeEvent, type FocusEvent, type FormEvent } from "rea
 import { useTranslations } from "next-intl";
 import { ApiError } from "@/lib/api";
 
-export type ErrorKey = "required" | "email" | "phone" | "code" | "tooLong" | "invalid";
+export type ErrorKey =
+  | "required"
+  | "email"
+  | "phone"
+  | "code"
+  | "tooLong"
+  | "invalid"
+  | "digits"
+  | "phoneCharacters"
+  | "slugCharacters"
+  | "saudiPhone"
+  | "registrationNumber"
+  | "students"
+  | "englishName"
+  | "arabicName"
+  | "slug";
+
+type Validator = (value: string) => ErrorKey | null;
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const SAUDI_MOBILE_PATTERN = /^(?:\+?966|0)?5[0-9]{8}$/;
+const SAUDI_PHONE_PATTERN = /^(?:\+?966|0)?[15][0-9]{8}$/;
+const SLUG_PATTERN = /^[a-z0-9_-]+$/;
+const ARABIC_LETTER = /[؀-ۿ]/;
+const LATIN_LETTER = /[A-Za-z]/;
 const ARABIC_DIGITS = /[٠-٩۰-۹]/g;
 
 /** Turns Arabic-Indic digits into 0-9, so Arabic keyboards work. */
@@ -20,11 +41,55 @@ export const toLatinDigits = (value: string) =>
 /** Only digits, +, spaces and dashes can be typed. */
 export const sanitizePhone = (value: string) => toLatinDigits(value).replace(/[^0-9+\s-]/g, "");
 export const sanitizeCode = (value: string) => toLatinDigits(value).replace(/[^0-9]/g, "");
+export const sanitizeDigits = sanitizeCode;
+/** Letters and numbers in any language, spaces, - and /. */
+export const sanitizeRegistrationNumber = (value: string) =>
+  toLatinDigits(value).replace(/[^\p{L}\p{N} /-]/gu, "");
+export const sanitizeSlug = (value: string) => value.toLowerCase().replace(/[^a-z0-9_-]/g, "");
 
 export const required = (max: number) => (value: string) => {
   if (!value.trim()) return "required";
   return value.length > max ? "tooLong" : null;
 };
+/** Runs after the required check, so an empty field always says "required". */
+const requiredAnd =
+  (check: (trimmed: string) => ErrorKey | null): Validator =>
+  (value) => {
+    const trimmed = value.trim();
+    return trimmed ? check(trimmed) : "required";
+  };
+const compactPhone = (value: string) => value.replace(/[\s-]/g, "");
+
+export const requiredMobile = requiredAnd((value) =>
+  SAUDI_MOBILE_PATTERN.test(compactPhone(value)) ? null : "phone",
+);
+export const optionalPhone = (value: string) =>
+  !value.trim() || SAUDI_PHONE_PATTERN.test(compactPhone(value)) ? null : "saudiPhone";
+export const slug = (max: number) =>
+  requiredAnd((value) => {
+    if (value.length > max) return "tooLong";
+    return SLUG_PATTERN.test(value) ? null : "slug";
+  });
+export const englishName = (max: number) =>
+  requiredAnd((value) => {
+    if (value.length > max) return "tooLong";
+    return LATIN_LETTER.test(value) && !ARABIC_LETTER.test(value) ? null : "englishName";
+  });
+export const arabicName = (max: number) =>
+  requiredAnd((value) => {
+    if (value.length > max) return "tooLong";
+    return ARABIC_LETTER.test(value) ? null : "arabicName";
+  });
+export const optionalRegistrationNumber = (max: number) => (value: string) => {
+  if (!value.trim()) return null;
+  if (value.length > max) return "tooLong";
+  return /[\p{L}\p{N}]/u.test(value) ? null : "registrationNumber";
+};
+export const wholeNumberInRange = (min: number, max: number, error: ErrorKey) =>
+  requiredAnd((value) => {
+    const number = Number(value);
+    return number >= min && number <= max ? null : error;
+  });
 export const optional = (max: number) => (value: string) => (value.length > max ? "tooLong" : null);
 export const email = (value: string) => {
   if (!value.trim()) return "required";
@@ -39,13 +104,19 @@ export const sixDigitCode = (value: string) => {
 
 type Options<F extends Record<string, string>> = {
   initial: F;
-  validators: Partial<Record<keyof F, (value: string) => ErrorKey | null>>;
+  validators: Partial<Record<keyof F, Validator>>;
   sanitizers?: Partial<Record<keyof F, (value: string) => string>>;
+  /** The warning to show at once when a sanitizer removes a typed character. */
+  rejectedInputErrors?: Partial<Record<keyof F, ErrorKey>>;
+  /** Checks a field from the first keystroke, instead of waiting until it loses focus. */
+  validateWhileTyping?: boolean;
   idPrefix?: string;
   submit: (values: F) => Promise<void>;
   onSuccess?: (values: F) => void;
   /** Returns the message for an error this form understands, such as a wrong password. */
   describeError?: (error: unknown) => string | null;
+  /** Returns the message for a server error on one field, in place of the general one. */
+  describeFieldError?: (name: keyof F) => string | null;
 };
 
 function bringIntoView(form: HTMLFormElement, name: string) {
@@ -66,23 +137,41 @@ export function useValidatedForm<F extends Record<string, string>>({
   initial,
   validators,
   sanitizers,
+  rejectedInputErrors,
+  validateWhileTyping = false,
   idPrefix = "lead-",
   submit,
   onSuccess,
   describeError,
+  describeFieldError,
 }: Options<F>) {
   const t = useTranslations("Leads.errors");
 
   const [values, setValues] = useState(initial);
   const [touched, setTouched] = useState<Partial<Record<keyof F, boolean>>>({});
+  const [rejected, setRejected] = useState<Partial<Record<keyof F, boolean>>>({});
   const [serverErrors, setServerErrors] = useState<Partial<Record<keyof F, boolean>>>({});
   const [formError, setFormError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
 
   function errorFor(name: keyof F) {
+    const rejectedKey: ErrorKey | undefined = rejected[name]
+      ? rejectedInputErrors?.[name]
+      : undefined;
+    if (rejectedKey) return t(rejectedKey);
     if (!touched[name]) return undefined;
-    const key = validators[name]?.(values[name]) ?? (serverErrors[name] ? "invalid" : null);
-    return key ? t(key) : undefined;
+
+    const key: ErrorKey | null | undefined = validators[name]?.(values[name]);
+    if (key) return t(key);
+    if (!serverErrors[name]) return undefined;
+    return describeFieldError?.(name) ?? t("invalid");
+  }
+
+  function setValue(name: keyof F & string, value: string) {
+    setValues((current) => ({ ...current, [name]: value }));
+    setServerErrors((current) => ({ ...current, [name]: false }));
+    setFormError(null);
+    if (validateWhileTyping) setTouched((current) => ({ ...current, [name]: true }));
   }
 
   function bind(name: keyof F & string) {
@@ -98,11 +187,12 @@ export function useValidatedForm<F extends Record<string, string>>({
       onChange: (
         event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>,
       ) => {
+        const typed = event.target.value;
         const sanitize = sanitizers?.[name];
-        const value = sanitize ? sanitize(event.target.value) : event.target.value;
-        setValues((current) => ({ ...current, [name]: value }));
-        setServerErrors((current) => ({ ...current, [name]: false }));
-        setFormError(null);
+        const value = sanitize ? sanitize(typed) : typed;
+        // Compares lengths, because a sanitizer may also convert what it keeps.
+        setRejected((current) => ({ ...current, [name]: value.length < typed.length }));
+        setValue(name, value);
       },
       onBlur: (event: FocusEvent<HTMLElement>) => {
         // Showing an error here would move the submit button from under the click.
@@ -116,6 +206,7 @@ export function useValidatedForm<F extends Record<string, string>>({
   function reset(next: F = initial) {
     setValues(next);
     setTouched({});
+    setRejected({});
     setServerErrors({});
     setFormError(null);
   }
@@ -124,6 +215,7 @@ export function useValidatedForm<F extends Record<string, string>>({
     event.preventDefault();
     const form = event.currentTarget;
     setFormError(null);
+    setRejected({});
 
     const names = Object.keys(values) as (keyof F & string)[];
     setTouched(Object.fromEntries(names.map((name) => [name, true])) as Record<keyof F, boolean>);
@@ -160,5 +252,5 @@ export function useValidatedForm<F extends Record<string, string>>({
     }
   }
 
-  return { values, bind, errorFor, formError, saving, handleSubmit, reset };
+  return { values, bind, setValue, errorFor, formError, saving, handleSubmit, reset };
 }

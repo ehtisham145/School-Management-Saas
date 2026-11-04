@@ -28,13 +28,22 @@ export function Modal({ open, onClose, title, description, closeLabel, children 
     } else if (!open && dialog.open) {
       dialog.close();
     }
+
+    // Next.js keeps a page alive after leaving it (cacheComponents), and an open
+    // dialog would stay on top of the next page and block every click.
+    return () => {
+      if (dialog.open) dialog.close();
+    };
   }, [open]);
 
   return (
     <dialog
       ref={ref}
       aria-labelledby="modal-title"
-      onClose={onClose}
+      onClose={() => {
+        // The event arrives late, so a dialog already reopened is not closed by it.
+        if (!ref.current?.open) onClose();
+      }}
       onClick={(event) => {
         if (event.target === ref.current) onClose();
       }}

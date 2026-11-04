@@ -12,6 +12,7 @@ import {
   type Membership,
 } from "../schemas";
 import { useSession } from "../session-store";
+import { markFreshLogin } from "../welcome";
 import { EmailCodeForm } from "./email-code-form";
 import { LoginForm } from "./login-form";
 import { SchoolPicker } from "./school-picker";
@@ -24,7 +25,7 @@ type Step =
   | { name: "totp" }
   | { name: "totp-setup"; response: AuthenticatedResponse }
   | { name: "choose-school"; memberships: Membership[] }
-  | { name: "no-school" };
+  | { name: "no-school"; schoolInactive: boolean };
 
 export function LoginFlow() {
   const [resetKey, setResetKey] = useState(0);
@@ -44,14 +45,16 @@ function LoginSteps() {
   const [step, setStep] = useState<Step>({ name: "password" });
 
   const continueToApp = useCallback(
-    ({ is_platform_admin, memberships }: AuthenticatedResponse) => {
+    ({ is_platform_admin, memberships, school_inactive }: AuthenticatedResponse) => {
       if (is_platform_admin) {
+        markFreshLogin();
         router.push("/platform");
       } else if (memberships.length === 0) {
         void logout();
-        setStep({ name: "no-school" });
+        setStep({ name: "no-school", schoolInactive: school_inactive });
       } else if (memberships.length === 1) {
         setSession(toActiveSession(memberships[0]));
+        markFreshLogin();
         router.push("/dashboard");
       } else {
         setStep({ name: "choose-school", memberships });
@@ -96,17 +99,19 @@ function LoginSteps() {
       );
     case "totp-setup":
       return (
-        <div data-two-factor>
+        <div data-two-factor data-totp-setup>
           <TotpSetupStep response={step.response} onDone={continueToApp} />
         </div>
       );
     case "choose-school":
-      return <SchoolPicker memberships={step.memberships} locale={locale} />;
+      return (
+        <SchoolPicker memberships={step.memberships} locale={locale} onSelected={markFreshLogin} />
+      );
     case "no-school":
       return (
         <div className="flex flex-col gap-3">
           <p role="alert" className="text-sm text-destructive">
-            {t("noSchool")}
+            {t(step.schoolInactive ? "schoolInactive" : "noSchool")}
           </p>
           <Button type="button" variant="outline" onClick={backToPassword}>
             {t("totp.backToLogin")}

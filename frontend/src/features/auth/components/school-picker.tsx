@@ -14,9 +14,10 @@ type SchoolPickerErrorKey = "notFound" | "generic";
 type SchoolPickerProps = {
   memberships: Membership[];
   locale: string;
+  onSelected?: () => void;
 };
 
-export function SchoolPicker({ memberships, locale }: SchoolPickerProps) {
+export function SchoolPicker({ memberships, locale, onSelected }: SchoolPickerProps) {
   const t = useTranslations("Auth.schoolPicker");
   const tRoles = useTranslations("Roles");
   const router = useRouter();
@@ -36,6 +37,7 @@ export function SchoolPicker({ memberships, locale }: SchoolPickerProps) {
         role: result.role,
         school: result.school,
       });
+      onSelected?.();
       router.push("/dashboard");
     } catch (err) {
       setError(err instanceof ApiError && err.code === "not_found" ? "notFound" : "generic");
