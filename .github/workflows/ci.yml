@@ -58,4 +58,11 @@ jobs:
       - run: npm run format:check
       - run: npm run build
 
+  backend-image:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: docker build -t lessonlab-backend:ci backend
+
+
 # Here This CI pipeline will run on everysingle merge
