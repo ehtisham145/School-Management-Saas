@@ -16,6 +16,18 @@ VALID_SCHOOL = {
     "name_ar": "مدرسة النور",
     "code": "alnoor",
     "admin_email": "head@alnoor.example",
+    "admin_name": "Sara Ahmed",
+    "admin_phone": "0501234567",
+    "school_type": "mixed",
+    "education_stages": ["primary", "intermediate"],
+    "email": "office@alnoor.example",
+    "phone": "0112345678",
+    "region": "riyadh",
+    "city": "Riyadh",
+    "address": "King Fahd Road",
+    "cr_number": "1010123456",
+    "moe_license_number": "778899",
+    "estimated_students": 450,
 }
 
 
@@ -154,7 +166,7 @@ def test_new_admin_cannot_see_other_schools(two_schools, django_capture_on_commi
     assert client.get(SCHOOLS_URL).status_code == 403
 
 
-def test_create_with_existing_email_links_the_same_user(two_schools):
+def test_create_refuses_an_admin_email_that_already_has_an_account(two_schools):
     school_a, _ = two_schools
     existing = User.objects.create_user("old", password=PASSWORD, email="HEAD@alnoor.example")
     Membership.objects.create(school=school_a, user=existing, role=Role.TEACHER)
@@ -162,11 +174,10 @@ def test_create_with_existing_email_links_the_same_user(two_schools):
 
     response = client.post(SCHOOLS_URL, VALID_SCHOOL)
 
-    assert response.status_code == 201
-    assert Membership.objects.filter(user=existing).count() == 2
-    assert User.objects.filter(email__iexact=VALID_SCHOOL["admin_email"]).count() == 1
-    existing.refresh_from_db()
-    assert existing.check_password(PASSWORD)
+    assert response.status_code == 400
+    assert "admin_email" in response.data["error"]["fields"]
+    assert Membership.objects.filter(user=existing).count() == 1
+    assert not School.objects.filter(code="alnoor").exists()
 
 
 def test_duplicate_code_returns_400_even_with_different_case(two_schools):
@@ -197,7 +208,7 @@ def test_invalid_fields_return_400(db):
     )
 
     assert response.status_code == 400
-    assert set(response.data["error"]["fields"]) == {"name_en", "name_ar", "code", "admin_email"}
+    assert {"name_en", "name_ar", "code", "admin_email"} <= set(response.data["error"]["fields"])
 
 
 def test_username_clash_rolls_back_the_school(db):

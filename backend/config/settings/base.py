@@ -87,6 +87,17 @@ EMAIL_USE_SSL = env.bool("EMAIL_USE_SSL", default=False)
 EMAIL_TIMEOUT = 15
 FRONTEND_URL = env("FRONTEND_URL", default="http://localhost:3000")
 LEADS_EMAIL = env("LEADS_EMAIL", default="info@lessonlab.me")
+
+# Branded emails (apps/integrations/email/branded.py). A blank value hides that footer part.
+COMPANY_NAME = "Lesson Lab"
+COMPANY_WEBSITE = env("COMPANY_WEBSITE", default=FRONTEND_URL).rstrip("/")
+COMPANY_ADDRESS = env("COMPANY_ADDRESS", default="")
+SUPPORT_EMAIL = env("SUPPORT_EMAIL", default="support@lessonlab.me")
+BRAND_HEADER_LABEL = env("BRAND_HEADER_LABEL", default="School Management")
+# Blank attaches the logo to each email. A value must be an absolute, public URL.
+BRAND_LOGO_URL = env("BRAND_LOGO_URL", default="")
+BRAND_LOGO_WIDTH = 155
+BRAND_LOGO_HEIGHT = 36
 OTP_TOTP_ISSUER = "Lesson Lab"
 
 # ---------------------------------------------------------------- Passwords

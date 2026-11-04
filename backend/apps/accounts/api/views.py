@@ -17,8 +17,26 @@ from apps.accounts.api.serializers import (
 )
 from apps.accounts.models import User
 from apps.accounts.selectors import needs_2fa_setup
-from apps.accounts.services import request_email_otp, verify_email_otp
-from apps.tenancy.selectors import get_switchable_membership, list_active_memberships
+from apps.accounts.services import request_email_otp, totp_wait_seconds, verify_email_otp
+from apps.tenancy.selectors import (
+    get_switchable_membership,
+    is_locked_out_by_inactive_school,
+    list_active_memberships,
+)
+
+
+def _totp_wait_response(seconds):
+    return Response(
+        {
+            "error": {
+                "code": "totp_wait",
+                "message": f"Too many wrong codes. Please wait {seconds} seconds and try again.",
+                "retry_after": seconds,
+            }
+        },
+        status=429,
+        headers={"Retry-After": str(seconds)},
+    )
 
 
 def _serialize_memberships(memberships):
@@ -49,6 +67,7 @@ def _session_payload(request):
     return {
         "is_platform_admin": request.user.is_platform_admin,
         "requires_2fa_setup": needs_2fa_setup(request.user),
+        "school_inactive": is_locked_out_by_inactive_school(request.user),
         "memberships": _serialize_memberships(_active_memberships(request)),
     }
 
@@ -147,6 +166,9 @@ class TOTPVerifyView(APIView):
             )
 
         device = TOTPDevice.objects.filter(user=user, confirmed=True).first()
+        if device is not None and (wait := totp_wait_seconds(device)):
+            return _totp_wait_response(wait)
+
         if device is None or not device.verify_token(serializer.validated_data["token"]):
             return Response(
                 {"error": {"code": "invalid_token", "message": "Invalid code."}}, status=401
@@ -264,6 +286,8 @@ class MeView(APIView):
         return Response(
             {
                 "username": request.user.username,
+                "email": request.user.email,
+                "full_name": request.user.get_full_name(),
                 "active_membership_id": active_id if active_id in active_ids else None,
                 **payload,
             }
@@ -313,6 +337,9 @@ class TOTPConfirmView(APIView):
                 {"error": {"code": "not_found", "message": "No pending 2FA setup found."}},
                 status=404,
             )
+
+        if wait := totp_wait_seconds(device):
+            return _totp_wait_response(wait)
 
         if not device.verify_token(serializer.validated_data["token"]):
             return Response(

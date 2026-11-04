@@ -13,6 +13,8 @@ This system stores **children's personal data** for multiple organisations. A cr
 ## 2. Authentication
 - [x] Argon2 password hashing; Django password validators on.
 - [x] `django-axes`: lock after 5 failed attempts (per user + IP), with cool-off.
+- [x] Emails: anything a user typed, including names, goes through `user_text()` before it is placed in email markup. Codes and links are never logged, and a code is never in a subject or preheader.
+- [x] After a wrong TOTP code, django-otp refuses every code for 1, 2, 4, 8... seconds. The API answers 429 `totp_wait` with `retry_after`, so the user is told to wait instead of being told a correct code is wrong.
 - [ ] Email OTP: random 6 digits, stored **hashed**, 10-min expiry, single use, 5 attempts max, resend throttled (e.g. 1/min, 5/hour).
 - [x] TOTP 2FA mandatory for Super Admin and School Admin.
 - [ ] Recovery codes issued once (today a lost device is reset by an email code alone).
@@ -28,7 +30,9 @@ This system stores **children's personal data** for multiple organisations. A cr
 - [ ] Default deny for every other endpoint (plain `APIView`s only require login by default).
 - [ ] Django admin requires 2FA or is restricted (`/admin` accepts a password alone; `/api/platform/` already refuses such a session).
 - [ ] Parents see only linked children; teachers only assigned sections (current year).
-- [ ] Super Admin cross-school actions are audit-logged.
+- [ ] Super Admin cross-school actions are audit-logged. Creating, activating and deactivating schools and updating demo requests go to the application log for now.
+- [x] A deactivated school loses tenant access at once, including for users already signed in, and can't be switched into.
+- [x] Reading and updating demo requests needs a platform admin session verified with TOTP. The public form stays write-only and can't set the status or notes.
 
 ## 4. Web security
 - [ ] HTTPS only (Caddy), HSTS on.

@@ -21,6 +21,8 @@ export type LoginRequest = {
 export type AuthenticatedResponse = {
   is_platform_admin: boolean;
   requires_2fa_setup: boolean;
+  /** The user belongs to schools, but all of them are deactivated. */
+  school_inactive: boolean;
   memberships: Membership[];
 };
 
@@ -46,6 +48,8 @@ export type SwitchSchoolResponse = {
 
 export type MeResponse = AuthenticatedResponse & {
   username: string;
+  email: string | null;
+  full_name: string;
   active_membership_id: number | null;
 };
 

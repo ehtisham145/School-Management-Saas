@@ -14,6 +14,7 @@ def must_use_2fa(user):
             user=user,
             role=Membership.Role.SCHOOL_ADMIN,
             status=Membership.Status.ACTIVE,
+            school__is_active=True,
         ).exists()
     )
 

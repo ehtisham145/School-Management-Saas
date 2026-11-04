@@ -29,15 +29,17 @@ export default async function LoginPage({ params }: PageProps<"/[locale]/login">
 
         <div className="flex flex-1 items-center justify-center py-10">
           <div className="w-full max-w-[400px]">
-            <Link
-              href="/"
-              className="-ms-1 mb-6 inline-flex items-center gap-1.5 rounded-control py-1 ps-1 pe-2 text-sm font-semibold text-navy hover:bg-navy-soft lg:-ms-7"
-            >
-              <ArrowLeft aria-hidden="true" className="size-4 rtl:rotate-180" />
-              {t("backHome")}
-            </Link>
-            <h1 className="text-[clamp(28px,3vw,36px)] text-navy-deep">{t("welcome")}</h1>
-            <p className="mt-2 mb-7 text-ink-soft">{t("welcomeSub")}</p>
+            <div className="group-has-data-totp-setup/signin:hidden">
+              <Link
+                href="/"
+                className="-ms-1 mb-6 inline-flex items-center gap-1.5 rounded-control py-1 ps-1 pe-2 text-sm font-semibold text-navy hover:bg-navy-soft lg:-ms-7"
+              >
+                <ArrowLeft aria-hidden="true" className="size-4 rtl:rotate-180" />
+                {t("backHome")}
+              </Link>
+              <h1 className="text-[clamp(28px,3vw,36px)] text-navy-deep">{t("welcome")}</h1>
+              <p className="mt-2 mb-7 text-ink-soft">{t("welcomeSub")}</p>
+            </div>
             <LoginFlow />
           </div>
         </div>

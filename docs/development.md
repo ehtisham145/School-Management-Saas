@@ -92,6 +92,8 @@ pre-commit run --all-files          # first run may "fail" after auto-fixing fil
 
 To use the Super Admin panel at `/platform`, tick **Is platform admin** on your user in Django admin (`createsuperuser` does not set it). The first website login asks you to set up 2FA.
 
+`python manage.py preview_emails` writes every email, with sample data, to `backend/.email-previews/` as HTML and text files (dev only). Branded email settings are in `.env.example`. `COMPANY_WEBSITE` defaults to `FRONTEND_URL`. The logo is attached to each email, so it shows in a real inbox even from a local machine. Set `BRAND_LOGO_URL` only to link to a public copy instead.
+
 `LEADS_EMAIL` sets who receives Book a demo and Contact form emails (default `info@lessonlab.me`). Without `EMAIL_HOST` in `.env`, emails are printed in the Django terminal. With it, they go through SMTP (see `.env.example`). Check the settings with `python manage.py sendtestemail you@example.com`. Port 587 uses `EMAIL_USE_TLS=True`; port 465 uses `EMAIL_USE_TLS=False` and `EMAIL_USE_SSL=True`.
 
 If the frontend build complains about pages that no longer exist, or the dev server shows old styles after CSS changes, stop it, delete the generated `frontend/.next` folder and start it again.
@@ -156,7 +158,9 @@ CI runs all of these on every PR.
 - Colors, radius and fonts come only from the tokens in `frontend/src/app/globals.css`.
 - Forms use `useValidatedForm` and `Field`: `*` on required fields, errors that clear as soon as the value is valid, and scrolling to the first error on submit.
 - Text goes in `messages/en.json` and `messages/ar.json`. A key missing from either fails the type check.
-- Next.js keeps visited pages alive (`cacheComponents`), so `useState` survives navigation. Reset anything that must start fresh, such as sign-in steps and scroll effects.
+- Next.js keeps visited pages alive (`cacheComponents`), so `useState` survives navigation, and hidden pages stay in the DOM. Reset anything that must start fresh, such as sign-in steps and scroll effects. `Modal` closes itself when its page is hidden.
+- For fields that accept only some characters, give `useValidatedForm` a sanitizer and a `rejectedInputErrors` entry, so a blocked character shows a warning at once. `validateWhileTyping` checks a field from the first keystroke.
+- `WelcomeReveal` plays once after a sign-in. The sign-in flow sets the `ll_welcome` session flag and the component consumes it, so refreshing never replays it. `ll_welcome_seen_{username}` and `ll_welcome_day_{username}` in localStorage choose the greeting.
 - Before saying a screen works, try it in a browser in `npm run dev`, in Arabic and English, at phone and desktop widths.
 
 ## 8. Definition of done

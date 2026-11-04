@@ -82,8 +82,12 @@ class TenantModel(models.Model):
 - Super Admins and active School Admins must use TOTP. Until they set it up, login returns `requires_2fa_setup: true` and `HasPolicy` answers 403 `2fa_setup_required`.
 - `/api/platform/` needs `is_platform_admin` and a session verified with TOTP (`user.is_verified()`), so a password-only Django admin session is refused.
 - A new School Admin gets no password: the Super Admin enters their email, and they sign in with an email code, then set up TOTP.
+- A new school's email and its admin's email must both be unused. Neither can match any user account, including a Super Admin's, or any school's email, in any letter case, and the two can't be the same. A database constraint backs up school emails, and `accounts_user` email is already unique.
 - Demo request phone numbers must be Saudi mobiles and are saved as `+9665XXXXXXXX`. The frontend blocks other characters, and the backend checks again.
+- Every email goes through `apps/integrations/email/branded.py` (one shared header, footer and block helpers, tables and inline styles only) and is composed in `adapter.py`. Celery tasks on the `emails` queue send them, so sending never blocks a web request.
 - The public Book a demo and Contact forms post to `/api/platform/demo-requests/` and `/api/platform/contact-messages/`. They use no session, are throttled per IP (`leads` scope) and have a honeypot field. The team is emailed at `LEADS_EMAIL` and submissions are listed in Django admin.
+- The Super Admin panel reads demo requests through `/api/platform/manage/demo-requests/`, kept apart from the public form, which stays write-only. A request moves `new → contacted → demo_scheduled → converted / rejected`. Converted is set only by creating a school from the request (`demo_request` on `POST /api/platform/schools/`), which links the two in one transaction. `is_handled` follows the status.
+- `POST /api/platform/schools/{id}/deactivate/` and `/activate/` switch a school. A deactivated school's memberships stop working on the user's next request: `TenantMiddleware`, `list_active_memberships` and `get_switchable_membership` all ignore them, and no data changes. Login and `/me` return `school_inactive: true` when all of a user's schools are deactivated.
 
 ## 4. Authorization (RBAC)
 
@@ -111,7 +115,7 @@ The frontend hides buttons by role for UX only. **The backend is the only author
 ## 5. Core data model (MVP)
 
 ```
-tenancy:        School, Membership, SchoolSettings
+tenancy:        School (with onboarding details: type, stages, contact, location, admin contact, and optional phone, CR and MOE license numbers), Membership, SchoolSettings
 accounts:       User, EmailOTP, (django-otp TOTPDevice)
 academics:      AcademicYear, Term, Grade, Section, Subject,
                 Enrollment(student, section, year), TeacherAssignment(teacher, section, subject, year),
@@ -124,7 +128,7 @@ fees:           FeeHead, FeeStructure(grade, year), FeeDue(student, amount, due_
 communication:  Announcement(audience), Conversation, Message
 notifications:  Notification(user, type, payload, read_at), PushSubscription
 files:          StoredFile(owner, key, mime, size)
-platform:       DemoRequest, ContactMessage; later Plan, Subscription(school), Quotation   (no school FK scoping — platform-owned)
+platform:       DemoRequest(status, admin_notes, converted_school), ContactMessage; later Plan, Subscription(school), Quotation   (no school FK scoping — platform-owned)
 audit:          django-auditlog entries (+ school id, actor, IP)
 ```
 

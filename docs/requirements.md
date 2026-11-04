@@ -23,7 +23,7 @@ A person can hold roles in more than one school (e.g. a parent with children in 
 ## 3. Features
 
 ### MVP (Phase 1 — 4 weeks)
-- Multi-tenancy + Super Admin: create school, create its admin
+- Multi-tenancy + Super Admin: create school, create its admin, activate and deactivate schools, follow up demo requests
 - Auth: username/password, email code, and 2FA. 2FA is mandatory for Super Admins and School Admins. New School Admins get no password: they sign in with an email code, then set up 2FA
 - Role-based access for the 6 roles above
 - Academics: academic years, terms, grades, sections, subjects, teacher assignment, enrollment

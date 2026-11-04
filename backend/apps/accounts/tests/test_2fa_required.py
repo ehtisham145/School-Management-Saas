@@ -1,3 +1,6 @@
+from datetime import timedelta
+
+from django.utils import timezone
 from django_otp.oath import totp as generate_totp
 from django_otp.plugins.otp_totp.models import TOTPDevice
 
@@ -18,6 +21,113 @@ def _set_up_2fa(client, user):
     device = TOTPDevice.objects.get(user=user, confirmed=False)
     token = f"{generate_totp(device.bin_key):06d}"
     return client.post("/api/auth/2fa/confirm/", {"token": token})
+
+
+def _wrong_code_for(device):
+    good = f"{generate_totp(device.bin_key):06d}"
+    return "000000" if good != "000000" else "000001"
+
+
+def _wait_is_over(device):
+    device.refresh_from_db()
+    device.throttling_failure_timestamp = timezone.now() - timedelta(hours=1)
+    device.save()
+
+
+def test_right_code_during_the_wait_at_login_says_wait_and_does_not_sign_in(api_client, db):
+    user = User.objects.create_user("owner", password=PASSWORD)
+    device = TOTPDevice.objects.create(user=user, confirmed=True, name="default")
+    _login(api_client, user)
+
+    wrong = api_client.post("/api/auth/2fa/verify/", {"token": _wrong_code_for(device)})
+    assert wrong.status_code == 401
+    assert wrong.data["error"]["code"] == "invalid_token"
+
+    good = f"{generate_totp(device.bin_key):06d}"
+    response = api_client.post("/api/auth/2fa/verify/", {"token": good})
+
+    assert response.status_code == 429
+    assert response.data["error"]["code"] == "totp_wait"
+    assert response.data["error"]["retry_after"] == 1
+    assert response["Retry-After"] == "1"
+    assert "_auth_user_id" not in api_client.session
+
+
+def test_the_right_code_signs_in_once_the_wait_is_over(api_client, db):
+    user = User.objects.create_user("owner", password=PASSWORD)
+    device = TOTPDevice.objects.create(user=user, confirmed=True, name="default")
+    _login(api_client, user)
+    api_client.post("/api/auth/2fa/verify/", {"token": _wrong_code_for(device)})
+
+    _wait_is_over(device)
+    response = api_client.post(
+        "/api/auth/2fa/verify/", {"token": f"{generate_totp(device.bin_key):06d}"}
+    )
+
+    assert response.status_code == 200
+    assert api_client.session["_auth_user_id"] == str(user.pk)
+
+
+def test_the_wait_grows_with_each_wrong_code(api_client, db):
+    user = User.objects.create_user("owner", password=PASSWORD)
+    device = TOTPDevice.objects.create(user=user, confirmed=True, name="default")
+    _login(api_client, user)
+
+    for _ in range(3):
+        _wait_is_over(device)
+        api_client.post("/api/auth/2fa/verify/", {"token": _wrong_code_for(device)})
+
+    response = api_client.post("/api/auth/2fa/verify/", {"token": _wrong_code_for(device)})
+
+    assert response.status_code == 429
+    assert 1 < response.data["error"]["retry_after"] <= 4
+
+
+def test_codes_sent_during_the_wait_do_not_make_it_longer(api_client, db):
+    user = User.objects.create_user("owner", password=PASSWORD)
+    device = TOTPDevice.objects.create(user=user, confirmed=True, name="default")
+    _login(api_client, user)
+    api_client.post("/api/auth/2fa/verify/", {"token": _wrong_code_for(device)})
+
+    api_client.post("/api/auth/2fa/verify/", {"token": _wrong_code_for(device)})
+
+    device.refresh_from_db()
+    assert device.throttling_failure_count == 1
+
+
+def test_right_code_during_the_wait_in_setup_says_wait_and_does_not_turn_on_2fa(api_client, db):
+    user = User.objects.create_user("owner", password=PASSWORD)
+    _login(api_client, user)
+    api_client.post("/api/auth/2fa/setup/")
+    device = TOTPDevice.objects.get(user=user, confirmed=False)
+
+    wrong = api_client.post("/api/auth/2fa/confirm/", {"token": _wrong_code_for(device)})
+    assert wrong.data["error"]["code"] == "invalid_token"
+
+    good = f"{generate_totp(device.bin_key):06d}"
+    response = api_client.post("/api/auth/2fa/confirm/", {"token": good})
+
+    assert response.status_code == 429
+    assert response.data["error"]["code"] == "totp_wait"
+    device.refresh_from_db()
+    assert device.confirmed is False
+
+
+def test_setup_works_once_the_wait_is_over(api_client, db):
+    user = User.objects.create_user("owner", password=PASSWORD)
+    _login(api_client, user)
+    api_client.post("/api/auth/2fa/setup/")
+    device = TOTPDevice.objects.get(user=user, confirmed=False)
+    api_client.post("/api/auth/2fa/confirm/", {"token": _wrong_code_for(device)})
+
+    _wait_is_over(device)
+    response = api_client.post(
+        "/api/auth/2fa/confirm/", {"token": f"{generate_totp(device.bin_key):06d}"}
+    )
+
+    assert response.status_code == 204
+    device.refresh_from_db()
+    assert device.confirmed is True
 
 
 def test_school_admin_without_device_must_set_up_2fa(api_client, two_schools):

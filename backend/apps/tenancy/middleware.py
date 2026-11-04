@@ -16,6 +16,7 @@ class TenantMiddleware:
                     id=membership_id,
                     user=request.user,
                     status=Membership.Status.ACTIVE,
+                    school__is_active=True,
                 )
                 .select_related("school")
                 .first()

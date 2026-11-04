@@ -12,5 +12,12 @@ def send_school_admin_welcome_email_task(to_email, school_name):
 
 
 @shared_task(queue="emails")
-def send_lead_notification_email_task(*, subject, body, reply_to):
-    send_lead_notification_email(subject=subject, body=body, reply_to=reply_to)
+def send_lead_notification_email_task(*, subject, heading, intro, rows, message, reply_to):
+    send_lead_notification_email(
+        subject=subject,
+        heading=heading,
+        intro=intro,
+        rows=rows,
+        message=message,
+        reply_to=reply_to,
+    )
