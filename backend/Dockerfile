@@ -10,7 +10,7 @@ WORKDIR /app
 # Requirements come first, so that a code change doesn't reinstall every package.
 COPY requirements/ requirements/
 RUN python -m venv --without-pip /opt/venv \
-    && pip install --no-cache-dir --python /opt/venv/bin/python -r requirements/prod.txt
+    && pip --python /opt/venv/bin/python install --no-cache-dir -r requirements/prod.txt
 
 COPY . .
 
