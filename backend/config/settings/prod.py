@@ -1,7 +1,7 @@
 from django.core.exceptions import ImproperlyConfigured
 
 from .base import *  # noqa: F403
-from .base import EMAIL_HOST, REDIS_URL, env
+from .base import EMAIL_HOST, MIDDLEWARE, REDIS_URL, env
 
 DEBUG = False
 
@@ -12,6 +12,13 @@ if not EMAIL_HOST:
     raise ImproperlyConfigured("EMAIL_HOST is required in production")
 
 CSRF_TRUSTED_ORIGINS = env.list("CSRF_TRUSTED_ORIGINS")
+
+# Static files: WhiteNoise goes right after SecurityMiddleware, so HTTPS redirects still apply.
+MIDDLEWARE = [MIDDLEWARE[0], "whitenoise.middleware.WhiteNoiseMiddleware", *MIDDLEWARE[1:]]
+STORAGES = {
+    "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
+    "staticfiles": {"BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage"},
+}
 
 # HTTPS (Caddy terminates TLS and forwards the protocol header)
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")

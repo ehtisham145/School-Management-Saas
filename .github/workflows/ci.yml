@@ -175,6 +175,19 @@ jobs:
         run: docker compose run --rm lessonlab-migrate
       - name: Start every service and wait until healthy
         run: docker compose up -d --wait --wait-timeout 180
+      - name: Serves the admin stylesheet
+        run: |
+          docker compose exec -T lessonlab-backend python -c "
+          import re, urllib.request as u
+          headers = {'Host': 'staging.example.com', 'X-Forwarded-Proto': 'https'}
+          def get(path):
+              return u.urlopen(u.Request('http://127.0.0.1:8000' + path, headers=headers), timeout=10)
+          page = get('/admin/login/').read().decode()
+          path = re.search(r'/static/admin/css/base[^\"]*\.css', page).group()
+          response = get(path)
+          assert response.headers['Content-Type'].startswith('text/css'), response.headers['Content-Type']
+          print(path)
+          "
       - name: Publishes no ports
         run: test -z "$(docker compose ps --format '{{.Ports}}' | grep -e '->' || true)"
       - if: failure()
