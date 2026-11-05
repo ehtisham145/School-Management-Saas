@@ -58,6 +58,24 @@ jobs:
       - run: npm run format:check
       - run: npm run build
 
+
+  dockerfile-lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hadolint/hadolint-action@v3.5.0
+        with:
+          dockerfile: backend/Dockerfile
+          failure-threshold: warning
+      - uses: hadolint/hadolint-action@v3.5.0
+        if: always()
+        with:
+          dockerfile: frontend/Dockerfile
+          failure-threshold: warning
+
+
+
+
   backend-image:
     runs-on: ubuntu-latest
     env:
