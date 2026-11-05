@@ -113,7 +113,15 @@ jobs:
           -e CSRF_TRUSTED_ORIGINS=https://ci.invalid
           "$IMAGE"
           sh -c "python manage.py check && python -c 'import config.asgi, uvicorn_worker, config.celery'"
-
+      - name: Scan the image with Trivy
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          image-ref: ${{ env.IMAGE }}
+          scanners: vuln
+          severity: HIGH,CRITICAL
+          ignore-unfixed: true
+          exit-code: "1"
+          version: v0.76.1
 
   frontend-image:
     runs-on: ubuntu-latest
@@ -167,6 +175,15 @@ jobs:
           done
           echo "Last health status: $status"
           exit 1
+      - name: Scan the image with Trivy
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          image-ref: ${{ env.IMAGE }}
+          scanners: vuln
+          severity: HIGH,CRITICAL
+          ignore-unfixed: true
+          exit-code: "1"
+          version: v0.76.1
       - if: failure()
         run: docker logs frontend
 
