@@ -151,3 +151,31 @@ jobs:
           exit 1
       - if: failure()
         run: docker logs frontend
+
+  staging-stack:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: staging
+    env:
+      BACKEND_IMAGE: lessonlab-backend:ci
+      FRONTEND_IMAGE: lessonlab-frontend:ci
+    steps:
+      - uses: actions/checkout@v4
+      - run: docker build -t "$BACKEND_IMAGE" ../backend
+      - run: docker build -t "$FRONTEND_IMAGE" ../frontend
+      - name: Create the settings from the example
+        run: |
+          cp .env.example .env
+          for name in SECRET_KEY POSTGRES_PASSWORD REDIS_PASSWORD; do
+            sed -i "s/^$name=.*/$name=$(openssl rand -hex 32)/" .env
+          done
+      - run: docker network create lessonlab-edge
+      - name: Run the migrations
+        run: docker compose run --rm lessonlab-migrate
+      - name: Start every service and wait until healthy
+        run: docker compose up -d --wait --wait-timeout 180
+      - name: Publishes no ports
+        run: test -z "$(docker compose ps --format '{{.Ports}}' | grep -e '->' || true)"
+      - if: failure()
+        run: docker compose logs --no-color
