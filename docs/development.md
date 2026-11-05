@@ -125,7 +125,7 @@ docker compose run --rm lessonlab-migrate
 docker compose up -d --wait
 ```
 
-Containers run read-only as non-root with all capabilities dropped. No service publishes a port: nginx joins `lessonlab-edge` and reaches `lessonlab-backend:8000` and `lessonlab-frontend:3000`. The database and Redis are on an internal network with no internet access.
+Containers run read-only as non-root with all capabilities dropped. No service publishes a port: nginx joins `lessonlab-edge` and reaches `lessonlab-backend:8000` and `lessonlab-frontend:3000`. It must send `/api/`, `/admin/` and `/static/` to the backend and everything else to the frontend. The database and Redis are on an internal network with no internet access.
 
 ## 2. Git workflow
 - `main` is always deployable. No direct commits to `main`.
