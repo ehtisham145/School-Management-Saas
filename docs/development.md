@@ -113,6 +113,20 @@ If the frontend build complains about pages that no longer exist, or the dev ser
 
 Switching machines: always `git pull` before starting work, and commit + push before leaving.
 
+### Staging stack
+
+`staging/docker-compose.yml` runs the staging server: PostgreSQL, Redis, backend, Celery worker, Celery beat and frontend. Docker is for servers and CI only, so CI's `staging-stack` job is what proves this file works.
+
+```bash
+cd staging
+cp .env.example .env                   # fill in the values, then: chmod 600 .env
+docker network create lessonlab-edge   # once per server
+docker compose run --rm lessonlab-migrate
+docker compose up -d --wait
+```
+
+Containers run read-only as non-root with all capabilities dropped. No service publishes a port: nginx joins `lessonlab-edge` and reaches `lessonlab-backend:8000` and `lessonlab-frontend:3000`. The database and Redis are on an internal network with no internet access.
+
 ## 2. Git workflow
 - `main` is always deployable. No direct commits to `main`.
 - One branch per task: `feature/attendance`, `fix/login-otp`, `docs/...`, `chore/...`.

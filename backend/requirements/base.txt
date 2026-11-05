@@ -6,7 +6,7 @@ django-environ>=0.12,<1.0 # for managing .env
 psycopg[binary]>=3.2,<4.0
 
 # Background jobs, cache, real-time
-celery>=5.5,<6.0
+celery[redis]>=5.5,<6.0
 redis>=5.2,<7.0
 channels>=4.2,<5.0
 channels-redis>=4.2,<5.0
@@ -16,4 +16,3 @@ argon2-cffi>=23.1  # passowrd hasing algorithm
 
 django-axes>=7.0,<8.0  # lockout after repeated failed logins
 django-otp>=1.5,<2.0  # TOTP 2FA devices
-

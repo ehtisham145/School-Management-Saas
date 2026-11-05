@@ -1,0 +1,152 @@
+# Lesson Lab staging stack. See docs/development.md, "Staging stack".
+# Nothing publishes a port: nginx reaches the two web services over the shared lessonlab-edge network.
+
+name: lessonlab-staging
+
+x-hardening: &hardening
+  restart: unless-stopped
+  init: true
+  read_only: true
+  cap_drop: [ALL]
+  security_opt: ["no-new-privileges:true"]
+  tmpfs: [/tmp]
+  logging:
+    driver: json-file
+    options:
+      max-size: 10m
+      max-file: "3"
+
+x-backend: &backend
+  <<: *hardening
+  image: ${BACKEND_IMAGE:?set BACKEND_IMAGE}
+  user: "10001:10001"
+  env_file: [.env]
+  environment:
+    DATABASE_URL: postgres://lessonlab:${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD}@lessonlab-db:5432/lessonlab
+    REDIS_URL: redis://:${REDIS_PASSWORD:?set REDIS_PASSWORD}@lessonlab-redis:6379/0
+  depends_on:
+    lessonlab-db:
+      condition: service_healthy
+    lessonlab-redis:
+      condition: service_healthy
+
+# Service names on the edge network must stay unique on this server: a plain "backend"
+# could also answer for another site that uses the same nginx.
+services:
+  lessonlab-db:
+    <<: *hardening
+    image: postgres:17.11-trixie
+    user: "999:999"
+    environment:
+      POSTGRES_USER: lessonlab
+      POSTGRES_DB: lessonlab
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD}
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    tmpfs:
+      - /tmp
+      - /var/run/postgresql:uid=999,gid=999
+    networks: [data]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U lessonlab -d lessonlab"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+      start_interval: 2s
+    mem_limit: 768m
+    cpus: 1.0
+    pids_limit: 100
+
+  lessonlab-redis:
+    <<: *hardening
+    image: redis:7.4.12-alpine
+    user: "999:1000"
+    environment:
+      REDIS_PASSWORD: ${REDIS_PASSWORD:?set REDIS_PASSWORD}
+    command:
+      - sh
+      - -c
+      - exec redis-server --requirepass "$$REDIS_PASSWORD" --save "" --appendonly no --maxmemory 200mb --maxmemory-policy noeviction
+    networks: [data]
+    healthcheck:
+      test: ["CMD-SHELL", 'REDISCLI_AUTH="$$REDIS_PASSWORD" redis-cli ping | grep -q PONG']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+      start_interval: 2s
+    mem_limit: 256m
+    cpus: 0.5
+    pids_limit: 50
+
+  # One-off job, not a running service: docker compose run --rm lessonlab-migrate
+  lessonlab-migrate:
+    <<: *backend
+    profiles: [tools]
+    restart: "no"
+    command: ["python", "manage.py", "migrate", "--noinput"]
+    networks: [data]
+    healthcheck:
+      disable: true
+    mem_limit: 384m
+    cpus: 0.5
+    pids_limit: 50
+
+  lessonlab-backend:
+    <<: *backend
+    networks: [edge, data]
+    mem_limit: 512m
+    cpus: 1.0
+    pids_limit: 100
+
+  # Reads the "emails" queue, so it also needs the internet to reach the SMTP server.
+  lessonlab-worker:
+    <<: *backend
+    command: ["celery", "-A", "config", "worker", "-Q", "emails,celery", "--loglevel", "INFO", "--concurrency", "2"]
+    networks: [egress, data]
+    healthcheck:
+      test: ["CMD-SHELL", "celery -A config inspect ping --destination celery@$$HOSTNAME --timeout 10"]
+      interval: 60s
+      timeout: 20s
+      retries: 3
+      start_period: 60s
+      start_interval: 5s
+    mem_limit: 512m
+    cpus: 0.5
+    pids_limit: 100
+
+  lessonlab-beat:
+    <<: *backend
+    command: ["celery", "-A", "config", "beat", "--loglevel", "INFO", "--schedule", "/tmp/celerybeat-schedule", "--pidfile", "/tmp/celerybeat.pid"]
+    networks: [data]
+    healthcheck:
+      disable: true
+    mem_limit: 192m
+    cpus: 0.25
+    pids_limit: 50
+
+  lessonlab-frontend:
+    <<: *hardening
+    image: ${FRONTEND_IMAGE:?set FRONTEND_IMAGE}
+    user: "10001:10001"
+    tmpfs:
+      - /tmp
+      - /app/.next/cache:uid=10001,gid=10001
+    networks: [edge]
+    mem_limit: 384m
+    cpus: 0.5
+    pids_limit: 100
+
+networks:
+  # Shared with nginx. Create once on the server: docker network create lessonlab-edge
+  edge:
+    name: lessonlab-edge
+    external: true
+  # No internet and no host access: only the database and Redis live here.
+  data:
+    internal: true
+  egress: {}
+
+volumes:
+  db-data:
