@@ -35,7 +35,7 @@ x-backend: &backend
 services:
   lessonlab-db:
     <<: *hardening
-    image: postgres:17.11-trixie
+    image: postgres:18.4-trixie
     user: "999:999"
     environment:
       POSTGRES_USER: lessonlab
