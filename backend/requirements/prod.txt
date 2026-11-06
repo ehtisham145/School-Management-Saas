@@ -1,5 +1,5 @@
 -r base.txt
 
-gunicorn>=23.0
+gunicorn>=26.2.0
 uvicorn-worker>=0.3
 whitenoise>=6.12,<7.0  # serves the admin's static files
