@@ -1,7 +1,7 @@
 -r base.txt
 
 # Asyncrnous dev server (HTTP + WebSocket)
-uvicorn[standard]>=0.34
+uvicorn[standard]>=0.54.0
 
 # Quality
 ruff>=0.11  # package used for remove unused import and maintain code format and style
