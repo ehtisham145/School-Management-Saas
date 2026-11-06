@@ -60,7 +60,7 @@ services:
 
   lessonlab-redis:
     <<: *hardening
-    image: redis:7.4.12-alpine
+    image: redis:8.10.2-alpine
     user: "999:1000"
     environment:
       REDIS_PASSWORD: ${REDIS_PASSWORD:?set REDIS_PASSWORD}
