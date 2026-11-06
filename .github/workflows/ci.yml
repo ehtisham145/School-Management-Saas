@@ -58,6 +58,25 @@ jobs:
       - run: npm run format:check
       - run: npm run build
 
+  dependency-audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+      - name: Audit the Python packages
+        run: |
+          pip install "pip-audit>=2.9,<3"
+          pip-audit -r backend/requirements/prod.txt
+      - name: Audit the npm packages
+        if: always()
+        working-directory: frontend
+        run: npm audit --omit=dev --audit-level=high
+
 
   dockerfile-lint:
     runs-on: ubuntu-latest
@@ -72,8 +91,6 @@ jobs:
         with:
           dockerfile: frontend/Dockerfile
           failure-threshold: warning
-
-
 
 
   backend-image:
