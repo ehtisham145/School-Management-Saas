@@ -29,7 +29,7 @@ jobs:
       SECRET_KEY: ci-only-not-a-real-secret
       DATABASE_URL: postgres://school_saas:ci_only_password@localhost:5432/school_saas
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
@@ -47,7 +47,7 @@ jobs:
       run:
         working-directory: frontend
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: actions/setup-node@v4
         with:
           node-version: "24"
@@ -61,7 +61,7 @@ jobs:
   dependency-audit:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
@@ -80,7 +80,7 @@ jobs:
   secret-scan:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Scan the code for secrets
         uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
         with:
@@ -93,7 +93,7 @@ jobs:
   dockerfile-lint:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: hadolint/hadolint-action@v3.5.0
         with:
           dockerfile: backend/Dockerfile
@@ -109,7 +109,7 @@ jobs:
     env:
       IMAGE: lessonlab-backend:ci
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - run: docker build -t "$IMAGE" backend
       - name: Show the image size
         run: docker images "$IMAGE"
@@ -156,7 +156,7 @@ jobs:
     env:
       IMAGE: lessonlab-frontend:ci
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - run: docker build -t "$IMAGE" frontend
       - name: Show the image size
         run: docker images "$IMAGE"
@@ -224,7 +224,7 @@ jobs:
       BACKEND_IMAGE: lessonlab-backend:ci
       FRONTEND_IMAGE: lessonlab-frontend:ci
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - run: docker build -t "$BACKEND_IMAGE" ../backend
       - run: docker build -t "$FRONTEND_IMAGE" ../frontend
       - name: Create the settings from the example
