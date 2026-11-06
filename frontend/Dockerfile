@@ -1,5 +1,5 @@
 # Dependencies stage: dev packages and the npm cache stay here.
-FROM node:24.22.2-trixie-slim AS deps
+FROM node:24.22.2-trixie-slim@sha256:0820eaa85e07d0490446dd01d14707e17e6108a36988cf374899cd057eb3812d AS deps
 
 WORKDIR /app
 
@@ -8,7 +8,7 @@ RUN npm ci --no-audit --no-fund
 
 
 # Build stage: source code stays here.
-FROM node:24.22.2-trixie-slim AS build
+FROM node:24.22.2-trixie-slim@sha256:0820eaa85e07d0490446dd01d14707e17e6108a36988cf374899cd057eb3812d AS build
 
 WORKDIR /app
 
@@ -25,7 +25,7 @@ RUN npm run build \
 
 
 # Final stage
-FROM node:24.22.2-trixie-slim
+FROM node:24.22.2-trixie-slim@sha256:0820eaa85e07d0490446dd01d14707e17e6108a36988cf374899cd057eb3812d
 
 ARG APP_VERSION=dev
 LABEL org.opencontainers.image.source="https://github.com/ehtisham145/School-Management-Saas" \

@@ -7,6 +7,10 @@ updates:
     groups:
       python-minor:
         update-types: [minor, patch]
+    # Major upgrades (like Django 6) are planned work, not weekly updates.
+    ignore:
+      - dependency-name: "*"
+        update-types: [version-update:semver-major]
 
   - package-ecosystem: npm
     directory: /frontend
@@ -15,16 +19,29 @@ updates:
     groups:
       npm-minor:
         update-types: [minor, patch]
+    ignore:
+      - dependency-name: "*"
+        update-types: [version-update:semver-major]
 
   - package-ecosystem: docker
     directories: [/backend, /frontend]
     schedule:
       interval: weekly
+    ignore:
+      - dependency-name: "*"
+        update-types: [version-update:semver-major]
+      # Python 3.11 is our version; 3.12+ is a planned upgrade.
+      - dependency-name: python
+        update-types: [version-update:semver-minor]
 
   - package-ecosystem: docker-compose
     directory: /staging
     schedule:
       interval: weekly
+    # A Postgres major upgrade needs a data migration.
+    ignore:
+      - dependency-name: "*"
+        update-types: [version-update:semver-major]
 
   - package-ecosystem: github-actions
     directory: /
