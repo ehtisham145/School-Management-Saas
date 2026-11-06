@@ -2,7 +2,7 @@
 Django>=5.2,<5.3
 djangorestframework>=3.18.3,<3.19 # Build Rest APIs in Django
 drf-spectacular>=0.28,<1.0 # Swagger UI geenrator
-django-environ>=0.12,<1.0 # for managing .env
+django-environ>=0.14.0,<1.0 # for managing .env
 psycopg[binary]>=3.2,<4.0
 
 # Background jobs, cache, real-time
