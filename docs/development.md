@@ -135,6 +135,8 @@ certbot certonly --webroot -w /var/lib/docker/volumes/docker_certbot_www/_data -
 
 After changing `lessonlab.conf`, pull on the server, then check and reload nginx: `docker exec docker-nginx-1 nginx -t && docker exec docker-nginx-1 nginx -s reload`.
 
+To take Lesson Lab off this server, follow [staging-teardown.md](staging-teardown.md).
+
 ## 2. Git workflow
 - `main` is always deployable. No direct commits to `main`.
 - One branch per task: `feature/attendance`, `fix/login-otp`, `docs/...`, `chore/...`.
