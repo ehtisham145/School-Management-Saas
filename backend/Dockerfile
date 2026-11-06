@@ -1,5 +1,5 @@
 # Build stage: only what the final stage copies from here ships.
-FROM python:3.11.18-slim-trixie AS build
+FROM python:3.15.0-slim-trixie AS build
 
 ENV DJANGO_SETTINGS_MODULE=config.settings.prod \
     PIP_DISABLE_PIP_VERSION_CHECK=1 \
@@ -25,7 +25,7 @@ RUN SECRET_KEY=build-only \
 
 
 # Final stage
-FROM python:3.11.18-slim-trixie
+FROM python:3.15.0-slim-trixie
 
 ARG APP_VERSION=dev
 LABEL org.opencontainers.image.source="https://github.com/ehtisham145/School-Management-Saas" \
