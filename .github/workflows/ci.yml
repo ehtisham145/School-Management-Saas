@@ -242,7 +242,7 @@ jobs:
         run: |
           docker compose exec -T lessonlab-backend python -c "
           import re, urllib.request as u
-          headers = {'Host': 'staging.example.com', 'X-Forwarded-Proto': 'https'}
+          headers = {'Host': 'staging.lessonlab.me', 'X-Forwarded-Proto': 'https'}
           def get(path):
               return u.urlopen(u.Request('http://127.0.0.1:8000' + path, headers=headers), timeout=10)
           page = get('/admin/login/').read().decode()

@@ -127,6 +127,14 @@ docker compose up -d --wait
 
 Containers run read-only as non-root with all capabilities dropped. No service publishes a port: nginx joins `lessonlab-edge` and reaches `lessonlab-backend:8000` and `lessonlab-frontend:3000`. It must send `/api/`, `/admin/` and `/static/` to the backend and everything else to the frontend. The database and Redis are on an internal network with no internet access.
 
+**On the server** (`staging.lessonlab.me`): the code lives in `/opt/lessonlab/app`, cloned with a read-only deploy key. The shared nginx belongs to E-Numerak; its compose file mounts `/opt/lessonlab/app/staging/nginx` at `/etc/nginx/lessonlab` (read-only), includes `/etc/nginx/lessonlab/*.conf` at the end of its `http` block, and joins `lessonlab-edge`. Our site config is [`staging/nginx/lessonlab.conf`](../staging/nginx/lessonlab.conf). It resolves the upstreams per request, so nginx still starts when our stack is down. The TLS certificate comes from the host's certbot through the shared webroot and renews with E-Numerak's weekly cron:
+
+```bash
+certbot certonly --webroot -w /var/lib/docker/volumes/docker_certbot_www/_data -d staging.lessonlab.me
+```
+
+After changing `lessonlab.conf`, pull on the server, then check and reload nginx: `docker exec docker-nginx-1 nginx -t && docker exec docker-nginx-1 nginx -s reload`.
+
 ## 2. Git workflow
 - `main` is always deployable. No direct commits to `main`.
 - One branch per task: `feature/attendance`, `fix/login-otp`, `docs/...`, `chore/...`.
