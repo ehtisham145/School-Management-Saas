@@ -35,7 +35,7 @@ x-backend: &backend
 services:
   lessonlab-db:
     <<: *hardening
-    image: postgres:17.11-trixie
+    image: postgres:17.11-trixie@sha256:748a18a54d3842d43bc156f0840d78029b8d349e0feca98c12b9c4ce3404a6b3
     user: "999:999"
     environment:
       POSTGRES_USER: lessonlab
@@ -60,7 +60,7 @@ services:
 
   lessonlab-redis:
     <<: *hardening
-    image: redis:7.4.12-alpine
+    image: redis:7.4.12-alpine@sha256:c5d34a98396a4775e223c74e929162c35c5a2182901ba26b50ade939941ce14b
     user: "999:1000"
     environment:
       REDIS_PASSWORD: ${REDIS_PASSWORD:?set REDIS_PASSWORD}
