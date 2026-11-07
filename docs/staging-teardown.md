@@ -16,7 +16,8 @@ All server commands run as `root` on the server.
 | Images | `lessonlab-backend:staging`, `lessonlab-frontend:staging`, `postgres:17.11-trixie`, `redis:7.4.12-alpine` |
 | TLS certificate | `/etc/letsencrypt/live/staging.lessonlab.me` |
 | Code and settings | `/opt/lessonlab` (includes `staging/.env`) |
-| Deploy key | `/root/.ssh/lessonlab_deploy*`, `Host github-lessonlab` in `/root/.ssh/config`, and the key on GitHub |
+| `deploy` user | Its home `/home/deploy` holds the GitHub read key and the CI key in `authorized_keys` |
+| Auto-deploy | `staging` environment and its secrets, the deploy key, and the GHCR images, all on GitHub |
 | DNS | `A` record `staging` → `187.127.231.215` |
 
 ## 1. Back up the database (optional)
@@ -100,16 +101,19 @@ certbot delete --cert-name staging.lessonlab.me
 
 The weekly renew cron stays, because E-Numerak's certificates need it.
 
-## 6. Delete the code, settings and deploy key
+## 6. Stop auto-deploy, then delete the code, the deploy user and the keys
+
+First stop GitHub from deploying again: repo **Settings → Environments** → delete `staging` (this also deletes its secrets). Then disable or delete `.github/workflows/deploy-staging.yml` in a PR.
 
 ```bash
 rm -rf /opt/lessonlab
-rm -f /root/.ssh/lessonlab_deploy /root/.ssh/lessonlab_deploy.pub
-sed -i '/^Host github-lessonlab$/,/^  IdentitiesOnly yes$/d' /root/.ssh/config
-cat /root/.ssh/config   # the github-lessonlab block must be gone
+userdel --remove deploy   # also deletes /home/deploy with both SSH keys
+id deploy                 # must say "no such user"
 ```
 
-On GitHub: repo **Settings → Deploy keys** → delete `staging-server`.
+On GitHub:
+- **Settings → Deploy keys** → delete `staging-server`.
+- Your profile → **Packages** → delete `lessonlab-backend` and `lessonlab-frontend` if the images aren't needed.
 
 ## 7. Remove the DNS record
 

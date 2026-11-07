@@ -127,13 +127,25 @@ docker compose up -d --wait
 
 Containers run read-only as non-root with all capabilities dropped. No service publishes a port: nginx joins `lessonlab-edge` and reaches `lessonlab-backend:8000` and `lessonlab-frontend:3000`. It must send `/api/`, `/admin/` and `/static/` to the backend and everything else to the frontend. The database and Redis are on an internal network with no internet access.
 
-**On the server** (`staging.lessonlab.me`): the code lives in `/opt/lessonlab/app`, cloned with a read-only deploy key. The shared nginx belongs to E-Numerak; its compose file mounts `/opt/lessonlab/app/staging/nginx` at `/etc/nginx/lessonlab` (read-only), includes `/etc/nginx/lessonlab/*.conf` at the end of its `http` block, and joins `lessonlab-edge`. Our site config is [`staging/nginx/lessonlab.conf`](../staging/nginx/lessonlab.conf). It resolves the upstreams per request, so nginx still starts when our stack is down. The TLS certificate comes from the host's certbot through the shared webroot and renews with E-Numerak's weekly cron:
+**On the server** (`staging.lessonlab.me`): the code lives in `/opt/lessonlab/app`, owned by the `deploy` user and cloned with a read-only deploy key (`/home/deploy/.ssh/lessonlab_deploy`, used through the `github-lessonlab` host alias). The shared nginx belongs to E-Numerak; its compose file mounts `/opt/lessonlab/app/staging/nginx` at `/etc/nginx/lessonlab` (read-only), includes `/etc/nginx/lessonlab/*.conf` at the end of its `http` block, and joins `lessonlab-edge`. Our site config is [`staging/nginx/lessonlab.conf`](../staging/nginx/lessonlab.conf). It resolves the upstreams per request, so nginx still starts when our stack is down. The TLS certificate comes from the host's certbot through the shared webroot and renews with E-Numerak's weekly cron:
 
 ```bash
 certbot certonly --webroot -w /var/lib/docker/volumes/docker_certbot_www/_data -d staging.lessonlab.me
 ```
 
-After changing `lessonlab.conf`, pull on the server, then check and reload nginx: `docker exec docker-nginx-1 nginx -t && docker exec docker-nginx-1 nginx -s reload`.
+#### Auto-deploy
+
+Merging to `main` deploys staging on its own ([ADR-0013](decisions/0013-staging-auto-deploy.md)). When CI passes, `.github/workflows/deploy-staging.yml` builds the images, scans them, pushes them to GHCR as `ghcr.io/ehtisham145/lessonlab-{backend,frontend}:<sha>`, and then runs [`staging/deploy.sh`](../staging/deploy.sh) on the server over SSH. The script pulls the images, checks out the commit, migrates, starts the stack and waits until it's healthy. If anything fails it rolls back to the previous commit and images, but not the database. It reloads nginx when `staging/nginx/` changed.
+
+The server checkout is a detached HEAD at the deployed commit, so don't `git pull` there. To redeploy by hand, run the workflow again from the Actions tab.
+
+| Setting | Where |
+|---|---|
+| `STAGING_HOST`, `STAGING_KNOWN_HOSTS`, `STAGING_SSH_KEY` | GitHub → Settings → Environments → `staging` (deploys allowed from `main` only) |
+| CI key, limited to `deploy.sh` | `/home/deploy/.ssh/authorized_keys`: `command="/opt/lessonlab/app/staging/deploy.sh",restrict ssh-ed25519 …` |
+| Running image tags | `BACKEND_IMAGE` and `FRONTEND_IMAGE` in `/opt/lessonlab/app/staging/.env`, written by `deploy.sh` |
+
+Migrations must work with the code that was running before them, because a rollback leaves the database as it is. Add columns and tables in one release and remove old ones in a later one.
 
 To take Lesson Lab off this server, follow [staging-teardown.md](staging-teardown.md).
 

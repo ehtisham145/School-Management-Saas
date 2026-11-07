@@ -74,7 +74,8 @@ This system stores **children's personal data** for multiple organisations. A cr
 - [ ] Unattended security upgrades on the VM; monthly image rebuilds for base-image patches.
 - [ ] Secrets in `.env` (chmod 600) and GitHub secrets; never committed. Rotate if leaked. SMTP passwords stay in `.env` only, on every machine.
 - [ ] Backups encrypted (e.g. `age`/`gpg`) before upload; **restore test monthly**.
-- [ ] Dependency scanning: Dependabot + `pip-audit` + `npm audit` in CI.
+- [x] Dependency scanning: Dependabot + `pip-audit` + `npm audit` in CI.
+- [x] Staging auto-deploy uses a `deploy` user whose CI key can only run `staging/deploy.sh` (forced command + `restrict`), the script accepts only a commit SHA, and the registry token is short-lived and never stored on the server ([ADR-0013](decisions/0013-staging-auto-deploy.md)). GitHub-hosted runners have changing IPs, so SSH can't be limited to one IP while deploys come from them.
 
 ## 9. Before go-live checklist
 - [ ] Cross-tenant tests green for all endpoints
