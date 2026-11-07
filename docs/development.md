@@ -141,7 +141,7 @@ The server checkout is a detached HEAD at the deployed commit, so don't `git pul
 
 | Setting | Where |
 |---|---|
-| `STAGING_HOST`, `STAGING_KNOWN_HOSTS`, `STAGING_SSH_KEY` | GitHub → Settings → Environments → `staging` (deploys allowed from `main` only) |
+| `STAGING_HOST`, `STAGING_KNOWN_HOSTS`, `STAGING_SSH_KEY` | GitHub → Settings → Environments → `staging` (deploys allowed from `main` only). `STAGING_SSH_KEY` is the private key as one base64 line: `base64 -w0 <key>` |
 | CI key, limited to `deploy.sh` | `/home/deploy/.ssh/authorized_keys`: `command="/opt/lessonlab/app/staging/deploy.sh",restrict ssh-ed25519 …` |
 | Running image tags | `BACKEND_IMAGE` and `FRONTEND_IMAGE` in `/opt/lessonlab/app/staging/.env`, written by `deploy.sh` |
 

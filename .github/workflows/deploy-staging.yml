@@ -75,10 +75,13 @@ jobs:
         env:
           SSH_KEY: ${{ secrets.STAGING_SSH_KEY }}
           KNOWN_HOSTS: ${{ secrets.STAGING_KNOWN_HOSTS }}
+        # STAGING_SSH_KEY holds the private key as one base64 line
+        # (base64 -w0 <key>), so copying it can't break the line endings.
         run: |
           install -m 700 -d ~/.ssh
-          printf '%s\n' "$SSH_KEY" > ~/.ssh/deploy
+          printf '%s' "$SSH_KEY" | base64 --decode > ~/.ssh/deploy
           chmod 600 ~/.ssh/deploy
+          ssh-keygen -y -f ~/.ssh/deploy > /dev/null || { echo "STAGING_SSH_KEY is not a valid private key"; exit 1; }
           printf '%s\n' "$KNOWN_HOSTS" > ~/.ssh/known_hosts
       - name: Deploy on the server
         env:
