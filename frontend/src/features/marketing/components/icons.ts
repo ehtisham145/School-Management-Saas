@@ -10,6 +10,9 @@ export {
   MapPin as LocationIcon,
   MessageSquareText as MessagesIcon,
   MonitorPlay as TeacherIcon,
+  Network as GroupIcon,
+  School as SchoolIcon,
   ShieldCheck as AdminIcon,
+  Sparkles as PremiumIcon,
   UsersRound as ParentIcon,
 } from "lucide-react";

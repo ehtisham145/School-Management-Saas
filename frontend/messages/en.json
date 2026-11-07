@@ -496,13 +496,13 @@
         ],
         "chip1a": "Three plans",
         "chip1b": "Basic, Premium, Advanced",
-        "chip2a": "Sample prices",
-        "chip2b": "Not final"
+        "chip2a": "Per school",
+        "chip2b": "No per-student fees"
       },
       "perMonth": "per month",
-      "sampleBadge": "Sample prices",
-      "note": "These prices are samples and are not final. Your final price is confirmed for your school.",
+      "note": "Prices are per school, per month. Your quote depends on your student count and the modules you need.",
       "popular": "Most popular",
+      "includes": "What's included",
       "choose": "Book a demo",
       "tiers": {
         "basic": {
@@ -510,7 +510,11 @@
           "price": "SAR 1,500",
           "tagline": "One school, getting started.",
           "features": [
-            "Attendance, timetable and messages",
+            "Student, parent and staff records",
+            "Daily attendance",
+            "Class timetables",
+            "Announcements and parent messages",
+            "Arabic and English, on any device",
             "Up to 2 academic years of history",
             "Email support"
           ]
@@ -521,8 +525,11 @@
           "tagline": "For a growing private school.",
           "features": [
             "Everything in Basic",
-            "Exams, report cards and fees",
+            "Exams, marks and report cards",
+            "Fee plans, payments and receipts",
+            "Homework with attachments",
             "Hijri and Gregorian dates",
+            "Dashboards for principals and teachers",
             "Priority WhatsApp support"
           ]
         },
@@ -532,9 +539,12 @@
           "tagline": "Multiple campuses, one group.",
           "features": [
             "Everything in Premium",
+            "Several campuses under one group",
             "Shared staff across campuses",
             "Group-level reporting",
-            "A dedicated setup call"
+            "Full academic history",
+            "A dedicated setup and training call",
+            "A named account manager"
           ]
         }
       },
