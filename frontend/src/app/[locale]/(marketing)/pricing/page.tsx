@@ -1,19 +1,20 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
+import { Check } from "lucide-react";
 import { cn } from "cn";
-import { Badge } from "@/components/ui/badge";
 import { DemoButton } from "@/features/leads/components/demo-dialog";
+import { CtaBox, PageHero, Section, SectionHeading } from "@/features/marketing/components/blocks";
 import {
-  CheckItem,
-  CtaBox,
-  PageHero,
-  Section,
-  SectionHeading,
-} from "@/features/marketing/components/blocks";
-import { ExamsIcon, FeesIcon } from "@/features/marketing/components/icons";
+  ExamsIcon,
+  FeesIcon,
+  GroupIcon,
+  PremiumIcon,
+  SchoolIcon,
+} from "@/features/marketing/components/icons";
 import { Reveal } from "@/features/marketing/components/reveal";
 import { pageMetadata } from "@/i18n/metadata";
 
 const PLANS = ["basic", "premium", "advanced"] as const;
+const PLAN_ICONS = { basic: SchoolIcon, premium: PremiumIcon, advanced: GroupIcon };
 
 export async function generateMetadata({ params }: PageProps<"/[locale]/pricing">) {
   const { locale } = await params;
@@ -43,42 +44,104 @@ export default async function PricingPage({ params }: PageProps<"/[locale]/prici
       />
 
       <Section>
-        <div className="mb-8 flex justify-center">
-          <Badge tone="warning">{t("sampleBadge")}</Badge>
-        </div>
-        <div className="grid items-stretch gap-[18px] lg:grid-cols-3">
+        <div className="grid items-stretch gap-6 pt-4 lg:grid-cols-3 lg:gap-5">
           {PLANS.map((plan, index) => {
             const featured = plan === "premium";
             const features = t.raw(`tiers.${plan}.features`) as string[];
+            const PlanIcon = PLAN_ICONS[plan];
             return (
               <Reveal key={plan} delayMs={index * 110} className="h-full">
                 <article
                   className={cn(
-                    "relative flex h-full flex-col rounded-card border bg-bg p-7 transition-[transform,box-shadow] duration-200 hover:-translate-y-[3px] hover:shadow-soft",
-                    featured ? "border-2 border-navy" : "border-line",
+                    "relative isolate flex h-full flex-col overflow-hidden rounded-cta border p-8 transition-[transform,box-shadow] duration-300 hover:-translate-y-1.5 hover:shadow-soft",
+                    featured
+                      ? "border-navy-deep bg-navy-deep text-on-dark shadow-soft lg:-my-3 lg:py-11"
+                      : "border-line bg-bg text-ink",
                   )}
                 >
-                  {featured && (
-                    <Badge tone="orange" className="absolute end-5 top-5">
-                      {t("popular")}
-                    </Badge>
-                  )}
-                  <h2 className="text-xl text-navy-deep">{t(`tiers.${plan}.name`)}</h2>
-                  <p className="mt-1.5 text-sm text-ink-soft">{t(`tiers.${plan}.tagline`)}</p>
-                  <p className="mt-5 flex flex-wrap items-baseline gap-x-2 text-navy-deep">
-                    <bdi className="text-[34px] leading-tight font-bold tabular-nums">
+                  {/* A soft glow behind the top of the card. */}
+                  <span
+                    aria-hidden="true"
+                    className={cn(
+                      "pointer-events-none absolute -end-16 -top-20 -z-10 size-56 rounded-full blur-3xl",
+                      featured ? "bg-orange opacity-30" : "bg-navy-soft opacity-80",
+                    )}
+                  />
+
+                  <div className="flex items-start justify-between gap-3">
+                    <span
+                      className={cn(
+                        "grid size-12 place-items-center rounded-tile",
+                        featured ? "bg-orange text-on-orange" : "bg-navy-soft text-navy",
+                      )}
+                    >
+                      <PlanIcon aria-hidden="true" className="size-6" />
+                    </span>
+                    {featured && (
+                      <span className="rounded-full bg-orange px-3 py-1 text-xs font-bold text-on-orange">
+                        {t("popular")}
+                      </span>
+                    )}
+                  </div>
+
+                  <h2
+                    className={cn("mt-5 text-[22px]", featured ? "text-on-dark" : "text-navy-deep")}
+                  >
+                    {t(`tiers.${plan}.name`)}
+                  </h2>
+                  <p
+                    className={cn(
+                      "mt-1.5 text-sm",
+                      featured ? "text-on-dark-soft" : "text-ink-soft",
+                    )}
+                  >
+                    {t(`tiers.${plan}.tagline`)}
+                  </p>
+
+                  <p className="mt-6 flex flex-wrap items-baseline gap-x-2">
+                    <bdi
+                      className={cn(
+                        "text-[40px] leading-tight font-bold tabular-nums",
+                        featured ? "text-on-dark" : "text-navy-deep",
+                      )}
+                    >
                       {t(`tiers.${plan}.price`)}
                     </bdi>
-                    <span className="text-sm text-ink-soft">{t("perMonth")}</span>
+                    <span
+                      className={cn("text-sm", featured ? "text-on-dark-soft" : "text-ink-soft")}
+                    >
+                      {t("perMonth")}
+                    </span>
                   </p>
-                  <ul className="mt-6 mb-7 flex flex-1 flex-col gap-3 border-t border-line pt-6 text-[14.8px] text-ink">
+
+                  <p
+                    className={cn(
+                      "mt-6 mb-4 border-t pt-6 text-[13px] font-bold",
+                      featured ? "border-on-dark-line text-on-dark" : "border-line text-navy-deep",
+                    )}
+                  >
+                    {t("includes")}
+                  </p>
+                  <ul className="mb-8 flex flex-1 flex-col gap-3.5 text-[14.8px]">
                     {features.map((feature) => (
-                      <CheckItem key={feature}>{feature}</CheckItem>
+                      <li key={feature} className="flex items-start gap-3">
+                        <span
+                          aria-hidden="true"
+                          className={cn(
+                            "mt-px grid size-5 shrink-0 place-items-center rounded-full",
+                            featured ? "bg-orange text-on-orange" : "bg-navy-soft text-navy",
+                          )}
+                        >
+                          <Check className="size-3" strokeWidth={3} />
+                        </span>
+                        <span className={featured ? "text-on-dark" : "text-ink"}>{feature}</span>
+                      </li>
                     ))}
                   </ul>
+
                   <DemoButton
                     plan={plan}
-                    variant={featured ? "default" : "outline"}
+                    variant={featured ? "orange" : "outline"}
                     className="w-full"
                   >
                     {t("choose")}
