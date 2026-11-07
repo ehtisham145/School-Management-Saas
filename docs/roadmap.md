@@ -41,6 +41,8 @@ Goal: one or two real schools can run daily operations.
 - [ ] School app layout (sidebar, top bar) + Academic Year screen
 - [ ] Generated API client (OpenAPI), with the first screen that benefits from typed APIs
 
+- [x] Interim staging live at `staging.lessonlab.me` on the Hostinger VPS, test data only ([ADR-0011](decisions/0011-staging-on-hostinger-behind-shared-nginx.md)), auto-deployed from `main` ([ADR-0013](decisions/0013-staging-auto-deploy.md))
+
 **Waiting on the client's hosting:**
 - [ ] OCI VM provisioned, Caddy, **staging live**. Needed at least 1 week before launch, because Redis, Celery workers and WebSockets can only be verified there ([ADR-0009](decisions/0009-local-development-fully-native.md))
 
