@@ -25,3 +25,5 @@ One platform, many schools; each school's data is fully isolated.
 5. **Third-party services sit behind an adapter** (email, payments, AI). See [ADR-0007](decisions/0007-integrations-behind-adapters.md).
 6. **Every new endpoint ships with a cross-tenant test** proving School A cannot read or write School B's data.
 7. A new significant decision gets a new ADR; don't silently change an old one — supersede it.
+
+Developer : Ehtisham Malik
