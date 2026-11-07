@@ -86,7 +86,8 @@ If week 3 slips, move **homework** to month 2 first, then **messaging** (announc
 - [x] SEO: page metadata and Arabic/English `hreflang`, server-rendered text
 - [ ] SEO: sitemap, Open Graph images
 - [ ] PWA: manifest, service worker, install prompt, Web Push
-- [ ] Privacy policy, terms, DPA template
+- [x] Privacy policy page `/privacy` (Arabic + English), linked from the footer. It is a draft until the legal review below
+- [ ] Terms, DPA template
 - [ ] Polish from pilot school feedback
 
 ## Phase 2 — Hardening (Month 3)

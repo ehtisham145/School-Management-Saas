@@ -81,7 +81,15 @@ export async function SiteFooter() {
             </ul>
           </div>
         </div>
-        <p className="border-t border-on-dark-line py-[18px] text-[13px]">{t("copy")}</p>
+        <div className="flex flex-col gap-2 border-t border-on-dark-line py-[18px] text-[13px] sm:flex-row sm:items-center sm:justify-between">
+          <p className="flex flex-wrap items-center gap-x-4 gap-y-1">
+            <span>{t("copy")}</span>
+            <Link href="/privacy" className={`${linkClass} underline underline-offset-4`}>
+              {t("privacy")}
+            </Link>
+          </p>
+          <p>{t("developedBy")}</p>
+        </div>
       </div>
     </footer>
   );
