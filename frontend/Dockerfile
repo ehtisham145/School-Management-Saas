@@ -38,6 +38,12 @@ ENV NODE_ENV=production \
 
 WORKDIR /app
 
+# Debian security fix (CVE-2026-85091) that the pinned base image doesn't have
+# yet. Remove this once a newer base image digest ships it.
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends zlib1g=1:1.3.dfsg+really1.3.1-1+deb13u1 \
+    && rm -rf /var/lib/apt/lists/*
+
 COPY --from=build /app/.next/standalone ./
 COPY --from=build /app/.next/static ./.next/static
 COPY --from=build /app/public ./public
