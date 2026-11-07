@@ -38,6 +38,12 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 
 WORKDIR /app
 
+# Debian security fix (CVE-2026-85091) that the pinned base image doesn't have
+# yet. Remove this once a newer base image digest ships it.
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends zlib1g=1:1.3.dfsg+really1.3.1-1+deb13u1 \
+    && rm -rf /var/lib/apt/lists/*
+
 # Nothing installs packages at runtime, so the package tools are removed.
 # The app user can write only to media/.
 RUN /usr/local/bin/python -m pip uninstall -y pip setuptools wheel \
