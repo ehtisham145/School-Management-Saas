@@ -9,7 +9,8 @@ type RevealProps = {
 };
 
 const EASING = "cubic-bezier(0.22, 1, 0.36, 1)";
-const HIDDEN: CSSProperties = { opacity: 0, translate: "0 48px", scale: "0.97" };
+const DURATION = "1.2s";
+const HIDDEN: CSSProperties = { opacity: 0, translate: "0 36px", scale: "0.98" };
 
 /**
  * Slides content into place as it scrolls into view, and again whenever the
@@ -50,7 +51,7 @@ export function Reveal({ children, className, delayMs = 0 }: RevealProps) {
 
   const style: CSSProperties = visible
     ? {
-        transition: `opacity 0.8s ${EASING} ${delayMs}ms, translate 0.8s ${EASING} ${delayMs}ms, scale 0.8s ${EASING} ${delayMs}ms`,
+        transition: `opacity ${DURATION} ${EASING} ${delayMs}ms, translate ${DURATION} ${EASING} ${delayMs}ms, scale ${DURATION} ${EASING} ${delayMs}ms`,
       }
     : HIDDEN;
 

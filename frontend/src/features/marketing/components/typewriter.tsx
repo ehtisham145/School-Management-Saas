@@ -3,10 +3,10 @@
 import { useEffect, useState } from "react";
 import { cn } from "cn";
 
-const TYPE_MS = 60;
-const DELETE_MS = 25;
-const HOLD_MS = 2200;
-const GAP_MS = 300;
+const TYPE_MS = 95;
+const DELETE_MS = 45;
+const HOLD_MS = 2800;
+const GAP_MS = 450;
 
 /** Splits by visible character, so Arabic marks stay with their letter. */
 function toCharacters(word: string, locale: string) {
