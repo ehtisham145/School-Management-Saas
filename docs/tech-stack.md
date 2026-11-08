@@ -28,7 +28,7 @@ Guiding principles for this project:
 | PDF | **WeasyPrint** (handles Arabic shaping + RTL) with Arabic fonts | Headless Chromium (Playwright) — if layouts get very complex |
 | File storage | **OCI Object Storage (S3-compatible) via django-storages**, private bucket + presigned URLs | Local disk volume — acceptable for the first days only |
 | Search | **PostgreSQL full-text + pg_trgm** | Meilisearch — at 100K+ users if name search gets slow |
-| Email (sending) | **SMTP through Django**, settings in `.env`, behind `apps/integrations/email` | `django-anymail` + Amazon SES or Brevo, if volume or delivery becomes a problem |
+| Email (sending) | **SMTP through Django**, settings in `.env`, behind `apps/integrations/email` — **OCI Email Delivery** (Always Free, 3,000 emails/month) is enough at launch scale | `django-anymail` + Amazon SES or Brevo, if volume or delivery becomes a problem |
 | Email (mailbox) | **Zoho Mail free** (info@, sales@) | Google Workspace — if the client wants Gmail |
 | Hosting | **Oracle Cloud (OCI) Riyadh `me-riyadh-1`**, 1 Ampere A1 VM | Local Saudi VPS (Wafai Cloud etc.) or AWS Saudi region (launching Dec 2026) |
 | Runtime | **Docker Compose + Caddy** (auto HTTPS) on Ubuntu 24.04 — servers only | Nginx + certbot — you know it, but Caddy is less config |
@@ -82,10 +82,10 @@ Guiding principles for this project:
 |---|---|
 | OCI Ampere A1 VM (2 OCPU / 12 GB) — Always Free allowance | $0 |
 | Block storage (≤200 GB) + Object Storage (≤20 GB) — Always Free | $0 |
-| Domain (.com) | ~$1 |
-| Amazon SES (~10K emails) | ~$1 |
+| Domain (.com) | Already owned |
+| OCI Email Delivery (≤3,000 emails/month) — Always Free | $0 |
 | Zoho Mail free, Sentry free, UptimeRobot free, GitHub free | $0 |
-| **Total** | **~$2–5 / month** |
+| **Total** | **~$0 / month** |
 
 ### Phase 3 add-on: self-hosted AI (lesson plans/presentations)
 
