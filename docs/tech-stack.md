@@ -32,7 +32,7 @@ Guiding principles for this project:
 | Email (mailbox) | **Zoho Mail free** (info@, sales@) | Google Workspace — if the client wants Gmail |
 | Hosting | **Oracle Cloud (OCI) Riyadh `me-riyadh-1`**, 1 Ampere A1 VM | Local Saudi VPS (Wafai Cloud etc.) or AWS Saudi region (launching Dec 2026) |
 | Runtime | **Docker Compose + Caddy** (auto HTTPS) on Ubuntu 24.04 — servers only | Nginx + certbot — you know it, but Caddy is less config |
-| Staging | **Hostinger VPS (France), test data only**, behind the existing nginx. See [ADR-0011](decisions/0011-staging-on-hostinger-behind-shared-nginx.md) | — |
+| Staging | **OCI trial VM (Hyderabad, `E5.Flex`), test data only**, with its own Caddy, until the trial ends (~2026-12-07). See [ADR-0015](decisions/0015-staging-on-oci-trial-with-caddy.md) | — |
 | Static files | **WhiteNoise**, production settings only. See [ADR-0012](decisions/0012-whitenoise-for-static-files.md) | Serve from the proxy or object storage, if traffic to these files grows |
 | Local dev | **Fully native on both machines:** PostgreSQL 17 installed natively, no Docker, no Redis. See [development.md](development.md) / [ADR-0009](decisions/0009-local-development-fully-native.md) | — |
 | CI/CD | **GitHub Actions → GHCR → SSH deploy** | — |

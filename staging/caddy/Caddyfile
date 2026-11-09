@@ -1,0 +1,35 @@
+# Lesson Lab staging: the only service that publishes ports. Caddy gets and renews
+# the TLS certificate itself and sends traffic to the two web services over the
+# lessonlab-edge network. See docs/development.md, "Staging stack".
+#
+# SITE_DOMAIN and CADDY_TLS come from staging/.env. CADDY_TLS is the address
+# Let's Encrypt uses for expiry notices, or "internal" for a self-signed
+# certificate (CI uses that, because it can't be reached from the internet).
+
+{$SITE_DOMAIN} {
+	tls {$CADDY_TLS}
+
+	encode zstd gzip
+
+	header {
+		Strict-Transport-Security "max-age=31536000"
+		# Staging must never show up in search results.
+		X-Robots-Tag "noindex, nofollow"
+		-Server
+	}
+
+	request_body {
+		max_size 10MB
+	}
+
+	# Caddy sets X-Forwarded-For and X-Forwarded-Proto itself and ignores the
+	# values a client sends, so Django can trust them.
+	@backend path /api/* /admin/* /static/*
+	handle @backend {
+		reverse_proxy lessonlab-backend:8000
+	}
+
+	handle {
+		reverse_proxy lessonlab-frontend:3000
+	}
+}

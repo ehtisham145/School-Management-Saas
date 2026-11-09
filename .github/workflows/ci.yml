@@ -233,25 +233,27 @@ jobs:
           for name in SECRET_KEY POSTGRES_PASSWORD REDIS_PASSWORD; do
             sed -i "s/^$name=.*/$name=$(openssl rand -hex 32)/" .env
           done
-      - run: docker network create lessonlab-edge
+          # CI can't be reached by Let's Encrypt, so Caddy signs its own certificate.
+          sed -i "s/^CADDY_TLS=.*/CADDY_TLS=internal/" .env
       - name: Run the migrations
         run: docker compose run --rm lessonlab-migrate
       - name: Start every service and wait until healthy
         run: docker compose up -d --wait --wait-timeout 180
-      - name: Serves the admin stylesheet
+      # Every request below goes through Caddy, the way a visitor's does.
+      - name: Routes each path to the right service
         run: |
-          docker compose exec -T lessonlab-backend python -c "
-          import re, urllib.request as u
-          headers = {'Host': 'staging.lessonlab.me', 'X-Forwarded-Proto': 'https'}
-          def get(path):
-              return u.urlopen(u.Request('http://127.0.0.1:8000' + path, headers=headers), timeout=10)
-          page = get('/admin/login/').read().decode()
-          path = re.search(r'/static/admin/css/base[^\"]*\.css', page).group()
-          response = get(path)
-          assert response.headers['Content-Type'].startswith('text/css'), response.headers['Content-Type']
-          print(path)
-          "
-      - name: Publishes no ports
-        run: test -z "$(docker compose ps --format '{{.Ports}}' | grep -e '->' || true)"
+          site=https://staging.lessonlab.me
+          get() { curl --fail --silent --show-error --insecure --resolve staging.lessonlab.me:443:127.0.0.1 "$@"; }
+          get "$site/api/health/"
+          get --output /dev/null "$site/en"
+          css="$(get "$site/admin/login/" | grep -oE '/static/admin/css/base[^"]*\.css' | head -n 1)"
+          get --output /dev/null --write-out '%{content_type}\n' "$site$css" | grep '^text/css'
+      - name: Sends plain HTTP to HTTPS
+        run: |
+          curl --silent --output /dev/null --write-out '%{http_code} %{redirect_url}\n' \
+            -H 'Host: staging.lessonlab.me' http://127.0.0.1/ | grep '^308 https://staging.lessonlab.me/'
+      - name: Only Caddy publishes ports
+        run: |
+          test -z "$(docker compose ps --format '{{.Service}} {{.Ports}}' | grep -e '->' | grep -v '^lessonlab-proxy ' || true)"
       - if: failure()
         run: docker compose logs --no-color

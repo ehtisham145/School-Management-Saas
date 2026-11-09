@@ -4,7 +4,7 @@
 - **Date:** 2026-11-07
 
 ## Context
-Staging runs on a shared Hostinger VPS ([ADR-0011](0011-staging-on-hostinger-behind-shared-nginx.md)). Deploying by hand meant logging in as root, pulling, building the images on the server and restarting the stack. Building on the server slows E-Numerak down, and a root login for every release is more access than a deploy needs.
+Staging ran on a shared Hostinger VPS when this was decided ([ADR-0011](0011-staging-on-hostinger-behind-shared-nginx.md)); it now runs on an OCI VM ([ADR-0015](0015-staging-on-oci-trial-with-caddy.md)) and deploys the same way. Deploying by hand meant logging in as root, pulling, building the images on the server and restarting the stack. Building on the server slows E-Numerak down, and a root login for every release is more access than a deploy needs.
 
 ## Decision
 - After CI passes on `main`, `.github/workflows/deploy-staging.yml` builds both images, scans them with Trivy and pushes them to GHCR, tagged with the commit SHA.
