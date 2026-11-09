@@ -115,27 +115,22 @@ Switching machines: always `git pull` before starting work, and commit + push be
 
 ### Staging stack
 
-`staging/docker-compose.yml` runs the staging server: PostgreSQL, Redis, backend, Celery worker, Celery beat and frontend. Docker is for servers and CI only, so CI's `staging-stack` job is what proves this file works.
+`staging/docker-compose.yml` runs the staging server: Caddy, PostgreSQL, Redis, backend, Celery worker, Celery beat and frontend. Docker is for servers and CI only, so CI's `staging-stack` job is what proves this file works. It sends real requests through Caddy with a self-signed certificate (`CADDY_TLS=internal`).
 
 ```bash
 cd staging
 cp .env.example .env                   # fill in the values, then: chmod 600 .env
-docker network create lessonlab-edge   # once per server
 docker compose run --rm lessonlab-migrate
 docker compose up -d --wait
 ```
 
-Containers run read-only as non-root with all capabilities dropped. No service publishes a port: nginx joins `lessonlab-edge` and reaches `lessonlab-backend:8000` and `lessonlab-frontend:3000`. It must send `/api/`, `/admin/` and `/static/` to the backend and everything else to the frontend. The database and Redis are on an internal network with no internet access.
+Containers run read-only with all capabilities dropped; all but Caddy run as non-root. Only Caddy (`lessonlab-proxy`) publishes ports, 80 and 443. It gets the Let's Encrypt certificate for `SITE_DOMAIN` itself, keeps it in the `caddy-data` volume, sends `/api/`, `/admin/` and `/static/` to `lessonlab-backend:8000` and everything else to `lessonlab-frontend:3000` ([`staging/caddy/Caddyfile`](../staging/caddy/Caddyfile)). The database and Redis are on an internal network with no internet access.
 
-**On the server** (`staging.lessonlab.me`): the code lives in `/opt/lessonlab/app`, owned by the `deploy` user and cloned with a read-only deploy key (`/home/deploy/.ssh/lessonlab_deploy`, used through the `github-lessonlab` host alias). The shared nginx belongs to E-Numerak; its compose file mounts `/opt/lessonlab/app/staging/nginx` at `/etc/nginx/lessonlab` (read-only), includes `/etc/nginx/lessonlab/*.conf` at the end of its `http` block, and joins `lessonlab-edge`. Our site config is [`staging/nginx/lessonlab.conf`](../staging/nginx/lessonlab.conf). It resolves the upstreams per request, so nginx still starts when our stack is down. The TLS certificate comes from the host's certbot through the shared webroot and renews with E-Numerak's weekly cron:
-
-```bash
-certbot certonly --webroot -w /var/lib/docker/volumes/docker_certbot_www/_data -d staging.lessonlab.me
-```
+**On the server** (`staging.lessonlab.me`, an OCI VM, see [ADR-0015](decisions/0015-staging-on-oci-trial-with-caddy.md)): the code lives in `/opt/lessonlab/app`, owned by the `deploy` user and cloned with a read-only deploy key (`/home/deploy/.ssh/lessonlab_deploy`, used through the `github-lessonlab` host alias). Ports 80 and 443 must be open in the VCN security list **and** in the VM's iptables rules, which OCI's Ubuntu image keeps in `/etc/iptables/rules.v4`. The DNS `A` record for `staging` must point at the VM before Caddy can get a certificate.
 
 #### Auto-deploy
 
-Merging to `main` deploys staging on its own ([ADR-0013](decisions/0013-staging-auto-deploy.md)). When CI passes, `.github/workflows/deploy-staging.yml` builds the images, scans them, pushes them to GHCR as `ghcr.io/ehtisham145/lessonlab-{backend,frontend}:<sha>`, and then runs [`staging/deploy.sh`](../staging/deploy.sh) on the server over SSH. The script pulls the images, checks out the commit, migrates, starts the stack and waits until it's healthy. If anything fails it rolls back to the previous commit and images, but not the database. It reloads nginx when `staging/nginx/` changed.
+Merging to `main` deploys staging on its own ([ADR-0013](decisions/0013-staging-auto-deploy.md)). When CI passes, `.github/workflows/deploy-staging.yml` builds the images, scans them, pushes them to GHCR as `ghcr.io/ehtisham145/lessonlab-{backend,frontend}:<sha>`, and then runs [`staging/deploy.sh`](../staging/deploy.sh) on the server over SSH. The script pulls the images, checks out the commit, migrates, starts the stack and waits until it's healthy. If anything fails it rolls back to the previous commit and images, but not the database. It reloads Caddy when `staging/caddy/` changed.
 
 The server checkout is a detached HEAD at the deployed commit, so don't `git pull` there. To redeploy by hand, run the workflow again from the Actions tab.
 

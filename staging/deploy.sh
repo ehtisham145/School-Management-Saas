@@ -18,7 +18,6 @@ umask 077
 APP=/opt/lessonlab/app
 ENV_FILE="$APP/staging/.env"
 REGISTRY=ghcr.io/ehtisham145
-NGINX=docker-nginx-1
 KEEP_IMAGES=3
 
 log() { echo "==> $*"; }
@@ -79,9 +78,11 @@ main() {
     exit 1
   fi
 
-  if ! git -C "$APP" diff --quiet "$previous" "$sha" -- staging/nginx/; then
-    log "Reloading nginx for the changed site config"
-    docker exec "$NGINX" nginx -t && docker exec "$NGINX" nginx -s reload
+  # Caddy reads its config only at start, and a changed file doesn't recreate the
+  # container. A bad config makes the reload fail and Caddy keeps the old one.
+  if ! git -C "$APP" diff --quiet "$previous" "$sha" -- staging/caddy/; then
+    log "Reloading Caddy for the changed config"
+    docker compose exec -T lessonlab-proxy caddy reload --config /etc/caddy/Caddyfile </dev/null
   fi
 
   log "Removing old images (keeping the newest $KEEP_IMAGES)"

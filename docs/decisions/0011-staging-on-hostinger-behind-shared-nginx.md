@@ -1,6 +1,6 @@
 # ADR-0011: Staging on Hostinger behind the shared nginx
 
-- **Status:** Accepted
+- **Status:** Superseded by [ADR-0015](0015-staging-on-oci-trial-with-caddy.md)
 - **Date:** 2026-11-05
 
 ## Context
