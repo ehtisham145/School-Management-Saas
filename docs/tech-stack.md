@@ -28,7 +28,7 @@ Guiding principles for this project:
 | PDF | **WeasyPrint** (handles Arabic shaping + RTL) with Arabic fonts | Headless Chromium (Playwright) — if layouts get very complex |
 | File storage | **OCI Object Storage (S3-compatible) via django-storages**, private bucket + presigned URLs | Local disk volume — acceptable for the first days only |
 | Search | **PostgreSQL full-text + pg_trgm** | Meilisearch — at 100K+ users if name search gets slow |
-| Email (sending) | **SMTP through Django**, settings in `.env`, behind `apps/integrations/email` | `django-anymail` + Amazon SES or Brevo, if volume or delivery becomes a problem |
+| Email (sending) | **SMTP through Django**, settings in `.env`, behind `apps/integrations/email` — **OCI Email Delivery** (Always Free, 3,000 emails/month) is enough at launch scale | `django-anymail` + Amazon SES or Brevo, if volume or delivery becomes a problem |
 | Email (mailbox) | **Zoho Mail free** (info@, sales@) | Google Workspace — if the client wants Gmail |
 | Hosting | **Oracle Cloud (OCI) Riyadh `me-riyadh-1`**, 1 Ampere A1 VM | Local Saudi VPS (Wafai Cloud etc.) or AWS Saudi region (launching Dec 2026) |
 | Runtime | **Docker Compose + Caddy** (auto HTTPS) on Ubuntu 24.04 — servers only | Nginx + certbot — you know it, but Caddy is less config |
@@ -39,7 +39,7 @@ Guiding principles for this project:
 | Errors | **Sentry** (free tier, PII scrubbing on) | GlitchTip self-hosted — if no data may leave KSA, even error traces |
 | Uptime | **UptimeRobot / Better Stack free** (external) | — |
 | Logs | Docker JSON logs with rotation + structured logs (structlog) | Grafana Loki — at 10K+ users |
-| AI (Phase 3) | **Provider adapter**, hosted LLM API | Self-hosted model on GPU — only if API cost exceeds ~$300/month |
+| AI (Phase 3) | **Provider adapter**, self-hosted open-weight model on a dedicated (paid) GPU server once funded | Larger self-hosted model as budget grows. Never a third-party hosted API — client decision ([ADR-0014](decisions/0014-self-hosted-ai-model.md)) |
 
 ## Why each choice fits this project
 
@@ -82,10 +82,24 @@ Guiding principles for this project:
 |---|---|
 | OCI Ampere A1 VM (2 OCPU / 12 GB) — Always Free allowance | $0 |
 | Block storage (≤200 GB) + Object Storage (≤20 GB) — Always Free | $0 |
-| Domain (.com) | ~$1 |
-| Amazon SES (~10K emails) | ~$1 |
+| Domain (.com) | Already owned |
+| OCI Email Delivery (≤3,000 emails/month) — Always Free | $0 |
 | Zoho Mail free, Sentry free, UptimeRobot free, GitHub free | $0 |
-| **Total** | **~$2–5 / month** |
+| **Total** | **~$0 / month** |
+
+### Phase 3 add-on: self-hosted AI (lesson plans/presentations)
+
+Not needed until Phase 3 AI work starts ([ADR-0014](decisions/0014-self-hosted-ai-model.md)). Kept separate from the Always Free VM above — the main app stays on Oracle, the AI model runs on a rented GPU, billed separately.
+
+| Item | Cost |
+|---|---|
+| GPU rental — RTX 4090 (24 GB VRAM), [DCP.sa](https://dcp.sa) (Saudi Arabia, per-second billing, PDPL-compliant) | 3.62 SAR/hr (~$0.97/hr) while running |
+| Light/occasional use (e.g. ~1,000 generations/month, GPU only on for the request) | ~$16–30/month |
+| Moderate use (several schools, daily use) | ~$80–100/month |
+| Always-on 24/7 (not recommended — needs start/stop automation instead) | ~$700/month |
+| **Project total once AI is live** | **~$22–100 / month** (app ~$2–5 unchanged + AI add-on) |
+
+Model: a 7–14B parameter open-weight model (e.g. Qwen 2.5 14B) fits comfortably in 24 GB VRAM — no training needed to start, good prompts are enough; fine-tuning on the school's own sample lesson plans is a later, optional quality improvement.
 
 Leaves headroom inside the $20 budget. Not included: developer tooling (Claude subscription) and a `.sa` domain if the client wants one.
 If free A1 capacity is unavailable, expect **~$30–60/month** for a paid VM in KSA. Check current prices in the provider's console before buying.
