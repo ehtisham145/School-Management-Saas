@@ -1,6 +1,6 @@
 # ADR-0014: Self-hosted AI model for lesson-plan generation, not a third-party API
 
-- **Status:** Accepted
+- **Status:** Accepted as the long-term target; interim approach superseded by [ADR-0016](0016-interim-hosted-ai-api.md) (hosted API first, self-host once a GPU server is funded)
 - **Date:** 2026-11-08
 
 ## Context
