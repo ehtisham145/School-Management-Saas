@@ -102,7 +102,7 @@ If week 3 slips, move **homework** to month 2 first, then **messaging** (announc
 
 ## Phase 3 — Features (Month 4+)
 - [ ] Lesson plans + presentations: manual editor (rich text + slide builder)
-- [ ] AI generation behind `integrations/ai` adapter, per-school monthly quota, async via Celery. No student PII sent to the model. **Self-hosted model only, never a third-party API** — blocked on a dedicated paid GPU server being funded ([ADR-0014](decisions/0014-self-hosted-ai-model.md))
+- [ ] AI generation behind `integrations/ai` adapter, per-school monthly quota, async via Celery. No student PII sent to the model. **Interim: hosted API (Groq/Gemini)** — self-hosted model is the long-term target once a dedicated GPU server is funded ([ADR-0016](decisions/0016-interim-hosted-ai-api.md), [ADR-0014](decisions/0014-self-hosted-ai-model.md))
 - [ ] Online classes — integrate an existing provider (e.g. Jitsi / Zoom / Google Meet links) rather than building video
 - [ ] Online fee payments via a Saudi gateway (Moyasar / HyperPay / Tap) — if the client asks
 - [ ] Client-requested features

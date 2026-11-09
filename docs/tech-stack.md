@@ -39,7 +39,7 @@ Guiding principles for this project:
 | Errors | **Sentry** (free tier, PII scrubbing on) | GlitchTip self-hosted — if no data may leave KSA, even error traces |
 | Uptime | **UptimeRobot / Better Stack free** (external) | — |
 | Logs | Docker JSON logs with rotation + structured logs (structlog) | Grafana Loki — at 10K+ users |
-| AI (Phase 3) | **Provider adapter**, self-hosted open-weight model on a dedicated (paid) GPU server once funded | Larger self-hosted model as budget grows. Never a third-party hosted API — client decision ([ADR-0014](decisions/0014-self-hosted-ai-model.md)) |
+| AI (Phase 3) | **Provider adapter**, hosted LLM API (Groq/Gemini) — interim, cheap, no upfront GPU cost. See [ADR-0016](decisions/0016-interim-hosted-ai-api.md) | Self-hosted open-weight model on a dedicated GPU server, once funded — long-term target ([ADR-0014](decisions/0014-self-hosted-ai-model.md)) |
 
 ## Why each choice fits this project
 
@@ -87,19 +87,17 @@ Guiding principles for this project:
 | Zoho Mail free, Sentry free, UptimeRobot free, GitHub free | $0 |
 | **Total** | **~$0 / month** |
 
-### Phase 3 add-on: self-hosted AI (lesson plans/presentations)
+### Phase 3 add-on: AI (lesson plans/presentations)
 
-Not needed until Phase 3 AI work starts ([ADR-0014](decisions/0014-self-hosted-ai-model.md)). Kept separate from the Always Free VM above — the main app stays on Oracle, the AI model runs on a rented GPU, billed separately.
+Not needed until Phase 3 AI work starts. **Interim plan ([ADR-0016](decisions/0016-interim-hosted-ai-api.md)): hosted LLM API**, not self-hosted — avoids any GPU server cost before the feature has real usage.
 
 | Item | Cost |
 |---|---|
-| GPU rental — RTX 4090 (24 GB VRAM), [DCP.sa](https://dcp.sa) (Saudi Arabia, per-second billing, PDPL-compliant) | 3.62 SAR/hr (~$0.97/hr) while running |
-| Light/occasional use (e.g. ~1,000 generations/month, GPU only on for the request) | ~$16–30/month |
-| Moderate use (several schools, daily use) | ~$80–100/month |
-| Always-on 24/7 (not recommended — needs start/stop automation instead) | ~$700/month |
-| **Project total once AI is live** | **~$22–100 / month** (app ~$2–5 unchanged + AI add-on) |
+| Hosted API (Groq or Gemini, exact pick at implementation time), light use (~1,000 generations/month) | ~$1–15/month |
+| Hosted API, moderate use (several schools, daily use, ~10,000 generations/month) | ~$15–125/month |
+| **Project total once AI is live (interim)** | **~$3–130 / month** (app ~$0–5 unchanged + API add-on) |
 
-Model: a 7–14B parameter open-weight model (e.g. Qwen 2.5 14B) fits comfortably in 24 GB VRAM — no training needed to start, good prompts are enough; fine-tuning on the school's own sample lesson plans is a later, optional quality improvement.
+**Long-term target ([ADR-0014](decisions/0014-self-hosted-ai-model.md)):** once funded, move to a self-hosted open-weight model (7–14B params, e.g. Qwen 2.5 14B) on a rented GPU — [DCP.sa](https://dcp.sa) (Saudi Arabia, RTX 4090, per-second billing, PDPL-compliant) at ~$0.97/hr while running, roughly $16–100/month depending on usage with start/stop automation, or ~$700/month if left on 24/7 (not recommended). No training needed to start on either path — good prompts are enough; fine-tuning on the school's own sample lesson plans is a later, optional quality improvement either way.
 
 Leaves headroom inside the $20 budget. Not included: developer tooling (Claude subscription) and a `.sa` domain if the client wants one.
 If free A1 capacity is unavailable, expect **~$30–60/month** for a paid VM in KSA. Check current prices in the provider's console before buying.
