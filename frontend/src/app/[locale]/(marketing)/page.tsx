@@ -1,15 +1,11 @@
-import Image from "next/image";
-import { Check } from "lucide-react";
 import { getTranslations, setRequestLocale } from "next-intl/server";
-import { buttonVariants } from "@/components/ui/button";
-import { DemoButton } from "@/features/leads/components/demo-dialog";
 import {
   CtaBox,
   FeatureCard,
   IconTile,
+  PhotoHero,
   Section,
   SectionHeading,
-  StatusChip,
 } from "@/features/marketing/components/blocks";
 import {
   AdminIcon,
@@ -45,7 +41,6 @@ const ROLES = [
   { icon: ParentIcon, title: "parent", description: "parentD" },
 ] as const;
 
-const FACTS = ["fact1", "fact2", "fact3"] as const;
 const STRIP = [
   { key: "a", className: "ps-0 sm:ps-0" },
   { key: "b", className: "border-s" },
@@ -66,67 +61,14 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
 
   return (
     <>
-      <section className="relative flex flex-col overflow-hidden bg-bg lg:block">
-        <div className="page-wrap relative z-[1] pt-11 pb-8 lg:py-[clamp(56px,7vw,96px)]">
-          <div className="max-w-[640px] lg:max-w-[min(47%,540px)]">
-            <span className="inline-flex items-center gap-2 rounded-full bg-orange-soft px-[13px] py-1.5 text-[13px] font-bold text-orange-text">
-              <i aria-hidden="true" className="size-[7px] rounded-full bg-orange" />
-              {t("hero.eyebrow")}
-            </span>
-            <h1 className="mt-5 text-[clamp(36px,4.5vw,58px)] text-navy-deep">
-              <Typewriter
-                words={t.raw("hero.words") as string[]}
-                highlights={t.raw("hero.highlights") as string[]}
-                locale={locale}
-              />
-            </h1>
-            <p className="mt-[18px] text-[clamp(16px,1.35vw,18px)] text-ink-soft">
-              {t("hero.lede")}
-            </p>
-            <div className="mt-7 flex flex-wrap gap-3">
-              <DemoButton className="flex-[1_1_100%] sm:flex-none">{t("hero.primary")}</DemoButton>
-              <a
-                href="#features"
-                className={buttonVariants({
-                  variant: "outline",
-                  className: "flex-[1_1_100%] sm:flex-none",
-                })}
-              >
-                {t("hero.secondary")}
-              </a>
-            </div>
-            <ul className="mt-[30px] flex flex-wrap gap-x-6 gap-y-2.5 text-sm font-medium text-ink">
-              {FACTS.map((fact) => (
-                <li key={fact} className="inline-flex items-center gap-2">
-                  <Check aria-hidden="true" className="size-[18px] shrink-0 text-orange-text" />
-                  {t(`hero.${fact}`)}
-                </li>
-              ))}
-            </ul>
-          </div>
-        </div>
-
-        <div className="hero-photo-fade relative aspect-[4/3] sm:aspect-[16/10] lg:absolute lg:inset-0 lg:aspect-auto">
-          <Image
-            src="/brand/hero.jpg"
-            alt={t("hero.alt")}
-            fill
-            priority
-            sizes="100vw"
-            className="object-cover object-[78%_center] lg:object-[center_42%] rtl:-scale-x-100"
-          />
-          <StatusChip
-            chip={{ icon: AttendanceIcon, title: t("hero.chip1a"), sub: t("hero.chip1b") }}
-            tone="navy"
-            className="start-[3%] top-[6%] lg:start-1/2 lg:top-[9%]"
-          />
-          <StatusChip
-            chip={{ icon: ExamsIcon, title: t("hero.chip2a"), sub: t("hero.chip2b") }}
-            tone="orange"
-            className="start-[3%] bottom-[6%] [animation-delay:-3s] lg:start-[37%] lg:bottom-[9%] rtl:lg:start-[49%] rtl:lg:bottom-[4%]"
-          />
-        </div>
-      </section>
+      <PhotoHero image="/images/home.jpg" alt={t("hero.alt")}>
+        <Typewriter
+          words={t.raw("hero.words") as string[]}
+          highlights={t.raw("hero.highlights") as string[]}
+          locale={locale}
+          onPhoto
+        />
+      </PhotoHero>
 
       <section aria-label={t("hero.eyebrow")} className="bg-navy-deep text-on-dark">
         <div className="page-wrap grid grid-cols-2 lg:grid-cols-4">

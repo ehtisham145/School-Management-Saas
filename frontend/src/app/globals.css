@@ -176,26 +176,13 @@
     }
   }
 
-  /* Fades the hero photo into the page on its calm side, from the demo. */
-  .hero-photo-fade::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
-    background: linear-gradient(
-      to right,
-      var(--bg) 0%,
-      rgb(255 255 255 / 94%) 30%,
-      transparent 54%
-    );
-  }
-  html[dir="rtl"] .hero-photo-fade::after {
-    background: linear-gradient(to left, var(--bg) 0%, rgb(255 255 255 / 94%) 30%, transparent 54%);
-  }
-  @media (max-width: 64.99rem) {
-    .hero-photo-fade::after {
-      display: none;
-    }
+  /* Light hero text over the full photo: a dark navy shadow keeps it readable
+     on both the bright and the busy parts of the photo, with no wash over it. */
+  .hero-on-photo {
+    text-shadow:
+      0 1px 2px color-mix(in srgb, var(--navy-deep) 80%, transparent),
+      0 2px 10px color-mix(in srgb, var(--navy-deep) 65%, transparent),
+      0 0 28px color-mix(in srgb, var(--navy-deep) 55%, transparent);
   }
 
   .modal-dialog::backdrop {

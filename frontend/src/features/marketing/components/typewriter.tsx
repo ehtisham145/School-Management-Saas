@@ -18,6 +18,8 @@ type TypewriterProps = {
   /** The part of each word shown in the accent color. */
   highlights?: string[];
   locale: string;
+  /** Brighter accent for text placed over a photo. */
+  onPhoto?: boolean;
   className?: string;
 };
 
@@ -26,7 +28,7 @@ type TypewriterProps = {
  * one is reserved and the page never jumps while typing. The server renders the
  * first word in full for search engines and for people who prefer less motion.
  */
-export function Typewriter({ words, highlights, locale, className }: TypewriterProps) {
+export function Typewriter({ words, highlights, locale, onPhoto, className }: TypewriterProps) {
   const [wordIndex, setWordIndex] = useState(0);
   const [length, setLength] = useState<number | null>(null);
   const [deleting, setDeleting] = useState(true);
@@ -88,10 +90,17 @@ export function Typewriter({ words, highlights, locale, className }: TypewriterP
         ) : (
           <>
             {typed.slice(0, start)}
-            <span className="text-orange-text">{typed.slice(start)}</span>
+            <span className={onPhoto ? "text-orange" : "text-orange-text"}>
+              {typed.slice(start)}
+            </span>
           </>
         )}
-        <span className="ms-0.5 inline-block h-[0.85em] w-[3px] translate-y-[0.08em] animate-[caret_1s_steps(1)_infinite] bg-orange-text" />
+        <span
+          className={cn(
+            "ms-0.5 inline-block h-[0.85em] w-[3px] translate-y-[0.08em] animate-[caret_1s_steps(1)_infinite]",
+            onPhoto ? "bg-orange" : "bg-orange-text",
+          )}
+        />
       </span>
     </span>
   );

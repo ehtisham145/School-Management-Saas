@@ -40,16 +40,10 @@ export default async function LmsPage({ params }: PageProps<"/[locale]/lms">) {
   return (
     <>
       <PageHero
-        eyebrow={t("hero.eyebrow")}
+        image="/images/lms.jpg"
         titleLead={t("hero.titleLead")}
         words={t.raw("hero.words") as string[]}
-        lede={t("hero.lede")}
         locale={locale}
-        media="illustration"
-        chips={[
-          { icon: AttendanceIcon, title: t("hero.chip1a"), sub: t("hero.chip1b") },
-          { icon: ExamsIcon, title: t("hero.chip2a"), sub: t("hero.chip2b") },
-        ]}
       />
 
       <Section>

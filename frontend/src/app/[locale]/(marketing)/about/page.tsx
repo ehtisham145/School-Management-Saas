@@ -33,16 +33,10 @@ export default async function AboutPage({ params }: PageProps<"/[locale]/about">
   return (
     <>
       <PageHero
-        eyebrow={t("hero.eyebrow")}
+        image="/images/about.jpg"
         titleLead={t("hero.titleLead")}
         words={t.raw("hero.words") as string[]}
-        lede={t("hero.lede")}
         locale={locale}
-        media="photo"
-        chips={[
-          { icon: BilingualIcon, title: t("hero.chip1a"), sub: t("hero.chip1b") },
-          { icon: AttendanceIcon, title: t("hero.chip2a"), sub: t("hero.chip2b") },
-        ]}
       />
 
       <Section>
