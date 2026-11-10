@@ -87,113 +87,54 @@ export function CheckItem({ children }: { children: ReactNode }) {
   );
 }
 
-export type HeroChip = { icon: Icon; title: string; sub: string };
-
-export function StatusChip({
-  chip,
-  tone,
-  className,
+/**
+ * Full-width photo with only the page heading over it. The heading is light
+ * text with a dark shadow, so it reads on any part of the photo without a
+ * wash over the image.
+ */
+export function PhotoHero({
+  image,
+  alt = "",
+  children,
 }: {
-  chip: HeroChip;
-  tone: "navy" | "orange";
-  className?: string;
+  image: string;
+  alt?: string;
+  children: ReactNode;
 }) {
-  const IconComponent = chip.icon;
   return (
-    <div
-      aria-hidden="true"
-      className={cn(
-        "absolute z-[1] flex animate-float items-center gap-[7px] rounded-[11px] bg-bg px-2.5 py-[7px] text-ink shadow-chip sm:gap-2.5 sm:rounded-[14px] sm:px-3.5 sm:py-2.5",
-        className,
-      )}
-    >
-      <span
-        className={cn(
-          "grid size-[26px] shrink-0 place-items-center rounded-lg sm:size-[34px] sm:rounded-control",
-          tone === "navy" ? "bg-navy-soft text-navy" : "bg-orange-soft text-orange-text",
-        )}
-      >
-        <IconComponent className="size-3.5 sm:size-[18px]" />
-      </span>
-      <div>
-        <b className="block text-xs font-bold whitespace-nowrap sm:text-sm">{chip.title}</b>
-        <span className="block text-[10.5px] whitespace-nowrap text-ink-soft sm:text-xs">
-          {chip.sub}
-        </span>
+    <section className="relative flex min-h-[clamp(360px,48vw,620px)] items-start overflow-hidden bg-navy-deep">
+      <Image
+        src={image}
+        alt={alt}
+        fill
+        priority
+        sizes="100vw"
+        className="object-cover object-center"
+      />
+      <div className="page-wrap relative z-[1] pt-[clamp(40px,7vw,104px)] pb-12">
+        <h1 className="hero-on-photo max-w-[min(100%,680px)] text-[clamp(34px,4.5vw,58px)] text-on-dark">
+          {children}
+        </h1>
       </div>
-    </div>
+    </section>
   );
 }
 
 export function PageHero({
-  eyebrow,
+  image,
   titleLead,
   words,
-  lede,
   locale,
-  media,
-  chips,
 }: {
-  eyebrow: string;
+  image: string;
   titleLead: string;
   words: string[];
-  lede: string;
   locale: string;
-  media: "photo" | "illustration";
-  chips: [HeroChip, HeroChip];
 }) {
   return (
-    <section className="border-b border-line bg-bg-tint">
-      <div className="page-wrap grid items-center gap-10 py-[clamp(40px,5vw,72px)] lg:grid-cols-[1.05fr_0.95fr] lg:gap-14">
-        <div className="min-w-0">
-          <span className="inline-flex items-center gap-2 rounded-full bg-orange-soft px-[13px] py-1.5 text-[13px] font-bold text-orange-text">
-            <i aria-hidden="true" className="size-[7px] rounded-full bg-orange" />
-            {eyebrow}
-          </span>
-          <h1 className="mt-5 text-[clamp(34px,4.2vw,54px)] text-navy-deep">
-            {titleLead} <Typewriter words={words} locale={locale} className="text-orange-text" />
-          </h1>
-          <p className="mt-[18px] max-w-[56ch] text-[clamp(16px,1.35vw,18px)] text-ink-soft">
-            {lede}
-          </p>
-        </div>
-
-        <div className="relative mx-auto w-full max-w-[560px] lg:max-w-none">
-          <div
-            className={cn(
-              "relative aspect-[4/3] overflow-hidden rounded-cta",
-              media === "illustration" && "bg-navy-deep",
-            )}
-          >
-            {media === "photo" ? (
-              <Image
-                src="/brand/hero.jpg"
-                alt=""
-                fill
-                priority
-                sizes="(max-width: 1040px) 560px, 45vw"
-                className="object-cover object-[80%_center]"
-              />
-            ) : (
-              <Image
-                src="/brand/sign-in.webp"
-                alt=""
-                fill
-                priority
-                sizes="(max-width: 1040px) 560px, 45vw"
-                className="mask-[radial-gradient(closest-side,black_72%,transparent_100%)] object-contain p-4"
-              />
-            )}
-          </div>
-          <StatusChip chip={chips[0]} tone="navy" className="start-3 top-4 sm:-start-3 sm:top-6" />
-          <StatusChip
-            chip={chips[1]}
-            tone="orange"
-            className="end-3 bottom-4 [animation-delay:-3s] sm:-end-3 sm:bottom-6"
-          />
-        </div>
-      </div>
-    </section>
+    <PhotoHero image={image}>
+      {titleLead} <Typewriter words={words} locale={locale} onPhoto className="text-orange" />
+    </PhotoHero>
   );
 }
 

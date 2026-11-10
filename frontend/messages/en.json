@@ -259,19 +259,7 @@
     "home": {
       "hero": {
         "eyebrow": "School management for Saudi Arabia",
-        "title1": "Run your whole school",
-        "title2": "from one place.",
-        "lede": "Attendance, exams, fees, timetables and parent messages, together in one bilingual system built for how private schools in Saudi Arabia actually work.",
-        "primary": "Book a demo",
-        "secondary": "Explore features",
-        "fact1": "Arabic and English",
-        "fact2": "Hijri and Gregorian dates",
-        "fact3": "Data hosted in Saudi Arabia",
-        "alt": "A school administrator and a teacher smiling at a dashboard on a laptop, with students walking in the corridor behind them",
-        "chip1a": "Attendance marked",
-        "chip1b": "Grade 6B, today",
-        "chip2a": "Report cards ready",
-        "chip2b": "Term 1",
+        "alt": "A long aisle of library shelves full of books",
         "words": [
           "Welcome to Lesson Lab",
           "Run your whole school from one place.",
@@ -344,14 +332,8 @@
     },
     "about": {
       "hero": {
-        "eyebrow": "About",
-        "lede": "Lesson Lab started from one question: why does a school's own data — attendance, marks, fees — live in five different spreadsheets instead of one record?",
         "titleLead": "Built for schools",
-        "words": ["in Riyadh.", "in Jeddah.", "in Dammam.", "across Saudi Arabia."],
-        "chip1a": "Two languages",
-        "chip1b": "Arabic and English",
-        "chip2a": "Sunday to Thursday",
-        "chip2b": "The Saudi school week"
+        "words": ["in Riyadh.", "in Jeddah.", "in Dammam.", "across Saudi Arabia."]
       },
       "story": {
         "eyebrow": "Why we're building this",
@@ -392,8 +374,6 @@
     },
     "lms": {
       "hero": {
-        "eyebrow": "Product",
-        "lede": "Every module below is part of the same record. Mark attendance in the morning and it is already reflected in the afternoon's absence digest — nothing exported, nothing re-entered.",
         "titleLead": "Built to run a",
         "words": [
           "Sunday morning.",
@@ -401,11 +381,7 @@
           "fee deadline.",
           "parent evening.",
           "report card day."
-        ],
-        "chip1a": "Six modules",
-        "chip1b": "One record",
-        "chip2a": "Report cards ready",
-        "chip2b": "Term 1"
+        ]
       },
       "gridEyebrow": "Six modules, one record",
       "gridTitle": "Jump to what your school needs most.",
@@ -485,19 +461,13 @@
     },
     "pricing": {
       "hero": {
-        "eyebrow": "Pricing",
-        "lede": "Every school's year looks different — grade count, sections, staff. Lesson Lab is quoted per school after a short call, not unlocked feature-by-feature.",
         "titleLead": "Priced for a",
         "words": [
           "50-student school.",
           "500-student school.",
           "five-campus network.",
           "single pilot section."
-        ],
-        "chip1a": "Three plans",
-        "chip1b": "Basic, Premium, Advanced",
-        "chip2a": "Per school",
-        "chip2b": "No per-student fees"
+        ]
       },
       "perMonth": "per month",
       "note": "Prices are per school, per month. Your quote depends on your student count and the modules you need.",
@@ -576,14 +546,8 @@
     },
     "contact": {
       "hero": {
-        "eyebrow": "Contact",
-        "lede": "Reach us directly on WhatsApp for the fastest reply, or send a message below and we'll get back to you by email.",
         "titleLead": "Talk to us about",
-        "words": ["a demo.", "your school's setup.", "pricing.", "a pilot term."],
-        "chip1a": "WhatsApp",
-        "chip1b": "Fastest way to reach us",
-        "chip2a": "Email",
-        "chip2b": "We reply by email"
+        "words": ["a demo.", "your school's setup.", "pricing.", "a pilot term."]
       },
       "channels": {
         "whatsapp": {

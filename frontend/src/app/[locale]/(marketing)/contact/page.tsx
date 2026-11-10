@@ -8,7 +8,7 @@ import {
   WHATSAPP_NUMBER_DISPLAY,
   WHATSAPP_URL,
 } from "@/features/marketing/contact-info";
-import { MailIcon, MessagesIcon } from "@/features/marketing/components/icons";
+import { MailIcon } from "@/features/marketing/components/icons";
 import { Reveal } from "@/features/marketing/components/reveal";
 import { WhatsAppLogo } from "@/features/marketing/components/whatsapp-float";
 import { pageMetadata } from "@/i18n/metadata";
@@ -26,16 +26,10 @@ export default async function ContactPage({ params }: PageProps<"/[locale]/conta
   return (
     <>
       <PageHero
-        eyebrow={t("hero.eyebrow")}
+        image="/images/contact.jpg"
         titleLead={t("hero.titleLead")}
         words={t.raw("hero.words") as string[]}
-        lede={t("hero.lede")}
         locale={locale}
-        media="photo"
-        chips={[
-          { icon: MessagesIcon, title: t("hero.chip1a"), sub: t("hero.chip1b") },
-          { icon: MailIcon, title: t("hero.chip2a"), sub: t("hero.chip2b") },
-        ]}
       />
 
       <Section>

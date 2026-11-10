@@ -3,13 +3,7 @@ import { Check } from "lucide-react";
 import { cn } from "cn";
 import { DemoButton } from "@/features/leads/components/demo-dialog";
 import { CtaBox, PageHero, Section, SectionHeading } from "@/features/marketing/components/blocks";
-import {
-  ExamsIcon,
-  FeesIcon,
-  GroupIcon,
-  PremiumIcon,
-  SchoolIcon,
-} from "@/features/marketing/components/icons";
+import { GroupIcon, PremiumIcon, SchoolIcon } from "@/features/marketing/components/icons";
 import { Reveal } from "@/features/marketing/components/reveal";
 import { pageMetadata } from "@/i18n/metadata";
 
@@ -31,16 +25,10 @@ export default async function PricingPage({ params }: PageProps<"/[locale]/prici
   return (
     <>
       <PageHero
-        eyebrow={t("hero.eyebrow")}
+        image="/images/pricing.jpg"
         titleLead={t("hero.titleLead")}
         words={t.raw("hero.words") as string[]}
-        lede={t("hero.lede")}
         locale={locale}
-        media="illustration"
-        chips={[
-          { icon: FeesIcon, title: t("hero.chip1a"), sub: t("hero.chip1b") },
-          { icon: ExamsIcon, title: t("hero.chip2a"), sub: t("hero.chip2b") },
-        ]}
       />
 
       <Section>
