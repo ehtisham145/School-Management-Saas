@@ -12,27 +12,24 @@ This system stores **children's personal data** for multiple organisations. A cr
 
 ## 2. Authentication
 - [x] Argon2 password hashing; Django password validators on.
-- [x] `django-axes`: lock after 5 failed attempts (per user + IP), with cool-off.
+- [x] `django-axes`: lock after 15 failed attempts (per user + IP), with a 1-hour cool-off.
 - [x] Emails: anything a user typed, including names, goes through `user_text()` before it is placed in email markup. Codes and links are never logged, and a code is never in a subject or preheader.
-- [x] After a wrong TOTP code, django-otp refuses every code for 1, 2, 4, 8... seconds. The API answers 429 `totp_wait` with `retry_after`, so the user is told to wait instead of being told a correct code is wrong.
 - [ ] Email OTP: random 6 digits, stored **hashed**, 10-min expiry, single use, 5 attempts max, resend throttled (e.g. 1/min, 5/hour).
-- [x] TOTP 2FA mandatory for Super Admin and School Admin.
-- [ ] Recovery codes issued once (today a lost device is reset by an email code alone).
+- [ ] No two-factor authentication: it was removed at the owner's request ([ADR-0018](decisions/0018-remove-two-factor-authentication.md)). A password or an email code alone signs in every role, including Super Admin. Revisit before real school data goes live.
 - [ ] Session cookies `HttpOnly; Secure; SameSite=Lax`; session rotated on login and on privilege change; logout invalidates server-side.
 - [x] Login and OTP endpoints return identical responses for "user not found" and "wrong password".
-- [x] Email code login can't skip 2FA, and a password-only Django admin session can't use `/api/platform/`.
 - [x] Public sign-in and lead form endpoints use no session, so an old session can't block them. Their protection is throttling; endpoints for signed-in users still require CSRF.
-- [ ] Tighter email code resend limit: today it is only the shared `twofa` throttle (50/min), not the 1/min and 5/hour above.
+- [ ] Tighter email code resend limit: today it is only the shared `email_code` throttle (50/min), not the 1/min and 5/hour above.
 
 ## 3. Authorization
 - [ ] Backend enforces every permission; UI hiding is cosmetic only.
 - [x] Default deny on `TenantScopedViewSet`: an action without a policy fails closed.
 - [ ] Default deny for every other endpoint (plain `APIView`s only require login by default).
-- [ ] Django admin requires 2FA or is restricted (`/admin` accepts a password alone; `/api/platform/` already refuses such a session).
+- [ ] Django admin is restricted (`/admin` accepts a password alone).
 - [ ] Parents see only linked children; teachers only assigned sections (current year).
 - [ ] Super Admin cross-school actions are audit-logged. Creating, activating and deactivating schools and updating demo requests go to the application log for now.
 - [x] A deactivated school loses tenant access at once, including for users already signed in, and can't be switched into.
-- [x] Reading and updating demo requests needs a platform admin session verified with TOTP. The public form stays write-only and can't set the status or notes.
+- [x] Reading and updating demo requests needs a platform admin session. The public form stays write-only and can't set the status or notes.
 
 ## 4. Web security
 - [ ] HTTPS only (Caddy), HSTS on.
@@ -44,7 +41,7 @@ This system stores **children's personal data** for multiple organisations. A cr
 - [ ] Decide how long demo requests and contact messages are kept (they hold personal data).
 - [ ] No raw SQL with string formatting; ORM or parameterised queries only.
 - [ ] User-generated HTML (announcements, lesson plans) sanitised server-side (`nh3`) before storing or rendering.
-- [ ] `DEBUG=False`, Django admin on a non-default path, restricted to platform admins + 2FA.
+- [ ] `DEBUG=False`, Django admin on a non-default path, restricted to platform admins.
 
 ## 5. Files
 - [ ] Private bucket; access only via short-lived presigned URLs after a permission check.
@@ -66,7 +63,7 @@ This system stores **children's personal data** for multiple organisations. A cr
 - [ ] `django-auditlog` on marks, attendance, fees/payments, users/memberships, school settings.
 - [ ] Each entry stores actor, school, IP, timestamp, before/after.
 - [ ] Audit log is append-only for app users; visible to Principal/School Admin for their school.
-- [ ] Also log security events: logins, failed logins, OTP failures, 2FA changes, password resets, role changes.
+- [ ] Also log security events: logins, failed logins, OTP failures, password resets, role changes.
 
 ## 8. Infrastructure
 - [ ] SSH key-only, root login disabled, non-standard user, `fail2ban`; ideally SSH reachable only from your IP (OCI security list).

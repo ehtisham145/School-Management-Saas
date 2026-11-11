@@ -11,10 +11,7 @@ export async function generateMetadata({ params }: PageProps<"/[locale]/login">)
   return pageMetadata(locale, "login", "/login");
 }
 
-/**
- * Brand on one side, the sign-in card on the other, on a plain tinted page.
- * During the two-factor steps only the card stays, centred.
- */
+/** Brand on one side, the sign-in card on the other, on a plain tinted page. */
 export default async function LoginPage({ params }: PageProps<"/[locale]/login">) {
   const { locale } = await params;
   setRequestLocale(locale);
@@ -23,17 +20,17 @@ export default async function LoginPage({ params }: PageProps<"/[locale]/login">
 
   return (
     <DemoDialogProvider>
-      <main className="group/signin flex flex-1 flex-col bg-bg-tint">
+      <main className="flex flex-1 flex-col bg-bg-tint">
         <div className="page-wrap flex justify-end pt-5">
           <LanguageMenu />
         </div>
 
-        <div className="page-wrap grid flex-1 content-center items-center gap-10 py-10 lg:grid-cols-[1fr_minmax(0,420px)] lg:gap-20 lg:group-has-data-two-factor/signin:grid-cols-1">
-          <div className="text-center lg:text-start lg:group-has-data-two-factor/signin:text-center">
+        <div className="page-wrap grid flex-1 content-center items-center gap-10 py-10 lg:grid-cols-[1fr_minmax(0,420px)] lg:gap-20">
+          <div className="text-center lg:text-start">
             <Link href="/" className="inline-block">
               <Logo priority className="h-12 sm:h-16" />
             </Link>
-            <div className="group-has-data-two-factor/signin:hidden">
+            <div>
               <p className="mx-auto mt-6 max-w-[18ch] text-[clamp(26px,3.2vw,40px)] leading-tight font-semibold text-navy-deep lg:mx-0">
                 {t("headline")}
               </p>
@@ -43,16 +40,14 @@ export default async function LoginPage({ params }: PageProps<"/[locale]/login">
             </div>
           </div>
 
-          <div className="mx-auto w-full max-w-[420px] lg:group-has-data-totp-setup/signin:max-w-[480px]">
+          <div className="mx-auto w-full max-w-[420px]">
             <div className="rounded-card border border-line bg-bg p-6 shadow-soft sm:p-8">
-              <div className="group-has-data-totp-setup/signin:hidden">
-                <h1 className="text-[clamp(24px,2.4vw,30px)] text-navy-deep">{t("welcome")}</h1>
-                <p className="mt-1.5 mb-6 text-ink-soft">{t("welcomeSub")}</p>
-              </div>
+              <h1 className="text-[clamp(24px,2.4vw,30px)] text-navy-deep">{t("welcome")}</h1>
+              <p className="mt-1.5 mb-6 text-ink-soft">{t("welcomeSub")}</p>
               <LoginFlow />
             </div>
 
-            <div className="mt-6 flex flex-wrap items-center justify-center gap-x-3 gap-y-2 text-[15px] text-ink-soft group-has-data-two-factor/signin:hidden">
+            <div className="mt-6 flex flex-wrap items-center justify-center gap-x-3 gap-y-2 text-[15px] text-ink-soft">
               <span>{t("newSchool")}</span>
               <DemoButton variant="outline" size="sm">
                 {t("bookDemo")}

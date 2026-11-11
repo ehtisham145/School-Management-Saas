@@ -1,7 +1,6 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useLogout } from "@/features/auth/use-logout";
@@ -45,9 +44,6 @@ export function ProfilePanel() {
               <bdi>{user.email || t("common.notProvided")}</bdi>
             </DetailRow>
             <DetailRow label={t("profile.role")}>{t("profile.roleValue")}</DetailRow>
-            <DetailRow label={t("profile.twoFactor")}>
-              <Badge tone="success">{t("profile.twoFactorOn")}</Badge>
-            </DetailRow>
           </dl>
 
           <div className="border-t border-line pt-5">

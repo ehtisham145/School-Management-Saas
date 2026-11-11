@@ -1,5 +1,3 @@
-from django_otp.oath import totp as generate_totp
-from django_otp.plugins.otp_totp.models import TOTPDevice
 from rest_framework.test import APIClient
 
 from apps.accounts.models import User
@@ -105,25 +103,12 @@ def test_cannot_switch_into_a_deactivated_school(two_schools):
     assert response.status_code == 404
 
 
-def test_school_admin_of_a_deactivated_school_is_not_asked_to_set_up_2fa(two_schools):
+def test_school_admin_login_also_reports_a_deactivated_school(two_schools):
     school_a, _ = two_schools
     user, _ = _member(school_a, role=Role.SCHOOL_ADMIN)
     _deactivate(school_a)
 
-    assert _login(APIClient(), user).data["requires_2fa_setup"] is False
-
-
-def test_2fa_login_also_reports_a_deactivated_school(two_schools):
-    school_a, _ = two_schools
-    user, _ = _member(school_a, role=Role.SCHOOL_ADMIN)
-    device = TOTPDevice.objects.create(user=user, name="default", confirmed=True)
-    _deactivate(school_a)
-    client = APIClient()
-
-    assert _login(client, user).data == {"requires_2fa": True}
-    response = client.post(
-        "/api/auth/2fa/verify/", {"token": f"{generate_totp(device.bin_key):06d}"}
-    )
+    response = _login(APIClient(), user)
 
     assert response.data["memberships"] == []
     assert response.data["school_inactive"] is True
@@ -144,14 +129,10 @@ def test_platform_admin_with_a_deactivated_school_still_signs_in(two_schools):
     school_a, _ = two_schools
     user = User.objects.create_user("platform", password=PASSWORD, is_platform_admin=True)
     Membership.objects.create(school=school_a, user=user, role=Role.TEACHER)
-    device = TOTPDevice.objects.create(user=user, name="default", confirmed=True)
     _deactivate(school_a)
     client = APIClient()
-    _login(client, user)
 
-    response = client.post(
-        "/api/auth/2fa/verify/", {"token": f"{generate_totp(device.bin_key):06d}"}
-    )
+    response = _login(client, user)
 
     assert response.data["is_platform_admin"] is True
     assert client.get("/api/platform/schools/").status_code == 200

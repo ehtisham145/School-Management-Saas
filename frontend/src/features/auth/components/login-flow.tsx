@@ -5,25 +5,16 @@ import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
 import { logout } from "../api";
-import {
-  toActiveSession,
-  type AuthenticatedResponse,
-  type LoginResponse,
-  type Membership,
-} from "../schemas";
+import { toActiveSession, type AuthenticatedResponse, type Membership } from "../schemas";
 import { useSession } from "../session-store";
 import { markFreshLogin } from "../welcome";
 import { EmailCodeForm } from "./email-code-form";
 import { LoginForm } from "./login-form";
 import { SchoolPicker } from "./school-picker";
-import { TotpForm } from "./totp-form";
-import { TotpSetup } from "./totp-setup";
 
 type Step =
   | { name: "password" }
   | { name: "email-code" }
-  | { name: "totp" }
-  | { name: "totp-setup"; response: AuthenticatedResponse }
   | { name: "choose-school"; memberships: Membership[] }
   | { name: "no-school"; schoolInactive: boolean };
 
@@ -63,46 +54,18 @@ function LoginSteps() {
     [router, setSession],
   );
 
-  function handleAuthenticated(response: AuthenticatedResponse) {
-    if (response.requires_2fa_setup) {
-      setStep({ name: "totp-setup", response });
-    } else {
-      continueToApp(response);
-    }
-  }
-
-  function handleResponse(response: LoginResponse) {
-    if ("requires_2fa" in response) {
-      setStep({ name: "totp" });
-    } else {
-      handleAuthenticated(response);
-    }
-  }
-
   const backToPassword = () => setStep({ name: "password" });
 
   switch (step.name) {
     case "password":
       return (
         <LoginForm
-          onResponse={handleResponse}
+          onResponse={continueToApp}
           onUseEmailCode={() => setStep({ name: "email-code" })}
         />
       );
     case "email-code":
-      return <EmailCodeForm onResponse={handleResponse} onBack={backToPassword} />;
-    case "totp":
-      return (
-        <div data-two-factor>
-          <TotpForm onAuthenticated={handleAuthenticated} onRestart={backToPassword} />
-        </div>
-      );
-    case "totp-setup":
-      return (
-        <div data-two-factor data-totp-setup>
-          <TotpSetupStep response={step.response} onDone={continueToApp} />
-        </div>
-      );
+      return <EmailCodeForm onResponse={continueToApp} onBack={backToPassword} />;
     case "choose-school":
       return (
         <SchoolPicker memberships={step.memberships} locale={locale} onSelected={markFreshLogin} />
@@ -114,21 +77,9 @@ function LoginSteps() {
             {t(step.schoolInactive ? "schoolInactive" : "noSchool")}
           </p>
           <Button type="button" variant="outline" onClick={backToPassword}>
-            {t("totp.backToLogin")}
+            {t("backToLogin")}
           </Button>
         </div>
       );
   }
-}
-
-function TotpSetupStep({
-  response,
-  onDone,
-}: {
-  response: AuthenticatedResponse;
-  onDone: (response: AuthenticatedResponse) => void;
-}) {
-  const handleDone = useCallback(() => onDone(response), [onDone, response]);
-
-  return <TotpSetup onDone={handleDone} />;
 }

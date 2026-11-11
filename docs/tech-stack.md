@@ -16,13 +16,12 @@ Guiding principles for this project:
 | API contract | **drf-spectacular** (OpenAPI) → generated TypeScript client | Hand-written fetch wrappers — not worth it |
 | Frontend | **Next.js (App Router) + TypeScript + Tailwind CSS + shadcn/ui (Base UI)**, with `lucide-react` icons, IBM Plex Sans and IBM Plex Sans Arabic | Vite + React SPA + separate Astro marketing site — if SSR ever becomes a burden |
 | i18n | **next-intl** (frontend), Django i18n (emails/PDFs) | — |
-| 2FA QR code | **qrcode.react**, loaded only on the setup step | — |
 | Database | **PostgreSQL 17** | — (no serious alternative for this workload) |
 | Multi-tenancy | **Shared schema, `school_id` on every tenant row** | `django-tenants` (schema per school) — if a large customer demands stronger isolation or per-school customisation |
 | Cache / broker | **Redis 7** (or Valkey) | — |
 | Background jobs | **Celery + Celery Beat** | Django-Q2 / Dramatiq — lighter, but smaller ecosystem |
 | Real-time | **Django Channels + channels-redis** (WebSockets) | Server-Sent Events — if you only ever need server→client push |
-| Auth | **Django sessions (httpOnly cookies)**, django-otp (TOTP 2FA), custom email OTP, argon2, django-axes | JWT (simplejwt) — only if a native mobile app is added |
+| Auth | **Django sessions (httpOnly cookies)**, custom email OTP, argon2, django-axes (no 2FA, [ADR-0018](decisions/0018-remove-two-factor-authentication.md)) | JWT (simplejwt) — only if a native mobile app is added |
 | Authorization | Membership-based roles + policy functions + scoped selectors | django-rules — if policies grow very complex |
 | Audit log | **django-auditlog** | Custom `AuditEvent` model |
 | PDF | **WeasyPrint** (handles Arabic shaping + RTL) with Arabic fonts | Headless Chromium (Playwright) — if layouts get very complex |

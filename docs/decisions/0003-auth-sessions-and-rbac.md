@@ -1,6 +1,6 @@
 # ADR-0003: Authentication with session cookies; membership-based RBAC
 
-- **Status:** Accepted
+- **Status:** Accepted; the TOTP 2FA part is superseded by [ADR-0018](0018-remove-two-factor-authentication.md)
 - **Date:** 2026-10-30
 
 ## Context

@@ -55,7 +55,6 @@ def school_admin_welcome_content(to_email, school_name):
                 "Open the sign-in page using the button below.",
                 "Choose <strong>Sign in with an email code</strong>.",
                 "Enter this email address, then the code we send you.",
-                "Set up two-factor authentication to keep your account safe.",
             ],
             title="How to sign in",
         ),

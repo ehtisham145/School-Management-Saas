@@ -17,21 +17,22 @@ Goal: one or two real schools can run daily operations.
 - [x] `apps/core/policies.py` permission matrix (`can(role, action)`) + `HasPolicy` on `TenantScopedViewSet` (`feature/policies`)
 - [x] Accounts: custom `User` model (`apps/accounts`)
 - [x] Accounts: username/password login + logout (`POST /api/auth/login/`, `/logout/`)
-- [x] Accounts: login lockout (`django-axes`, 5 attempts/1h cool-off) + throttling (`feature/login-lockout`)
-- [x] Accounts: email OTP (parents), TOTP 2FA + email-based reset (staff, `feature/totp-2fa`)
+- [x] Accounts: login lockout (`django-axes`, 15 attempts/1h cool-off, raised from 5) + throttling (`feature/login-lockout`)
+- [x] Accounts: email OTP (parents), TOTP 2FA + email-based reset (staff, `feature/totp-2fa`) — 2FA removed later ([ADR-0018](decisions/0018-remove-two-factor-authentication.md))
 - [x] Membership + roles (`apps/tenancy`)
 - [x] School switcher (`POST /api/auth/switch-school/`)
 - [x] Super Admin: create school + its admin (Django admin, `feature/django-admin`)
 - [x] Next.js 16 app: `[locale]` routing (next-intl, default `en`), RTL/LTR layouts, Arabic font, shadcn/ui base (RTL), Prettier
 - [x] Login flow UI (Next.js): username/password form, multi-school picker, placeholder dashboard + logout (`feature/login-flow`)
-- [x] Login flow UI: email code and 2FA verify/reset steps, session restored after refresh via `GET /api/auth/me/`, only school activated automatically, standard API error format (`fix/login-active-school`)
+- [x] Login flow UI: email code and 2FA verify/reset steps, session restored after refresh via `GET /api/auth/me/`, only school activated automatically, standard API error format (`fix/login-active-school`) — 2FA steps removed later ([ADR-0018](decisions/0018-remove-two-factor-authentication.md))
 - [x] CI pipeline: GitHub Actions runs backend and frontend checks on every PR (`chore/ci`)
 
 **Next, in this order** (Super Admin panel moved up from Phase 1.5 so school onboarding can be shown to the client, decided 2026-11-03):
-- [x] 2FA setup page (`/2fa/setup/`, `/2fa/confirm/`) and mandatory 2FA for Super Admins and School Admins (`feature/platform-panel`)
+- [x] 2FA setup page (`/2fa/setup/`, `/2fa/confirm/`) and mandatory 2FA for Super Admins and School Admins (`feature/platform-panel`) — 2FA removed later ([ADR-0018](decisions/0018-remove-two-factor-authentication.md))
+- [x] Two-factor authentication removed from the backend and the website at the owner's request; login lockout raised to 15 attempts ([ADR-0018](decisions/0018-remove-two-factor-authentication.md))
 - [x] Super Admin login on the website: login and `/me` identify `is_platform_admin`, redirect to `/platform`
 - [x] Super Admin APIs (`/api/platform/schools/`): list schools, create a school + its admin, other roles denied. Actions go to the application log for now; move to `django-auditlog` with the Week 4 audit item
-- [ ] Django admin (`/admin`) still accepts a password alone: require 2FA there or restrict it before launch
+- [ ] Django admin (`/admin`) accepts a password alone: restrict it before launch
 - [x] Super Admin panel (Next.js `/platform`): schools list and new-school form, Arabic + English
 - [x] Super Admin panel layout: sidebar, top bar with language and profile menus, dashboard, profile page (`feature/platform-admin-panel`)
 - [x] Super Admin demo requests: list, search, status pipeline, notes, create a school from a request
@@ -80,7 +81,7 @@ If week 3 slips, move **homework** to month 2 first, then **messaging** (announc
 - [x] Book a demo and Contact forms: saved through `/api/platform/demo-requests/` and `/contact-messages/`, listed in Django admin, emailed to `LEADS_EMAIL`
 - [x] Site effects: typewriter on every page heading, cards slide into place on scroll, status cards on each hero (`feature/brand-home-redesign`)
 - [x] Forms: required-field asterisks, live validation that clears at once, scroll to the first error, Saudi mobile validation on the frontend and backend, compact Book a demo popup (`feature/forms-validation`)
-- [x] Sign in page: brand beside a sign-in card on a plain page, no image, Book a demo link, validation on every step; only the card on the 2FA steps
+- [x] Sign in page: brand beside a sign-in card on a plain page, no image, Book a demo link, validation on every step
 - [x] SMTP email settings through `.env`; `sendtestemail` ran without an error against the real provider. Inbox delivery and SPF/DKIM/DMARC still to be confirmed
 - [ ] Replace sample prices and plan contents with confirmed ones
 - [ ] Translate backend validation and email text into Arabic

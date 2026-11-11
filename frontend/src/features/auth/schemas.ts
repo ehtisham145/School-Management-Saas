@@ -20,21 +20,10 @@ export type LoginRequest = {
 
 export type AuthenticatedResponse = {
   is_platform_admin: boolean;
-  requires_2fa_setup: boolean;
   /** The user belongs to schools, but all of them are deactivated. */
   school_inactive: boolean;
   memberships: Membership[];
 };
-
-export type TotpSetupResponse = {
-  otpauth_url: string;
-};
-
-export type Requires2faResponse = {
-  requires_2fa: true;
-};
-
-export type LoginResponse = AuthenticatedResponse | Requires2faResponse;
 
 export type SwitchSchoolRequest = {
   membership_id: number;

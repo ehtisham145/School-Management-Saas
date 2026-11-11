@@ -1,8 +1,6 @@
 import re
 
 from django.core import mail
-from django_otp.oath import totp as generate_totp
-from django_otp.plugins.otp_totp.models import TOTPDevice
 from rest_framework.test import APIClient
 
 from apps.accounts.models import User
@@ -31,16 +29,10 @@ VALID_SCHOOL = {
 }
 
 
-def _token(device):
-    return f"{generate_totp(device.bin_key):06d}"
-
-
-def _verified_platform_client(username="platform"):
-    user = User.objects.create_user(username, password=PASSWORD, is_platform_admin=True)
-    device = TOTPDevice.objects.create(user=user, name="default", confirmed=True)
+def _platform_client(username="platform"):
+    User.objects.create_user(username, password=PASSWORD, is_platform_admin=True)
     client = APIClient()
-    client.post("/api/auth/login/", {"username": username, "password": PASSWORD})
-    response = client.post("/api/auth/2fa/verify/", {"token": _token(device)})
+    response = client.post("/api/auth/login/", {"username": username, "password": PASSWORD})
     assert response.status_code == 200
     return client
 
@@ -49,44 +41,26 @@ def test_anonymous_user_is_denied(db):
     assert APIClient().get(SCHOOLS_URL).status_code == 403
 
 
-def test_school_admin_with_2fa_is_denied(two_schools):
+def test_school_admin_is_denied(two_schools):
     school_a, _ = two_schools
     user = User.objects.create_user("head", password=PASSWORD)
-    device = TOTPDevice.objects.create(user=user, name="default", confirmed=True)
     Membership.objects.create(school=school_a, user=user, role=Role.SCHOOL_ADMIN)
     client = APIClient()
     client.post("/api/auth/login/", {"username": "head", "password": PASSWORD})
-    client.post("/api/auth/2fa/verify/", {"token": _token(device)})
 
     assert client.get(SCHOOLS_URL).status_code == 403
     assert client.post(SCHOOLS_URL, VALID_SCHOOL).status_code == 403
     assert not School.objects.filter(code="alnoor").exists()
 
 
-def test_platform_admin_without_verified_session_is_denied(db):
-    user = User.objects.create_user("platform", password=PASSWORD, is_platform_admin=True)
-    TOTPDevice.objects.create(user=user, name="default", confirmed=True)
-    client = APIClient()
-    # Same kind of session a Django admin password login creates.
-    client.force_login(user, backend="django.contrib.auth.backends.ModelBackend")
-
-    assert client.get(SCHOOLS_URL).status_code == 403
-    assert client.post(SCHOOLS_URL, VALID_SCHOOL).status_code == 403
-
-
-def test_platform_admin_without_device_is_denied_until_setup(db):
+def test_platform_admin_signs_in_with_a_password_alone(db):
     User.objects.create_user("platform", password=PASSWORD, is_platform_admin=True)
     client = APIClient()
 
     response = client.post("/api/auth/login/", {"username": "platform", "password": PASSWORD})
 
-    assert response.data["requires_2fa_setup"] is True
-    assert client.get(SCHOOLS_URL).status_code == 403
-
-    client.post("/api/auth/2fa/setup/")
-    device = TOTPDevice.objects.get(user__username="platform", confirmed=False)
-    assert client.post("/api/auth/2fa/confirm/", {"token": _token(device)}).status_code == 204
-
+    assert response.status_code == 200
+    assert response.data["is_platform_admin"] is True
     assert client.get(SCHOOLS_URL).status_code == 200
 
 
@@ -94,7 +68,7 @@ def test_list_returns_all_schools_with_member_counts(two_schools):
     school_a, _ = two_schools
     user = User.objects.create_user("teacher", password=PASSWORD)
     Membership.objects.create(school=school_a, user=user, role=Role.TEACHER)
-    client = _verified_platform_client()
+    client = _platform_client()
 
     response = client.get(SCHOOLS_URL)
 
@@ -108,7 +82,7 @@ def test_list_is_paginated(db):
     School.objects.bulk_create(
         School(name_en=f"S{i}", name_ar=f"S{i}", code=f"s{i}") for i in range(30)
     )
-    client = _verified_platform_client()
+    client = _platform_client()
 
     response = client.get(f"{SCHOOLS_URL}?page=2")
 
@@ -117,7 +91,7 @@ def test_list_is_paginated(db):
 
 
 def test_create_makes_school_admin_and_sends_welcome_email(db, django_capture_on_commit_callbacks):
-    client = _verified_platform_client()
+    client = _platform_client()
 
     with django_capture_on_commit_callbacks(execute=True):
         response = client.post(SCHOOLS_URL, VALID_SCHOOL)
@@ -137,10 +111,8 @@ def test_create_makes_school_admin_and_sends_welcome_email(db, django_capture_on
     assert "Al Noor School" in mail.outbox[0].body
 
 
-def test_new_admin_signs_in_with_email_code_and_must_set_up_2fa(
-    db, django_capture_on_commit_callbacks
-):
-    platform = _verified_platform_client()
+def test_new_admin_signs_in_with_an_email_code(db, django_capture_on_commit_callbacks):
+    platform = _platform_client()
     with django_capture_on_commit_callbacks(execute=True):
         platform.post(SCHOOLS_URL, VALID_SCHOOL)
     email = VALID_SCHOOL["admin_email"]
@@ -151,12 +123,12 @@ def test_new_admin_signs_in_with_email_code_and_must_set_up_2fa(
     response = client.post("/api/auth/email-otp/verify/", {"email": email, "code": code})
 
     assert response.status_code == 200
-    assert response.data["requires_2fa_setup"] is True
     assert len(response.data["memberships"]) == 1
+    assert client.get("/api/academics/years/").status_code == 200
 
 
 def test_new_admin_cannot_see_other_schools(two_schools, django_capture_on_commit_callbacks):
-    platform = _verified_platform_client()
+    platform = _platform_client()
     with django_capture_on_commit_callbacks(execute=True):
         platform.post(SCHOOLS_URL, VALID_SCHOOL)
     admin = User.objects.get(email=VALID_SCHOOL["admin_email"])
@@ -170,7 +142,7 @@ def test_create_refuses_an_admin_email_that_already_has_an_account(two_schools):
     school_a, _ = two_schools
     existing = User.objects.create_user("old", password=PASSWORD, email="HEAD@alnoor.example")
     Membership.objects.create(school=school_a, user=existing, role=Role.TEACHER)
-    client = _verified_platform_client()
+    client = _platform_client()
 
     response = client.post(SCHOOLS_URL, VALID_SCHOOL)
 
@@ -181,7 +153,7 @@ def test_create_refuses_an_admin_email_that_already_has_an_account(two_schools):
 
 
 def test_duplicate_code_returns_400_even_with_different_case(two_schools):
-    client = _verified_platform_client()
+    client = _platform_client()
 
     response = client.post(SCHOOLS_URL, {**VALID_SCHOOL, "code": "SCHOOL-A"})
 
@@ -191,7 +163,7 @@ def test_duplicate_code_returns_400_even_with_different_case(two_schools):
 
 
 def test_code_is_saved_in_lowercase(db):
-    client = _verified_platform_client()
+    client = _platform_client()
 
     response = client.post(SCHOOLS_URL, {**VALID_SCHOOL, "code": "AlNoor"})
 
@@ -200,7 +172,7 @@ def test_code_is_saved_in_lowercase(db):
 
 
 def test_invalid_fields_return_400(db):
-    client = _verified_platform_client()
+    client = _platform_client()
 
     response = client.post(
         SCHOOLS_URL,
@@ -213,7 +185,7 @@ def test_invalid_fields_return_400(db):
 
 def test_username_clash_rolls_back_the_school(db):
     User.objects.create_user("alnoor.admin", password=PASSWORD)
-    client = _verified_platform_client()
+    client = _platform_client()
 
     response = client.post(SCHOOLS_URL, VALID_SCHOOL)
 
@@ -223,7 +195,7 @@ def test_username_clash_rolls_back_the_school(db):
 
 def test_update_and_delete_are_not_available(two_schools):
     school_a, _ = two_schools
-    client = _verified_platform_client()
+    client = _platform_client()
 
     assert client.patch(f"{SCHOOLS_URL}{school_a.id}/", {"name_en": "x"}).status_code == 404
     assert client.delete(f"{SCHOOLS_URL}{school_a.id}/").status_code == 404

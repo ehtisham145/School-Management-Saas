@@ -4,18 +4,12 @@ import { useCallback, useEffect, useState, type ReactNode } from "react";
 import { useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { me } from "@/features/auth/api";
-import { TotpSetup } from "@/features/auth/components/totp-setup";
 import type { MeResponse } from "@/features/auth/schemas";
 import { PlatformUserProvider } from "../platform-user";
 import { PlatformShell } from "./platform-shell";
 
-type GuardState =
-  | { name: "loading" }
-  | { name: "totp-setup" }
-  | { name: "ready"; user: MeResponse }
-  | { name: "failed" };
+type GuardState = { name: "loading" } | { name: "ready"; user: MeResponse } | { name: "failed" };
 
 export function RequirePlatformAdmin({ children }: { children: ReactNode }) {
   const tSession = useTranslations("Auth.session");
@@ -38,8 +32,6 @@ export function RequirePlatformAdmin({ children }: { children: ReactNode }) {
 
         if (!result.is_platform_admin) {
           router.replace("/dashboard");
-        } else if (result.requires_2fa_setup) {
-          setGuard({ name: "totp-setup" });
         } else {
           setGuard({ name: "ready", user: result });
         }
@@ -58,18 +50,6 @@ export function RequirePlatformAdmin({ children }: { children: ReactNode }) {
       cancelled = true;
     };
   }, [router, attempt]);
-
-  if (guard.name === "totp-setup") {
-    return (
-      <main className="flex flex-1 flex-col items-center justify-center p-8">
-        <Card className="w-full max-w-sm">
-          <CardContent>
-            <TotpSetup onDone={reload} />
-          </CardContent>
-        </Card>
-      </main>
-    );
-  }
 
   if (guard.name === "failed") {
     return (

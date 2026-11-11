@@ -54,8 +54,6 @@ def test_dashboard_is_read_only(platform_client):
     assert platform_client.post(DASHBOARD_URL).status_code == 405
 
 
-def test_dashboard_is_denied_to_everyone_else(
-    two_schools, school_admin_client, unverified_platform_client
-):
-    for client in (APIClient(), school_admin_client, unverified_platform_client):
+def test_dashboard_is_denied_to_everyone_else(two_schools, school_admin_client):
+    for client in (APIClient(), school_admin_client):
         assert client.get(DASHBOARD_URL).status_code == 403
