@@ -1,7 +1,6 @@
-import Image from "next/image";
-import { ArrowLeft } from "lucide-react";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { LoginFlow } from "@/features/auth/components/login-flow";
+import { DemoButton, DemoDialogProvider } from "@/features/leads/components/demo-dialog";
 import { LanguageMenu } from "@/features/marketing/components/language-menu";
 import { Logo } from "@/features/marketing/components/logo";
 import { Link } from "@/i18n/navigation";
@@ -12,54 +11,65 @@ export async function generateMetadata({ params }: PageProps<"/[locale]/login">)
   return pageMetadata(locale, "login", "/login");
 }
 
+/**
+ * Brand on one side, the sign-in card on the other, on a plain tinted page.
+ * During the two-factor steps only the card stays, centred.
+ */
 export default async function LoginPage({ params }: PageProps<"/[locale]/login">) {
   const { locale } = await params;
   setRequestLocale(locale);
   const t = await getTranslations("SignIn");
+  const tFooter = await getTranslations("Marketing.footer");
 
   return (
-    <main className="group/signin grid flex-1 lg:grid-cols-2 lg:has-data-two-factor:grid-cols-1">
-      <div className="flex flex-col px-4 py-6 sm:px-10 sm:py-8">
-        <div className="flex items-center justify-between gap-3">
-          <Link href="/" className="block shrink-0">
-            <Logo priority />
-          </Link>
+    <DemoDialogProvider>
+      <main className="group/signin flex flex-1 flex-col bg-bg-tint">
+        <div className="page-wrap flex justify-end pt-5">
           <LanguageMenu />
         </div>
 
-        <div className="flex flex-1 items-center justify-center py-10">
-          <div className="w-full max-w-[400px]">
-            <div className="group-has-data-totp-setup/signin:hidden">
-              <Link
-                href="/"
-                className="-ms-1 mb-6 inline-flex items-center gap-1.5 rounded-control py-1 ps-1 pe-2 text-sm font-semibold text-navy hover:bg-navy-soft lg:-ms-7"
-              >
-                <ArrowLeft aria-hidden="true" className="size-4 rtl:rotate-180" />
-                {t("backHome")}
-              </Link>
-              <h1 className="text-[clamp(28px,3vw,36px)] text-navy-deep">{t("welcome")}</h1>
-              <p className="mt-2 mb-7 text-ink-soft">{t("welcomeSub")}</p>
+        <div className="page-wrap grid flex-1 content-center items-center gap-10 py-10 lg:grid-cols-[1fr_minmax(0,420px)] lg:gap-20 lg:group-has-data-two-factor/signin:grid-cols-1">
+          <div className="text-center lg:text-start lg:group-has-data-two-factor/signin:text-center">
+            <Link href="/" className="inline-block">
+              <Logo priority className="h-12 sm:h-16" />
+            </Link>
+            <div className="group-has-data-two-factor/signin:hidden">
+              <p className="mx-auto mt-6 max-w-[18ch] text-[clamp(26px,3.2vw,40px)] leading-tight font-semibold text-navy-deep lg:mx-0">
+                {t("headline")}
+              </p>
+              <p className="mx-auto mt-3 max-w-[40ch] text-[17px] text-ink-soft lg:mx-0">
+                {t("sub")}
+              </p>
             </div>
-            <LoginFlow />
+          </div>
+
+          <div className="mx-auto w-full max-w-[420px] lg:group-has-data-totp-setup/signin:max-w-[480px]">
+            <div className="rounded-card border border-line bg-bg p-6 shadow-soft sm:p-8">
+              <div className="group-has-data-totp-setup/signin:hidden">
+                <h1 className="text-[clamp(24px,2.4vw,30px)] text-navy-deep">{t("welcome")}</h1>
+                <p className="mt-1.5 mb-6 text-ink-soft">{t("welcomeSub")}</p>
+              </div>
+              <LoginFlow />
+            </div>
+
+            <div className="mt-6 flex flex-wrap items-center justify-center gap-x-3 gap-y-2 text-[15px] text-ink-soft group-has-data-two-factor/signin:hidden">
+              <span>{t("newSchool")}</span>
+              <DemoButton variant="outline" size="sm">
+                {t("bookDemo")}
+              </DemoButton>
+            </div>
           </div>
         </div>
-      </div>
 
-      <aside className="relative hidden flex-col justify-between overflow-hidden bg-navy-deep p-12 text-on-dark lg:flex lg:group-has-data-two-factor/signin:hidden">
-        <div className="relative z-[1]">
-          <h2 className="max-w-[16ch] text-[clamp(30px,3.2vw,44px)]">{t("headline")}</h2>
-          <p className="mt-4 max-w-[40ch] text-on-dark-soft">{t("sub")}</p>
-        </div>
-        <Image
-          src="/brand/sign-in.webp"
-          width={1200}
-          height={939}
-          alt=""
-          priority
-          sizes="50vw"
-          className="mx-auto mt-6 w-full max-w-[620px] mask-[radial-gradient(closest-side,black_72%,transparent_100%)]"
-        />
-      </aside>
-    </main>
+        <footer className="page-wrap flex flex-wrap justify-center gap-x-5 gap-y-1 py-6 text-sm text-ink-soft">
+          <Link href="/" className="hover:text-navy hover:underline">
+            {t("backHome")}
+          </Link>
+          <Link href="/privacy" className="hover:text-navy hover:underline">
+            {tFooter("privacy")}
+          </Link>
+        </footer>
+      </main>
+    </DemoDialogProvider>
   );
 }

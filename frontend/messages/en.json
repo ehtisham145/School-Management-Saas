@@ -814,9 +814,11 @@
   "SignIn": {
     "headline": "Run your whole school from one place.",
     "sub": "Attendance, exams, fees and messages, in Arabic and English.",
-    "backHome": "Back",
+    "backHome": "Back to website",
     "welcome": "Welcome back",
-    "welcomeSub": "Sign in to your Lesson Lab account."
+    "welcomeSub": "Sign in to your Lesson Lab account.",
+    "newSchool": "New to Lesson Lab?",
+    "bookDemo": "Book a demo"
   },
   "Leads": {
     "fields": {

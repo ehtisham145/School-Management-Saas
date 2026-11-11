@@ -80,7 +80,7 @@ If week 3 slips, move **homework** to month 2 first, then **messaging** (announc
 - [x] Book a demo and Contact forms: saved through `/api/platform/demo-requests/` and `/contact-messages/`, listed in Django admin, emailed to `LEADS_EMAIL`
 - [x] Site effects: typewriter on every page heading, cards slide into place on scroll, status cards on each hero (`feature/brand-home-redesign`)
 - [x] Forms: required-field asterisks, live validation that clears at once, scroll to the first error, Saudi mobile validation on the frontend and backend, compact Book a demo popup (`feature/forms-validation`)
-- [x] Sign in page: two-panel layout, validation on every step, no side image on the 2FA steps
+- [x] Sign in page: brand beside a sign-in card on a plain page, no image, Book a demo link, validation on every step; only the card on the 2FA steps
 - [x] SMTP email settings through `.env`; `sendtestemail` ran without an error against the real provider. Inbox delivery and SPF/DKIM/DMARC still to be confirmed
 - [ ] Replace sample prices and plan contents with confirmed ones
 - [ ] Translate backend validation and email text into Arabic
