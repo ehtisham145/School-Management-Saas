@@ -1,4 +1,5 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
+import { HERO_IMAGES } from "@/features/marketing/hero-images";
 import { buttonVariants } from "@/components/ui/button";
 import { ContactForm } from "@/features/leads/components/contact-form";
 import { CtaLinkBox, PageHero, Section } from "@/features/marketing/components/blocks";
@@ -26,7 +27,7 @@ export default async function ContactPage({ params }: PageProps<"/[locale]/conta
   return (
     <>
       <PageHero
-        image="/images/contact.webp"
+        image={HERO_IMAGES.contact}
         titleLead={t("hero.titleLead")}
         words={t.raw("hero.words") as string[]}
         locale={locale}
