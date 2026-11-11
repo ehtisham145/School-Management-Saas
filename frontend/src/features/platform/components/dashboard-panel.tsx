@@ -12,6 +12,7 @@ import {
   DemoStatusBadge,
   formatDate,
   LoadFeedback,
+  localName,
   PageHeader,
   SchoolStatusBadge,
 } from "./panel-ui";
@@ -30,14 +31,16 @@ function StatTile({
   return (
     <Link
       href={href}
-      className="flex items-center justify-between gap-3 rounded-card border border-line bg-bg p-5 transition-[border-color,box-shadow] hover:border-navy-line hover:shadow-soft"
+      className="flex flex-col gap-3 rounded-card border border-line bg-bg p-4 transition-[border-color,box-shadow] hover:border-navy-line hover:shadow-soft sm:p-5"
     >
-      <span className="flex flex-col gap-1">
-        <span className="text-sm font-medium text-ink-soft">{label}</span>
-        <span className="text-3xl font-bold text-navy-deep tabular-nums">{value}</span>
+      <span className="flex size-9 shrink-0 items-center justify-center rounded-tile bg-navy-soft text-navy sm:size-11">
+        <Icon aria-hidden="true" className="size-[18px] sm:size-5" />
       </span>
-      <span className="flex size-11 shrink-0 items-center justify-center rounded-tile bg-navy-soft text-navy">
-        <Icon aria-hidden="true" className="size-5" />
+      <span className="flex flex-col gap-0.5">
+        <span className="text-xs font-medium text-ink-soft sm:text-sm">{label}</span>
+        <span className="text-2xl leading-tight font-bold text-navy-deep tabular-nums sm:text-3xl">
+          {value}
+        </span>
       </span>
     </Link>
   );
@@ -138,7 +141,7 @@ export function DashboardPanel() {
 
       {state.name === "ready" && (
         <>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
             <StatTile
               label={t("totalSchools")}
               value={state.data.schools.total}
@@ -204,7 +207,7 @@ export function DashboardPanel() {
                   {state.data.recent_schools.map((school) => (
                     <RecentRow
                       key={school.id}
-                      title={locale === "ar" ? school.name_ar : school.name_en}
+                      title={localName(school, locale)}
                       detail={school.code}
                       date={formatDate(school.created_at, locale)}
                       badge={<SchoolStatusBadge isActive={school.is_active} />}

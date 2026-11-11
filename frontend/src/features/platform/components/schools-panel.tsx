@@ -17,6 +17,7 @@ import {
   FilterTabs,
   formatDate,
   LoadFeedback,
+  localName,
   PageHeader,
   Pagination,
   SchoolStatusBadge,
@@ -48,14 +49,14 @@ function SchoolDetailDialog({ school, onClose }: { school: PlatformSchool; onClo
     <Modal
       open
       onClose={onClose}
-      title={locale === "ar" ? school.name_ar : school.name_en}
+      title={localName(school, locale)}
       description={t("title")}
       closeLabel={tCommon("close")}
     >
       <div className="flex flex-col gap-4">
         <DetailSection title={t("sectionSchool")}>
           <DetailRow label={tSchools("name")}>
-            <bdi>{locale === "ar" ? school.name_en : school.name_ar}</bdi>
+            <bdi>{orNone(locale === "ar" ? school.name_en : school.name_ar)}</bdi>
           </DetailRow>
           <DetailRow label={tSchools("code")}>
             <bdi className="font-mono text-xs">{school.code}</bdi>
@@ -136,7 +137,7 @@ function ConfirmStatusDialog({
   const [saving, setSaving] = useState(false);
   const [failed, setFailed] = useState(false);
 
-  const name = locale === "ar" ? school.name_ar : school.name_en;
+  const name = localName(school, locale);
   const activating = !school.is_active;
 
   async function confirm() {
@@ -241,8 +242,7 @@ export function SchoolsPanel() {
   }
 
   const isFiltered = query.search !== "" || query.status !== ALL;
-  const schoolName = (school: PlatformSchool) =>
-    locale === "ar" ? school.name_ar : school.name_en;
+  const schoolName = (school: PlatformSchool) => localName(school, locale);
 
   return (
     <>

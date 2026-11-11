@@ -14,7 +14,7 @@ Guiding principles for this project:
 | Backend | **Django 5.2 LTS + Django REST Framework**, Python 3.11 (same version locally and in the Docker image) | FastAPI — only if the backend becomes a thin API with no need for Django's auth/admin/ORM |
 | Python packages | **pip + venv**, pinned `requirements/{base,dev,prod}.txt` | uv / Poetry — not needed for one developer |
 | API contract | **drf-spectacular** (OpenAPI) → generated TypeScript client | Hand-written fetch wrappers — not worth it |
-| Frontend | **Next.js (App Router) + TypeScript + Tailwind CSS + shadcn/ui (Base UI)**, with `lucide-react` icons, IBM Plex Sans and IBM Plex Sans Arabic | Vite + React SPA + separate Astro marketing site — if SSR ever becomes a burden |
+| Frontend | **Next.js (App Router) + TypeScript + Tailwind CSS + shadcn/ui (Base UI)**, with `lucide-react` icons. Type: Manrope (body) + Cormorant Garamond (headings) for Latin text, IBM Plex Sans Arabic for Arabic ([ADR-0020](decisions/0020-latin-display-and-body-typefaces.md)) | Vite + React SPA + separate Astro marketing site — if SSR ever becomes a burden |
 | i18n | **next-intl** (frontend), Django i18n (emails/PDFs) | — |
 | Database | **PostgreSQL 17** | — (no serious alternative for this workload) |
 | Multi-tenancy | **Shared schema, `school_id` on every tenant row** | `django-tenants` (schema per school) — if a large customer demands stronger isolation or per-school customisation |

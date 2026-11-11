@@ -77,6 +77,11 @@ export const slug = (max: number) =>
     if (value.length > max) return "tooLong";
     return SLUG_PATTERN.test(value) ? null : "slug";
   });
+export const optionalSlug = (max: number) => (value: string) => {
+  if (!value.trim()) return null;
+  if (value.length > max) return "tooLong";
+  return SLUG_PATTERN.test(value) ? null : "slug";
+};
 export const englishName = (max: number) =>
   requiredAnd((value) => {
     if (value.length > max) return "tooLong";
@@ -87,6 +92,11 @@ export const arabicName = (max: number) =>
     if (value.length > max) return "tooLong";
     return ARABIC_LETTER.test(value) ? null : "arabicName";
   });
+export const optionalArabicName = (max: number) => (value: string) => {
+  if (!value.trim()) return null;
+  if (value.length > max) return "tooLong";
+  return ARABIC_LETTER.test(value) ? null : "arabicName";
+};
 export const optionalRegistrationNumber = (max: number) => (value: string) => {
   if (!value.trim()) return null;
   if (value.length > max) return "tooLong";

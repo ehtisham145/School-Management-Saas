@@ -42,7 +42,7 @@ function toWelcome(user: MeResponse, locale: string): Welcome {
     // The API exposes no user id here, and usernames are unique.
     mode: resolveWelcomeMode(user.username),
     firstName: user.full_name.trim().split(/\s+/)[0] ?? "",
-    subtitle: school && (locale === "ar" ? school.name_ar : school.name_en),
+    subtitle: school && (locale === "ar" ? school.name_ar || school.name_en : school.name_en),
   };
 }
 

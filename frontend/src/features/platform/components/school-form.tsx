@@ -12,10 +12,11 @@ import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
 import { ApiError } from "@/lib/api";
 import {
-  arabicName,
   email,
   englishName,
+  optionalArabicName,
   optionalRegistrationNumber,
+  optionalSlug,
   required,
   requiredMobile,
   optionalPhone,
@@ -23,7 +24,6 @@ import {
   sanitizePhone,
   sanitizeRegistrationNumber,
   sanitizeSlug,
-  slug,
   useValidatedForm,
   wholeNumberInRange,
 } from "@/lib/use-validated-form";
@@ -88,8 +88,8 @@ function SchoolForm({ demo }: { demo?: DemoRequest }) {
     validateWhileTyping: true,
     validators: {
       name_en: englishName(200),
-      name_ar: arabicName(200),
-      code: slug(30),
+      name_ar: optionalArabicName(200),
+      code: optionalSlug(30),
       school_type: required(20),
       education_stages: required(100),
       estimated_students: wholeNumberInRange(1, MAX_STUDENTS, "students"),
@@ -173,19 +173,13 @@ function SchoolForm({ demo }: { demo?: DemoRequest }) {
             className={`${COMPACT} rtl:text-end`}
           />
         </Field>
-        <Field
-          id="school-name_ar"
-          label={tForm("nameAr")}
-          required
-          error={form.errorFor("name_ar")}
-        >
+        <Field id="school-name_ar" label={tForm("nameAr")} error={form.errorFor("name_ar")}>
           <Input {...form.bind("name_ar")} dir="rtl" maxLength={200} className={COMPACT} />
         </Field>
         <Field
           id="school-code"
           label={tForm("code")}
           hint={tForm("codeHint")}
-          required
           error={form.errorFor("code")}
         >
           <Input

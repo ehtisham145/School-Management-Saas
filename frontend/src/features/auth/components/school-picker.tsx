@@ -55,7 +55,9 @@ export function SchoolPicker({ memberships, locale, onSelected }: SchoolPickerPr
       <ul className="flex flex-col gap-2">
         {memberships.map((membership) => {
           const schoolName =
-            locale === "ar" ? membership.school.name_ar : membership.school.name_en;
+            locale === "ar"
+              ? membership.school.name_ar || membership.school.name_en
+              : membership.school.name_en;
 
           return (
             <li key={membership.membership_id}>

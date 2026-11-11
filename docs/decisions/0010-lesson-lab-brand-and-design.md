@@ -1,6 +1,6 @@
 # ADR-0010: Lesson Lab brand and one design language
 
-- **Status:** Accepted
+- **Status:** Accepted; the Latin-typeface part (IBM Plex Sans for Latin text) is superseded by [ADR-0020](0020-latin-display-and-body-typefaces.md)
 - **Date:** 2026-11-03
 
 ## Context

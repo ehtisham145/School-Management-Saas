@@ -1,3 +1,4 @@
+import { ArrowLeft } from "lucide-react";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { LoginFlow } from "@/features/auth/components/login-flow";
 import { DemoButton, DemoDialogProvider } from "@/features/leads/components/demo-dialog";
@@ -21,7 +22,14 @@ export default async function LoginPage({ params }: PageProps<"/[locale]/login">
   return (
     <DemoDialogProvider>
       <main className="flex flex-1 flex-col bg-bg-tint">
-        <div className="page-wrap flex justify-end pt-5">
+        <div className="page-wrap flex items-center justify-between gap-3 pt-5">
+          <Link
+            href="/"
+            className="inline-flex items-center gap-1.5 text-sm font-semibold text-ink-soft hover:text-navy"
+          >
+            <ArrowLeft aria-hidden="true" className="size-4 rtl:rotate-180" />
+            {t("backHome")}
+          </Link>
           <LanguageMenu />
         </div>
 

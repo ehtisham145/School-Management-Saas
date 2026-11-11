@@ -68,15 +68,13 @@ Steps:
 3. Parent email OTP: request + verify. 6 digits, stored hashed, 10-min expiry, single use, max 5
    attempts, resend throttled. Email via django-anymail behind apps/integrations/email (console
    backend locally).
-4. TOTP 2FA with django-otp: setup (QR), verify, recovery codes. Mandatory for platform admin and
-   SCHOOL_ADMIN.
-5. Switch-school endpoint (validates membership server-side, rotates session).
-6. django-axes lockout + DRF throttling on auth/OTP endpoints. Same error for unknown user and wrong
+4. Switch-school endpoint (validates membership server-side, rotates session).
+5. django-axes lockout + DRF throttling on auth/OTP endpoints. Same error for unknown user and wrong
    password.
-7. Session/CSRF settings per docs/security.md section 2.
-8. Tests for every login method, wrong password/OTP, lockout, 2FA required, switch-school to a school
+6. Session/CSRF settings per docs/security.md section 2.
+7. Tests for every login method, wrong password/OTP, lockout, switch-school to a school
    I don't belong to -> rejected.
-9. Update docs/security.md (tick items), docs/development.md (.env changes), roadmap, then PR.
+8. Update docs/security.md (tick items), docs/development.md (.env changes), roadmap, then PR.
 
 Design reference: ADR-0003, docs/architecture.md section 3, docs/security.md sections 2-3.
 ```
@@ -99,7 +97,7 @@ Frontend:
    Fetch wrapper sends credentials + X-CSRFToken.
 6. Dev proxy so frontend and API share an origin locally (Next.js rewrites /api -> Django).
 7. Pages under app/[locale]/(auth): login (email/password), student login (username), parent email
-   OTP, 2FA step. All text from messages/ar.json + en.json; logical CSS only.
+   OTP. All text from messages/ar.json + en.json; logical CSS only.
 8. After login: app/[locale]/(app)/dashboard showing name, role and a school switcher.
 9. Check every page in /ar (RTL) and /en.
 10. Tests (backend policies + platform endpoints), docs, PR.
