@@ -151,6 +151,33 @@ To take Lesson Lab off this server, follow [staging-teardown.md](staging-teardow
 - Scope a PR to one complete, working module — not a tiny fragment (e.g. "add a model" alone), and not a sprawling grab-bag either. When two pieces share real infrastructure (e.g. TOTP 2FA and email OTP both need the same Celery/email setup), build them together in one PR rather than splitting purely for size. The bar: after merge, that one thing works end-to-end.
 - Merging to `main` deploys automatically (once CI/CD is set up).
 
+### Git aliases: ship and cleanup
+
+Set up once on each machine ([ADR-0017](decisions/0017-git-ship-and-cleanup-aliases.md)). It needs the GitHub CLI, signed in (`gh auth status`). Open the global git config with `notepad $env:USERPROFILE\.gitconfig` and add at the end (if `[fetch]` or `[alias]` already exists, add the lines under it):
+
+```ini
+[fetch]
+	prune = true
+[alias]
+	ship = "!git push -u origin HEAD && gh pr create --fill && gh pr merge --auto --squash --delete-branch"
+	cleanup = "!git checkout main && git pull && git branch -vv | grep ': gone]' | awk '{print $1}' | xargs -r git branch -D"
+```
+
+Check with `git config --global --get alias.ship` and `git config --global --get alias.cleanup`.
+
+Everyday flow:
+
+```powershell
+git checkout -b feature/something
+git add -A
+git commit -m "feat(scope): ..."
+git ship                  # push, open the PR, auto-merge when CI passes
+gh pr checks --watch      # optional: follow CI
+git cleanup               # after the merge: back to main, pull, delete merged branches
+```
+
+`git ship` doesn't commit and doesn't wait for CI. If CI fails, fix it, commit and `git push`; don't run `git ship` again. If the PR falls behind `main`, run `gh pr update-branch`.
+
 ## 3. Commit messages (Conventional Commits)
 ```
 feat(attendance): add daily attendance marking
