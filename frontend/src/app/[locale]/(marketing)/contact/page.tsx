@@ -26,7 +26,7 @@ export default async function ContactPage({ params }: PageProps<"/[locale]/conta
   return (
     <>
       <PageHero
-        image="/images/contact.jpg"
+        image="/images/contact.webp"
         titleLead={t("hero.titleLead")}
         words={t.raw("hero.words") as string[]}
         locale={locale}

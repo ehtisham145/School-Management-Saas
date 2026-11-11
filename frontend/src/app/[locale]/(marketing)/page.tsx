@@ -61,7 +61,7 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
 
   return (
     <>
-      <PhotoHero image="/images/home.jpg" alt={t("hero.alt")}>
+      <PhotoHero image="/images/home.webp" alt={t("hero.alt")}>
         <Typewriter
           words={t.raw("hero.words") as string[]}
           highlights={t.raw("hero.highlights") as string[]}

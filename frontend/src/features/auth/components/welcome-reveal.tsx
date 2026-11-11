@@ -175,7 +175,7 @@ export function WelcomeReveal() {
             <div className="wr-logo">
               {/* The logo's navy text needs a light background, as in the sidebar. */}
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/brand/logo.png" alt="Lesson Lab" />
+              <img src="/brand/logo.webp" alt="Lesson Lab" />
             </div>
             <div className="wr-rule" />
             <p className="wr-hello">

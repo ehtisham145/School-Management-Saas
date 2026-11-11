@@ -191,7 +191,7 @@ jobs:
       - name: Serves a page
         run: curl --fail --silent --output /dev/null --retry 10 --retry-all-errors --retry-delay 2 http://localhost:3000/en/login
       - name: Optimizes an image
-        run: curl --fail --silent --output /dev/null "http://localhost:3000/_next/image?url=%2Fbrand%2Flogo.png&w=640&q=75"
+        run: curl --fail --silent --output /dev/null "http://localhost:3000/_next/image?url=%2Fbrand%2Flogo.webp&w=640&q=75"
       - name: Becomes healthy
         run: |
           for attempt in $(seq 30); do

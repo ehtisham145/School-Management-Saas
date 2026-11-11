@@ -33,7 +33,7 @@ export default async function AboutPage({ params }: PageProps<"/[locale]/about">
   return (
     <>
       <PageHero
-        image="/images/about.jpg"
+        image="/images/about.webp"
         titleLead={t("hero.titleLead")}
         words={t.raw("hero.words") as string[]}
         locale={locale}

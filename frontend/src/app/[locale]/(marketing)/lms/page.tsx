@@ -40,7 +40,7 @@ export default async function LmsPage({ params }: PageProps<"/[locale]/lms">) {
   return (
     <>
       <PageHero
-        image="/images/lms.jpg"
+        image="/images/lms.webp"
         titleLead={t("hero.titleLead")}
         words={t.raw("hero.words") as string[]}
         locale={locale}
