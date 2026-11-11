@@ -1,6 +1,7 @@
 from pathlib import Path
 
 import environ
+from celery.schedules import crontab
 
 # settings/base.py -> settings -> config -> backend
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
@@ -30,6 +31,7 @@ THIRD_PARTY_APPS = [
 LOCAL_APPS: list[str] = [
     "apps.accounts",
     "apps.academics",
+    "apps.audit",
     "apps.core",
     "apps.platform",
     "apps.tenancy",
@@ -95,6 +97,16 @@ BRAND_HEADER_LABEL = env("BRAND_HEADER_LABEL", default="School Management")
 BRAND_LOGO_URL = env("BRAND_LOGO_URL", default="")
 BRAND_LOGO_WIDTH = 155
 BRAND_LOGO_HEIGHT = 36
+# Shown on quotation PDFs. Blank hides it.
+COMPANY_VAT_NUMBER = env("COMPANY_VAT_NUMBER", default="")
+
+# Quotations: Saudi VAT is 15%. A quotation keeps the rate it was made with.
+QUOTATION_VAT_RATE = env("QUOTATION_VAT_RATE", default="15.00")
+QUOTATION_VALID_DAYS = env.int("QUOTATION_VALID_DAYS", default=30)
+
+# Audit log: read the client IP from X-Forwarded-For only behind a proxy that sets it
+# itself (Caddy in production). Locally there is no proxy, so REMOTE_ADDR is right.
+TRUST_X_FORWARDED_FOR = False
 
 # ---------------------------------------------------------------- Passwords
 PASSWORD_HASHERS = [
@@ -173,3 +185,10 @@ else:
 
 CELERY_TIMEZONE = TIME_ZONE
 CELERY_TASK_ACKS_LATE = True
+CELERY_BEAT_SCHEDULE = {
+    # Just after midnight, Saudi time.
+    "expire-overdue-subscriptions": {
+        "task": "apps.platform.tasks.expire_overdue_subscriptions_task",
+        "schedule": crontab(hour=0, minute=15),
+    },
+}

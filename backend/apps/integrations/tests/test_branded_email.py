@@ -11,6 +11,7 @@ from apps.integrations.email.adapter import (
     lead_notification_content,
     otp_email_content,
     preview_messages,
+    quotation_email_content,
     school_admin_welcome_content,
     send_lead_notification_email,
     send_school_admin_welcome_email,
@@ -327,6 +328,7 @@ def test_every_email_can_be_previewed():
         "otp",
         "school-admin-welcome",
         "demo-request",
+        "quotation",
         "contact-message",
     }
 
@@ -338,7 +340,50 @@ def test_preview_command_writes_html_and_text_files(settings, tmp_path):
 
     assert Path(tmp_path, "otp.html").read_text(encoding="utf8").startswith("<!DOCTYPE html>")
     assert "Subject:" in Path(tmp_path, "otp.txt").read_text(encoding="utf8")
-    assert len(list(tmp_path.iterdir())) == 8
+    assert len(list(tmp_path.iterdir())) == 10
+
+
+# --- Attachments
+
+
+def test_a_file_attachment_keeps_the_message_mixed_so_clients_show_it(settings):
+    settings.BRAND_LOGO_URL = ""
+
+    message = build_branded_email(
+        subject="Quote",
+        to="a@example.com",
+        heading="Quote",
+        body_html="<p>x</p>",
+        attachments=[("Q-2026-00001.pdf", b"%PDF-1.7", "application/pdf")],
+    )
+
+    assert message.mixed_subtype == "mixed"
+    assert ("Q-2026-00001.pdf", b"%PDF-1.7", "application/pdf") in [
+        tuple(item) for item in message.attachments if isinstance(item, tuple)
+    ]
+
+
+def test_without_files_the_logo_stays_related(settings):
+    settings.BRAND_LOGO_URL = ""
+
+    message = build_branded_email(subject="x", to="a@example.com", heading="x", body_html="")
+
+    assert message.mixed_subtype == "related"
+
+
+def test_quotation_email_escapes_names_and_keeps_the_number():
+    content = quotation_email_content(
+        to_email="a@example.com",
+        recipient_name="<b>Sara</b>",
+        organization="Al Noor",
+        number="Q-2026-00042",
+        total="3,450.00",
+        valid_until="11/12/2026",
+    )
+
+    assert "&lt;b&gt;Sara&lt;/b&gt;" in content["intro"]
+    assert "Q-2026-00042" in content["subject"]
+    assert content["attachments"] is None
 
 
 def test_preview_command_refuses_to_run_outside_debug(settings, tmp_path):

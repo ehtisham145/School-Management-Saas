@@ -80,12 +80,48 @@ def lead_notification_content(*, subject, heading, intro, rows, message, reply_t
     }
 
 
+def quotation_email_content(
+    *, to_email, recipient_name, organization, number, total, valid_until, attachment=None
+):
+    """valid_until is already formatted. attachment = (filename, pdf_bytes, mimetype)."""
+    return {
+        "subject": f"Your Lesson Lab quotation {number}",
+        "to": to_email,
+        "heading": "Your quotation",
+        "intro": f"Hello {user_text(recipient_name)}, here is the quotation we prepared for "
+        f"<strong>{user_text(organization)}</strong>.",
+        "body_html": (
+            detail_table(
+                [
+                    ("Quotation no.", number),
+                    ("Total (incl. VAT)", f"SAR {total}"),
+                    ("Valid until", valid_until),
+                ],
+                mono=("Quotation no.",),
+            )
+            + paragraph("The full quotation is attached as a PDF.")
+            + paragraph(
+                "Reply to this email if you have any questions, or to accept the quotation.",
+                muted=True,
+                spacing=0,
+            )
+        ),
+        "preheader": f"Quotation {number} for {user_text(organization)}",
+        "reply_to": settings.LEADS_EMAIL,
+        "attachments": [attachment] if attachment else None,
+    }
+
+
 def send_otp_email(to_email, code):
     send_branded_email(**otp_email_content(to_email, code))
 
 
 def send_school_admin_welcome_email(to_email, school_name):
     send_branded_email(**school_admin_welcome_content(to_email, school_name))
+
+
+def send_quotation_email(**content):
+    send_branded_email(**quotation_email_content(**content))
 
 
 def send_lead_notification_email(*, subject, heading, intro, rows, message, reply_to):
@@ -125,6 +161,14 @@ def preview_messages():
             rows=demo_rows,
             message="We have 400 students.\nCan we see the attendance screens?",
             reply_to="sara@example.com",
+        ),
+        "quotation": quotation_email_content(
+            to_email="admin@example.com",
+            recipient_name="Sara Ahmed",
+            organization="Al Noor School",
+            number="Q-2026-00042",
+            total="3,450.00",
+            valid_until="11/12/2026",
         ),
         "contact-message": lead_notification_content(
             subject="Contact message: Omar Saleh",

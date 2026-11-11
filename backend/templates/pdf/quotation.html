@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="{{ language }}" dir="{{ direction }}">
+<head>
+<meta charset="utf-8">
+<title>{{ labels.title }} {{ quotation.number }}</title>
+<style>
+  /* Colours repeat the tokens in frontend/src/app/globals.css. */
+  @page {
+    size: A4;
+    margin: 18mm 16mm 20mm;
+    @bottom-center {
+      content: "{{ company.name }}{% if company.website %} · {{ company.website }}{% endif %}";
+      font-size: 8pt;
+      color: #475569;
+    }
+  }
+  html { font-family: "IBM Plex Sans", "IBM Plex Sans Arabic", "Noto Sans Arabic", "DejaVu Sans", sans-serif; font-size: 10pt; color: #0f172a; }
+  body { margin: 0; }
+  .header { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 3px solid #1e3a5f; padding-bottom: 10pt; }
+  .brand { font-size: 18pt; font-weight: 700; color: #1e3a5f; }
+  .brand-accent { display: inline-block; width: 18pt; height: 3pt; background: #F5781E; margin-top: 4pt; }
+  .company { font-size: 8.5pt; color: #475569; line-height: 1.5; margin-top: 4pt; }
+  .title { text-align: end; }
+  .title h1 { margin: 0; font-size: 20pt; color: #0f1d31; }
+  .meta { margin-top: 6pt; border-collapse: collapse; margin-inline-start: auto; }
+  .meta td { padding: 1.5pt 0; font-size: 9pt; }
+  .meta td:first-child { color: #475569; padding-inline-end: 10pt; }
+  .num { direction: ltr; unicode-bidi: embed; font-variant-numeric: tabular-nums; }
+  .hijri { color: #475569; font-size: 8pt; }
+  .recipient { margin-top: 16pt; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6pt; padding: 10pt 12pt; }
+  .recipient .label { font-size: 8pt; color: #475569; text-transform: uppercase; letter-spacing: 0.4pt; }
+  .recipient .name { font-size: 12pt; font-weight: 700; color: #0f1d31; margin-top: 2pt; }
+  .recipient .line { color: #334155; margin-top: 1pt; }
+  .plan { margin-top: 10pt; color: #334155; }
+  table.items { width: 100%; border-collapse: collapse; margin-top: 16pt; }
+  table.items th { background: #1e3a5f; color: #ffffff; font-weight: 600; font-size: 9pt; padding: 6pt 8pt; text-align: start; }
+  table.items td { padding: 7pt 8pt; border-bottom: 1px solid #e2e8f0; vertical-align: top; }
+  table.items .figure { text-align: end; white-space: nowrap; }
+  .totals { margin-top: 10pt; margin-inline-start: auto; width: 46%; border-collapse: collapse; }
+  .totals td { padding: 4pt 8pt; }
+  .totals td:last-child { text-align: end; }
+  .totals .grand td { border-top: 2px solid #1e3a5f; font-weight: 700; font-size: 12pt; color: #0f1d31; padding-top: 6pt; }
+  .notes { margin-top: 18pt; }
+  .notes h2 { font-size: 10pt; margin: 0 0 4pt; color: #0f1d31; }
+  .notes p { margin: 0; white-space: pre-wrap; color: #334155; line-height: 1.5; }
+  .small { margin-top: 14pt; font-size: 8pt; color: #475569; }
+  [lang="ar"] h1, [lang="ar"] .brand { letter-spacing: 0; }
+</style>
+</head>
+<body>
+  <div class="header">
+    <div>
+      <div class="brand">{{ company.name }}</div>
+      <div class="brand-accent"></div>
+      <div class="company">
+        {% if company.address %}<div>{{ company.address }}</div>{% endif %}
+        {% if company.email %}<div class="num">{{ company.email }}</div>{% endif %}
+        {% if company.vat_number %}<div>{{ labels.vat_number }}: <span class="num">{{ company.vat_number }}</span></div>{% endif %}
+      </div>
+    </div>
+    <div class="title">
+      <h1>{{ labels.title }}</h1>
+      <table class="meta">
+        <tr><td>{{ labels.number }}</td><td class="num">{{ quotation.number }}</td></tr>
+        <tr>
+          <td>{{ labels.date }}</td>
+          <td><span class="num">{{ issued_on|date:"d/m/Y" }}</span>{% if issued_on_hijri %} <span class="hijri">(<span class="num">{{ issued_on_hijri }}</span> {{ labels.hijri_suffix }})</span>{% endif %}</td>
+        </tr>
+        <tr>
+          <td>{{ labels.valid_until }}</td>
+          <td><span class="num">{{ quotation.valid_until|date:"d/m/Y" }}</span>{% if valid_until_hijri %} <span class="hijri">(<span class="num">{{ valid_until_hijri }}</span> {{ labels.hijri_suffix }})</span>{% endif %}</td>
+        </tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="recipient">
+    <div class="label">{{ labels.prepared_for }}</div>
+    <div class="name">{{ quotation.recipient_organization }}</div>
+    <div class="line">{{ quotation.recipient_name }}</div>
+    <div class="line num">{{ quotation.recipient_email }}</div>
+  </div>
+
+  {% if plan_name %}
+  <div class="plan">
+    <strong>{{ labels.plan }}:</strong> {{ plan_name }}{% if billing_label %} · <strong>{{ labels.billing }}:</strong> {{ billing_label }}{% endif %}
+  </div>
+  {% endif %}
+
+  <table class="items">
+    <thead>
+      <tr>
+        <th>{{ labels.description }}</th>
+        <th class="figure">{{ labels.quantity }}</th>
+        <th class="figure">{{ labels.unit_price }} ({{ labels.currency }})</th>
+        <th class="figure">{{ labels.amount }} ({{ labels.currency }})</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for item in items %}
+      <tr>
+        <td>{{ item.description }}</td>
+        <td class="figure num">{{ item.quantity }}</td>
+        <td class="figure num">{{ item.unit_price }}</td>
+        <td class="figure num">{{ item.amount }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <table class="totals">
+    <tr><td>{{ labels.subtotal }}</td><td class="num">{{ subtotal }} {{ labels.currency }}</td></tr>
+    <tr><td>{{ vat_label }}</td><td class="num">{{ vat_amount }} {{ labels.currency }}</td></tr>
+    <tr class="grand"><td>{{ labels.total }}</td><td class="num">{{ total }} {{ labels.currency }}</td></tr>
+  </table>
+
+  {% if quotation.notes %}
+  <div class="notes">
+    <h2>{{ labels.notes }}</h2>
+    <p>{{ quotation.notes }}</p>
+  </div>
+  {% endif %}
+
+  <p class="small">{{ labels.prices_note }}</p>
+</body>
+</html>

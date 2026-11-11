@@ -5,6 +5,7 @@ from rest_framework.response import Response
 from rest_framework.throttling import ScopedRateThrottle
 from rest_framework.views import APIView
 
+from apps.audit.services import actor_from_request
 from apps.platform.api.serializers import (
     ContactMessageSerializer,
     DemoRequestAdminSerializer,
@@ -47,12 +48,14 @@ class SchoolViewSet(mixins.ListModelMixin, mixins.CreateModelMixin, viewsets.Gen
         return list_schools(**filters.validated_data)
 
     def perform_create(self, serializer):
-        school = create_school_with_admin(actor=self.request.user, **serializer.validated_data)
+        school = create_school_with_admin(
+            actor=actor_from_request(self.request), **serializer.validated_data
+        )
         serializer.instance = self.get_queryset().get(pk=school.pk)
 
     def _set_active(self, is_active):
         school = set_school_active(
-            actor=self.request.user, school=self.get_object(), is_active=is_active
+            actor=actor_from_request(self.request), school=self.get_object(), is_active=is_active
         )
         return Response(self.get_serializer(school).data)
 
@@ -90,7 +93,7 @@ class DemoRequestAdminViewSet(
 
     def perform_update(self, serializer):
         demo = update_demo_request(
-            actor=self.request.user,
+            actor=actor_from_request(self.request),
             demo_request_id=serializer.instance.pk,
             **serializer.validated_data,
         )
