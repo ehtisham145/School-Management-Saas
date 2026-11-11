@@ -13,7 +13,7 @@ The product was named Schoolify and the public site had its own colors and fonts
 - The language is in the URL (`/en`, `/ar`) and remembered in the `NEXT_LOCALE` cookie, so `lang` and `dir` are rendered on the server with no flash.
 - Translation keys are type checked, and a key missing from either language fails the build.
 - At the owner's request the site goes beyond the demo in three ways: a typewriter on page headings, cards that slide into place on scroll, and images with status cards on every page hero.
-- `public/brand/logo.png` is rebuilt from `design/assets/logo.png` with a smaller flask, so the name reads larger. Don't replace it with the original.
+- `public/brand/logo.webp` is rebuilt from `design/assets/logo.png` with a smaller flask, so the name reads larger. Don't replace it with the original.
 
 ## Consequences
 - Logged-in screens pick up the new colors through the shared tokens, but they still need their own layout work.

@@ -4,7 +4,7 @@ import { cn } from "cn";
 export function Logo({ className, priority }: { className?: string; priority?: boolean }) {
   return (
     <Image
-      src="/brand/logo.png"
+      src="/brand/logo.webp"
       width={515}
       height={120}
       alt="Lesson Lab"

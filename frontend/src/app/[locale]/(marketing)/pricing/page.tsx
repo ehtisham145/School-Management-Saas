@@ -25,7 +25,7 @@ export default async function PricingPage({ params }: PageProps<"/[locale]/prici
   return (
     <>
       <PageHero
-        image="/images/pricing.jpg"
+        image="/images/pricing.webp"
         titleLead={t("hero.titleLead")}
         words={t.raw("hero.words") as string[]}
         locale={locale}
