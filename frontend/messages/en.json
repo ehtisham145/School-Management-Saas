@@ -613,7 +613,12 @@
       "demoRequests": "Demo requests",
       "schools": "Schools",
       "open": "Open menu",
-      "close": "Close menu"
+      "close": "Close menu",
+      "subscriptions": "Subscriptions",
+      "quotations": "Quotations",
+      "plans": "Plans",
+      "usage": "Usage",
+      "auditLog": "Audit log"
     },
     "profileMenu": {
       "label": "Account menu",
@@ -633,7 +638,18 @@
       "close": "Close",
       "cancel": "Cancel",
       "notProvided": "Not provided",
-      "search": "Search"
+      "search": "Search",
+      "currency": "SAR",
+      "actions": "Actions",
+      "edit": "Edit",
+      "save": "Save",
+      "saving": "Saving...",
+      "choose": "Choose...",
+      "actionFailed": "That didn't work. Please try again.",
+      "cycles": {
+        "monthly": "Monthly",
+        "yearly": "Yearly"
+      }
     },
     "dashboard": {
       "title": "Dashboard",
@@ -691,7 +707,8 @@
         "save": "Save changes",
         "saving": "Saving...",
         "createSchool": "Create school",
-        "saved": "The demo request was updated."
+        "saved": "The demo request was updated.",
+        "createQuotation": "Create quotation"
       }
     },
     "profile": {
@@ -762,6 +779,286 @@
         "generic": "Something went wrong. Please try again.",
         "emailTaken": "This email is already registered. Use a different one."
       }
+    },
+    "plans": {
+      "title": "Plans",
+      "subtitle": "The price list. A subscription keeps the price it started with.",
+      "new": "New plan",
+      "saved": "Plan saved.",
+      "empty": "No plans yet",
+      "emptyDescription": "Add a plan before giving a school a subscription.",
+      "newTitle": "New plan",
+      "editTitle": "Edit {name}",
+      "formHint": "Prices are in Saudi riyals, before VAT.",
+      "offered": "Offered",
+      "notOffered": "Not offered",
+      "unlimited": "No limit",
+      "fields": {
+        "code": "Code",
+        "codeHint": "Lowercase letters, numbers and hyphens, such as premium.",
+        "codeFixed": "The code can't be changed.",
+        "status": "Status",
+        "nameEn": "Name in English",
+        "nameAr": "Name in Arabic",
+        "monthlyPrice": "Monthly price (SAR)",
+        "yearlyPrice": "Yearly price (SAR)",
+        "maxStudents": "Student limit",
+        "maxStudentsHint": "Leave empty for no limit."
+      },
+      "columns": {
+        "plan": "Plan",
+        "monthly": "Monthly",
+        "yearly": "Yearly",
+        "students": "Students",
+        "subscriptions": "Active subscriptions",
+        "status": "Status"
+      }
+    },
+    "subscriptions": {
+      "title": "Subscriptions",
+      "subtitle": "Which plan each school is on, and until when.",
+      "activate": "Activate subscription",
+      "all": "All",
+      "searchLabel": "Search by school",
+      "empty": "No subscriptions yet",
+      "emptyDescription": "Activate a subscription to put a school on a plan.",
+      "noResults": "No subscriptions match.",
+      "expire": "Expire",
+      "status": {
+        "active": "Active",
+        "expired": "Expired"
+      },
+      "columns": {
+        "school": "School",
+        "plan": "Plan",
+        "price": "Price",
+        "startsOn": "Starts",
+        "endsOn": "Ends",
+        "status": "Status"
+      },
+      "notices": {
+        "activated": "Subscription activated.",
+        "expired": "Subscription expired."
+      },
+      "confirmExpire": {
+        "title": "Expire the subscription of {school}?",
+        "body": "It ends today. The school keeps working, and you can activate a new subscription afterwards."
+      },
+      "form": {
+        "title": "Activate subscription",
+        "description": "The subscription runs for one month or one year from the start date.",
+        "school": "School",
+        "plan": "Plan",
+        "billingCycle": "Billing",
+        "startsOn": "Start date",
+        "startsOnHint": "Within a year of today.",
+        "price": "Agreed price (SAR)",
+        "priceHint": "Leave empty to use the plan price: {price}.",
+        "priceHintNoPlan": "Leave empty to use the plan price.",
+        "notes": "Notes",
+        "submit": "Activate",
+        "schoolTaken": "This school already has an active subscription. Expire it first.",
+        "noPlans": "There are no plans on offer. Add a plan first.",
+        "noSchools": "There are no active schools."
+      }
+    },
+    "quotations": {
+      "title": "Quotations",
+      "subtitle": "Price offers for schools and for prospects from demo requests.",
+      "new": "New quotation",
+      "all": "All",
+      "searchLabel": "Search by number, school or email",
+      "empty": "No quotations yet",
+      "emptyDescription": "Create a quotation for a school or a demo request.",
+      "noResults": "No quotations match.",
+      "forSchool": "School on the platform",
+      "forProspect": "From a demo request",
+      "pdfUnavailable": "The PDF can't be made on this server right now.",
+      "status": {
+        "draft": "Draft",
+        "sent": "Sent",
+        "accepted": "Accepted",
+        "rejected": "Rejected",
+        "expired": "Expired"
+      },
+      "columns": {
+        "number": "Number",
+        "recipient": "For",
+        "total": "Total",
+        "validUntil": "Valid until",
+        "status": "Status"
+      },
+      "notices": {
+        "saved": "Quotation {number} saved as a draft.",
+        "dismiss": "Dismiss",
+        "send": "Quotation sent. The email with the PDF is on its way.",
+        "accept": "Quotation marked as accepted.",
+        "reject": "Quotation marked as rejected."
+      },
+      "actions": {
+        "download": "Download PDF",
+        "send": "Send",
+        "resend": "Send again",
+        "accept": "Mark accepted",
+        "reject": "Mark rejected"
+      },
+      "confirm": {
+        "sendTitle": "Send quotation {number}?",
+        "sendBody": "The PDF is emailed to {email}. A sent quotation can't be edited.",
+        "acceptTitle": "Mark {number} as accepted?",
+        "acceptBody": "Do this once the school has agreed. It can't be undone.",
+        "rejectTitle": "Mark {number} as rejected?",
+        "rejectBody": "Do this once the school has declined. It can't be undone."
+      },
+      "detail": {
+        "title": "Quotation {number}",
+        "organization": "For",
+        "recipient": "Recipient",
+        "plan": "Plan",
+        "validUntil": "Valid until",
+        "language": "PDF language",
+        "sentAt": "Sent",
+        "description": "Description",
+        "quantity": "Qty",
+        "amount": "Amount",
+        "subtotal": "Subtotal",
+        "vat": "VAT ({rate}%)",
+        "total": "Total"
+      },
+      "languages": {
+        "en": "English",
+        "ar": "Arabic"
+      }
+    },
+    "quotationForm": {
+      "newTitle": "New quotation",
+      "editTitle": "Edit quotation",
+      "subtitle": "Saved as a draft. You send it from the quotations list.",
+      "back": "Back to quotations",
+      "notDraft": "Only a draft quotation can be edited.",
+      "saveDraft": "Save draft",
+      "saveChanges": "Save changes",
+      "planLine": "{plan} plan, {cycle}",
+      "noPlan": "No plan",
+      "noCycle": "Not set",
+      "lineLabel": "Line {number}",
+      "removeLine": "Remove line {number}",
+      "addLine": "Add line",
+      "subtotal": "Subtotal",
+      "vat": "VAT",
+      "total": "Total",
+      "totalsHint": "An estimate. The saved quotation shows the exact totals.",
+      "errors": {
+        "lines": "Check the lines below."
+      },
+      "sections": {
+        "recipient": "Recipient",
+        "terms": "Terms",
+        "lines": "Lines"
+      },
+      "recipientTypes": {
+        "school": "A school on the platform",
+        "demo": "A demo request"
+      },
+      "languages": {
+        "en": "English",
+        "ar": "Arabic"
+      },
+      "fields": {
+        "recipientType": "Quotation for",
+        "language": "PDF language",
+        "languageHint": "The PDF and its labels use this language.",
+        "recipientName": "Recipient name",
+        "recipientEmail": "Recipient email",
+        "organization": "School name on the PDF",
+        "fromRecipient": "Leave empty to use the school's or request's details.",
+        "plan": "Plan",
+        "planHint": "Choosing a plan and billing adds its price as a line.",
+        "billingCycle": "Billing",
+        "validUntil": "Valid until",
+        "vatRate": "VAT rate (%)",
+        "vatRateHint": "Saudi VAT is 15%.",
+        "notes": "Notes",
+        "notesPlaceholder": "Payment terms, what is included...",
+        "description": "Description",
+        "quantity": "Qty",
+        "unitPrice": "Unit price (SAR)",
+        "recipientFixed": "The recipient can't change once the quotation exists."
+      }
+    },
+    "usage": {
+      "title": "Usage",
+      "subtitle": "How many people each school has, and how many signed in lately.",
+      "searchLabel": "Search by school",
+      "empty": "No schools yet",
+      "noResults": "No schools match.",
+      "activeHint": "Signed in within {days} days",
+      "until": "until",
+      "noPlan": "No plan",
+      "overLimit": "Over the plan limit",
+      "totals": {
+        "schools": "Active schools",
+        "subscriptions": "Active subscriptions",
+        "students": "Students",
+        "teachers": "Teachers",
+        "parents": "Parents",
+        "activeUsers": "Active users"
+      },
+      "columns": {
+        "school": "School",
+        "plan": "Plan",
+        "students": "Students",
+        "teachers": "Teachers",
+        "parents": "Parents",
+        "staff": "Admins and principals",
+        "activeUsers": "Active users",
+        "status": "Status"
+      }
+    },
+    "audit": {
+      "title": "Audit log",
+      "subtitle": "Every change made from this panel: who, what, when and from where.",
+      "actionFilter": "Filter by action",
+      "allActions": "All actions",
+      "searchLabel": "Search by person or record",
+      "empty": "Nothing logged yet",
+      "emptyDescription": "Changes made from this panel appear here.",
+      "noResults": "No entries match.",
+      "system": "System",
+      "columns": {
+        "when": "When",
+        "who": "Who",
+        "action": "Action",
+        "target": "Record",
+        "details": "Details",
+        "ip": "IP address"
+      },
+      "actions": {
+        "school.created": "School created",
+        "school.activated": "School activated",
+        "school.deactivated": "School deactivated",
+        "demo_request.updated": "Demo request updated",
+        "plan.created": "Plan created",
+        "plan.updated": "Plan updated",
+        "subscription.activated": "Subscription activated",
+        "subscription.expired": "Subscription expired",
+        "quotation.created": "Quotation created",
+        "quotation.updated": "Quotation updated",
+        "quotation.sent": "Quotation sent",
+        "quotation.accepted": "Quotation accepted",
+        "quotation.rejected": "Quotation rejected"
+      },
+      "details": {
+        "status": "Status: {from} → {to}",
+        "sentTo": "Sent to {email}",
+        "total": "Total: {total} SAR",
+        "price": "Price: {price} SAR",
+        "changed": "Changed: {fields}",
+        "reason": {
+          "manual": "Expired by hand",
+          "ended": "Reached its end date"
+        }
+      }
     }
   },
   "SignIn": {
@@ -811,7 +1108,14 @@
       "englishName": "Enter the name in English letters.",
       "arabicName": "Enter the name in Arabic letters.",
       "slug": "Use English letters, numbers and hyphens only.",
-      "registrationNumber": "Use only letters, numbers, spaces, - and /."
+      "registrationNumber": "Use only letters, numbers, spaces, - and /.",
+      "money": "Enter an amount, such as 1500 or 1500.50.",
+      "moneyCharacters": "Only numbers and a decimal point are allowed here.",
+      "percent": "Enter a percentage from 0 to 100.",
+      "quantity": "Enter a whole number from 1 to 10,000.",
+      "date": "Choose a date.",
+      "pastDate": "Choose today or a later date.",
+      "choose": "Choose one."
     },
     "demo": {
       "title": "Book a demo",

@@ -39,8 +39,9 @@ A person can hold roles in more than one school (e.g. a parent with children in 
 - Online classes
 
 ### Phase 1.5 (weeks 5–8)
-- Super Admin: quotation builder → PDF → email to school's business email
-- Subscription plans (monthly/yearly — **TBC with client**), manual activation/expiry
+- Super Admin: quotation builder → PDF (English or Arabic, with VAT and Hijri dates) → email, for a school or a demo request. Draft, sent, accepted, rejected
+- Subscription plans with monthly and yearly prices, set by the Super Admin in the panel (real prices **TBC with client**), manual activation/expiry, automatic expiry at the end date
+- Usage overview per school (students, teachers, parents, recent sign-ins, plan student limit) and an audit log of Super Admin actions
 - Public website with five pages: Home, About Us, LMS, Pricing, Contact (Arabic/English, SEO). Book a demo and Contact forms are saved and emailed to the team
 - PWA (installable, web push notifications)
 

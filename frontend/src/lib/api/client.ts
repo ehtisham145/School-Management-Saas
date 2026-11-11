@@ -91,3 +91,34 @@ export async function apiFetch<T>(path: string, options: ApiFetchOptions = {}): 
 
   return data as T;
 }
+
+/** A file from the API, such as a PDF. Errors still arrive as the JSON envelope. */
+export async function apiDownload(path: string): Promise<{ blob: Blob; filename: string | null }> {
+  const response = await fetch(`/api${path}`, { credentials: "same-origin" });
+
+  if (!response.ok) {
+    const data: unknown = await response.json().catch(() => null);
+    throw new ApiError(
+      response.status,
+      isApiErrorBody(data)
+        ? data
+        : { error: { code: "unknown_error", message: "Unexpected error." } },
+    );
+  }
+
+  const disposition = response.headers.get("Content-Disposition") ?? "";
+  const filename = /filename="([^"]+)"/.exec(disposition)?.[1] ?? null;
+  return { blob: await response.blob(), filename };
+}
+
+/** Hands a downloaded file to the browser to save. */
+export function saveFile(blob: Blob, filename: string) {
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = filename;
+  document.body.append(link);
+  link.click();
+  link.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 0);
+}

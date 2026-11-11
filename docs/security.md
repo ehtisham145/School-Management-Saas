@@ -27,7 +27,8 @@ This system stores **children's personal data** for multiple organisations. A cr
 - [ ] Default deny for every other endpoint (plain `APIView`s only require login by default).
 - [ ] Django admin is restricted (`/admin` accepts a password alone).
 - [ ] Parents see only linked children; teachers only assigned sections (current year).
-- [ ] Super Admin cross-school actions are audit-logged. Creating, activating and deactivating schools and updating demo requests go to the application log for now.
+- [x] Super Admin cross-school actions are audit-logged in `AuditEvent` with actor, IP and time: schools, demo requests, plans, subscriptions and quotations ([ADR-0019](decisions/0019-platform-audit-log-and-quotation-pdfs.md)). The log is read-only in the API and in Django admin.
+- [x] Plans, subscriptions, quotations, usage and the audit log need a platform admin session; school roles get 403.
 - [x] A deactivated school loses tenant access at once, including for users already signed in, and can't be switched into.
 - [x] Reading and updating demo requests needs a platform admin session. The public form stays write-only and can't set the status or notes.
 
@@ -61,9 +62,11 @@ This system stores **children's personal data** for multiple organisations. A cr
 
 ## 7. Audit logging
 - [ ] `django-auditlog` on marks, attendance, fees/payments, users/memberships, school settings.
-- [ ] Each entry stores actor, school, IP, timestamp, before/after.
+- [ ] Each entry stores actor, school, IP, timestamp, before/after. Done for platform actions (`AuditEvent`); tenant data still to do.
 - [ ] Audit log is append-only for app users; visible to Principal/School Admin for their school.
 - [ ] Also log security events: logins, failed logins, OTP failures, password resets, role changes.
+- [x] The client IP comes from `REMOTE_ADDR` locally and from `X-Forwarded-For` only in production (`TRUST_X_FORWARDED_FOR`), where Caddy sets that header itself.
+- [x] Quotation PDFs escape everything people typed (Django template autoescaping); quotation emails send only the name, number, total and date, with the PDF attached.
 
 ## 8. Infrastructure
 - [ ] SSH key-only, root login disabled, non-standard user, `fail2ban`; ideally SSH reachable only from your IP (OCI security list).
