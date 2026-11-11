@@ -1,4 +1,5 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
+import { HERO_IMAGES } from "@/features/marketing/hero-images";
 import { Check } from "lucide-react";
 import { cn } from "cn";
 import { DemoButton } from "@/features/leads/components/demo-dialog";
@@ -25,7 +26,7 @@ export default async function PricingPage({ params }: PageProps<"/[locale]/prici
   return (
     <>
       <PageHero
-        image="/images/pricing.webp"
+        image={HERO_IMAGES.pricing}
         titleLead={t("hero.titleLead")}
         words={t.raw("hero.words") as string[]}
         locale={locale}

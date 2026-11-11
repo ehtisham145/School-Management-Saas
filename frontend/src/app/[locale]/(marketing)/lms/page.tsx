@@ -1,4 +1,5 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
+import { HERO_IMAGES } from "@/features/marketing/hero-images";
 import {
   CheckItem,
   CtaBox,
@@ -40,7 +41,7 @@ export default async function LmsPage({ params }: PageProps<"/[locale]/lms">) {
   return (
     <>
       <PageHero
-        image="/images/lms.webp"
+        image={HERO_IMAGES.lms}
         titleLead={t("hero.titleLead")}
         words={t.raw("hero.words") as string[]}
         locale={locale}

@@ -1,4 +1,5 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
+import { HERO_IMAGES } from "@/features/marketing/hero-images";
 import {
   CtaBox,
   FeatureCard,
@@ -61,7 +62,7 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
 
   return (
     <>
-      <PhotoHero image="/images/home.webp" alt={t("hero.alt")}>
+      <PhotoHero image={HERO_IMAGES.home} alt={t("hero.alt")}>
         <Typewriter
           words={t.raw("hero.words") as string[]}
           highlights={t.raw("hero.highlights") as string[]}

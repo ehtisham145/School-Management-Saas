@@ -1,4 +1,5 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
+import { HERO_IMAGES } from "@/features/marketing/hero-images";
 import {
   CtaBox,
   FeatureCard,
@@ -33,7 +34,7 @@ export default async function AboutPage({ params }: PageProps<"/[locale]/about">
   return (
     <>
       <PageHero
-        image="/images/about.webp"
+        image={HERO_IMAGES.about}
         titleLead={t("hero.titleLead")}
         words={t.raw("hero.words") as string[]}
         locale={locale}

@@ -1,8 +1,9 @@
-import Image from "next/image";
+import Image, { type StaticImageData } from "next/image";
 import type { ComponentType, ReactNode } from "react";
 import { Check } from "lucide-react";
 import { cn } from "cn";
 import { DemoButton } from "@/features/leads/components/demo-dialog";
+import { HERO_SIZES } from "../hero-images";
 import { Reveal } from "./reveal";
 import { Typewriter } from "./typewriter";
 
@@ -90,14 +91,14 @@ export function CheckItem({ children }: { children: ReactNode }) {
 /**
  * Full-width photo with only the page heading over it. The heading is light
  * text with a dark shadow, so it reads on any part of the photo without a
- * wash over the image.
+ * wash over the image. A blurred preview shows until the photo arrives.
  */
 export function PhotoHero({
   image,
   alt = "",
   children,
 }: {
-  image: string;
+  image: StaticImageData;
   alt?: string;
   children: ReactNode;
 }) {
@@ -108,7 +109,8 @@ export function PhotoHero({
         alt={alt}
         fill
         priority
-        sizes="100vw"
+        placeholder="blur"
+        sizes={HERO_SIZES}
         className="object-cover object-center"
       />
       <div className="page-wrap relative z-[1] pt-[clamp(40px,7vw,104px)] pb-12">
@@ -126,7 +128,7 @@ export function PageHero({
   words,
   locale,
 }: {
-  image: string;
+  image: StaticImageData;
   titleLead: string;
   words: string[];
   locale: string;

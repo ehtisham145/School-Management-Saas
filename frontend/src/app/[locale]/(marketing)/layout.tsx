@@ -2,6 +2,7 @@ import { setRequestLocale } from "next-intl/server";
 import { DemoDialogProvider } from "@/features/leads/components/demo-dialog";
 import { SiteFooter } from "@/features/marketing/components/site-footer";
 import { SiteHeader } from "@/features/marketing/components/site-header";
+import { HeroPreloader } from "@/features/marketing/components/hero-preloader";
 import { WhatsAppFloat } from "@/features/marketing/components/whatsapp-float";
 
 export default async function MarketingLayout({ children, params }: LayoutProps<"/[locale]">) {
@@ -22,6 +23,7 @@ export default async function MarketingLayout({ children, params }: LayoutProps<
         </main>
         <SiteFooter />
         <WhatsAppFloat />
+        <HeroPreloader />
       </div>
     </DemoDialogProvider>
   );
