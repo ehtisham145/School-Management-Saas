@@ -33,7 +33,7 @@ class School(models.Model):
         AL_JAWF = "al_jawf", "Al Jawf"
 
     name_en = models.CharField(max_length=200)
-    name_ar = models.CharField(max_length=200)
+    name_ar = models.CharField(max_length=200, blank=True)
     code = models.SlugField(max_length=30, unique=True)
     is_active = models.BooleanField(default=True)
 

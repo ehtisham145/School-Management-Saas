@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { IBM_Plex_Sans, IBM_Plex_Sans_Arabic } from "next/font/google";
+import { Cormorant_Garamond, IBM_Plex_Sans_Arabic, Manrope } from "next/font/google";
 import { notFound } from "next/navigation";
 import { hasLocale, NextIntlClientProvider } from "next-intl";
 import { setRequestLocale } from "next-intl/server";
@@ -8,10 +8,18 @@ import { SessionProvider } from "@/features/auth/session-store";
 import { routing } from "@/i18n/routing";
 import "../globals.css";
 
-const plexSans = IBM_Plex_Sans({
-  variable: "--font-plex-sans",
+// Body text (Latin). Pairs with Cormorant Garamond below for headings.
+const manrope = Manrope({
+  variable: "--font-manrope",
   subsets: ["latin"],
   weight: ["400", "500", "600", "700"],
+});
+// Display/heading face (Latin only — Arabic headings stay on IBM Plex Sans
+// Arabic below; there's no Arabic companion for this pairing yet).
+const cormorant = Cormorant_Garamond({
+  variable: "--font-cormorant",
+  subsets: ["latin"],
+  weight: ["500", "600", "700"],
 });
 const plexArabic = IBM_Plex_Sans_Arabic({
   variable: "--font-plex-arabic",
@@ -39,7 +47,7 @@ export default async function LocaleLayout({ children, params }: LayoutProps<"/[
       lang={locale}
       dir={dir}
       data-scroll-behavior="smooth"
-      className={`${plexSans.variable} ${plexArabic.variable} h-full antialiased`}
+      className={`${manrope.variable} ${cormorant.variable} ${plexArabic.variable} h-full antialiased`}
     >
       <body className="flex min-h-full flex-col">
         <DirectionProvider direction={dir}>

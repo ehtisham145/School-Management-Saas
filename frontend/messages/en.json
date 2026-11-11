@@ -6,6 +6,8 @@
       "usernamePlaceholder": "Enter your username",
       "passwordLabel": "Password",
       "passwordPlaceholder": "Enter your password",
+      "showPassword": "Show password",
+      "hidePassword": "Hide password",
       "submit": "Sign in",
       "submitting": "Signing in...",
       "errors": {
@@ -597,7 +599,7 @@
       "nameEn": "School name (English)",
       "nameAr": "School name (Arabic)",
       "code": "School code",
-      "codeHint": "Such as al-noor. It can't be changed later.",
+      "codeHint": "Such as al-noor. Leave blank to generate one from the English name. It can't be changed later.",
       "adminEmail": "School admin's email",
       "submit": "Create school",
       "submitting": "Creating...",
@@ -1034,19 +1036,29 @@
         "ip": "IP address"
       },
       "actions": {
-        "school.created": "School created",
-        "school.activated": "School activated",
-        "school.deactivated": "School deactivated",
-        "demo_request.updated": "Demo request updated",
-        "plan.created": "Plan created",
-        "plan.updated": "Plan updated",
-        "subscription.activated": "Subscription activated",
-        "subscription.expired": "Subscription expired",
-        "quotation.created": "Quotation created",
-        "quotation.updated": "Quotation updated",
-        "quotation.sent": "Quotation sent",
-        "quotation.accepted": "Quotation accepted",
-        "quotation.rejected": "Quotation rejected"
+        "school": {
+          "created": "School created",
+          "activated": "School activated",
+          "deactivated": "School deactivated"
+        },
+        "demo_request": {
+          "updated": "Demo request updated"
+        },
+        "plan": {
+          "created": "Plan created",
+          "updated": "Plan updated"
+        },
+        "subscription": {
+          "activated": "Subscription activated",
+          "expired": "Subscription expired"
+        },
+        "quotation": {
+          "created": "Quotation created",
+          "updated": "Quotation updated",
+          "sent": "Quotation sent",
+          "accepted": "Quotation accepted",
+          "rejected": "Quotation rejected"
+        }
       },
       "details": {
         "status": "Status: {from} → {to}",

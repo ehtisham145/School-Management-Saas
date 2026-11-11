@@ -92,9 +92,9 @@
   --color-input: var(--input);
   --color-ring: var(--ring);
 
-  --font-sans: var(--font-plex-sans);
+  --font-sans: var(--font-manrope);
   --font-arabic: var(--font-plex-arabic);
-  --font-heading: var(--font-sans);
+  --font-heading: var(--font-cormorant);
 
   --radius-sm: calc(var(--radius) * 0.6);
   --radius-md: calc(var(--radius) * 0.8);
@@ -136,20 +136,29 @@
   }
   body {
     @apply bg-bg text-ink;
-    font-family: var(--font-plex-sans), system-ui, sans-serif;
+    font-family: var(--font-manrope), system-ui, sans-serif;
     font-size: 16px;
     line-height: 1.6;
   }
   html[dir="rtl"] body {
-    font-family: var(--font-plex-arabic), var(--font-plex-sans), system-ui, sans-serif;
+    font-family: var(--font-plex-arabic), var(--font-manrope), system-ui, sans-serif;
   }
   h1,
   h2,
   h3 {
-    font-weight: 700;
+    font-family: var(--font-heading), Georgia, serif;
+    font-weight: 600;
     line-height: 1.15;
-    letter-spacing: -0.02em;
+    letter-spacing: 0;
     text-wrap: balance;
+  }
+  html[dir="rtl"] h1,
+  html[dir="rtl"] h2,
+  html[dir="rtl"] h3 {
+    /* Cormorant Garamond has no Arabic glyphs; keep Arabic headings on the
+       body face rather than silently falling back to a system serif. */
+    font-family: var(--font-plex-arabic), var(--font-manrope), system-ui, sans-serif;
+    font-weight: 700;
   }
   html[dir="rtl"] h1,
   html[dir="rtl"] h2,

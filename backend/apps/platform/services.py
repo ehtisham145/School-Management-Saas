@@ -73,7 +73,7 @@ def create_school_with_admin(*, actor, admin_email, code, **details):
 
 @transaction.atomic
 def _create_school_with_admin(
-    *, actor, name_en, name_ar, code, admin_email, admin_name, demo_request=None, **details
+    *, actor, name_en, name_ar="", code, admin_email, admin_name, demo_request=None, **details
 ):
     demo = _lock_convertible_demo_request(demo_request) if demo_request else None
 
@@ -354,7 +354,9 @@ def _recipient_defaults(*, school, demo_request, language):
         return {
             "recipient_name": school.admin_name or school.name_en,
             "recipient_email": school.email,
-            "recipient_organization": school.name_ar if language == "ar" else school.name_en,
+            "recipient_organization": (
+                (school.name_ar or school.name_en) if language == "ar" else school.name_en
+            ),
         }
     return {
         "recipient_name": demo_request.name,

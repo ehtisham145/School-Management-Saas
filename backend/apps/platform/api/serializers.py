@@ -1,5 +1,6 @@
 import re
 
+from django.utils.text import slugify
 from rest_framework import serializers
 
 from apps.platform.models import ContactMessage, DemoRequest
@@ -48,7 +49,7 @@ def _registration_number(value):
 
 
 class SchoolSerializer(serializers.ModelSerializer):
-    code = serializers.SlugField(max_length=30)
+    code = serializers.SlugField(max_length=30, required=False, allow_blank=True)
     education_stages = serializers.ListField(
         child=serializers.ChoiceField(choices=School.Stage.choices), allow_empty=False
     )
@@ -85,6 +86,7 @@ class SchoolSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = ["is_active", "created_at"]
         extra_kwargs = {
+            "name_ar": {"required": False, "allow_blank": True},
             "school_type": REQUIRED_TEXT,
             "email": REQUIRED_TEXT,
             "region": REQUIRED_TEXT,
@@ -106,15 +108,26 @@ class SchoolSerializer(serializers.ModelSerializer):
         return value
 
     def validate_name_ar(self, value):
-        if not ARABIC_LETTER.search(value):
+        if value and not ARABIC_LETTER.search(value):
             raise serializers.ValidationError("Enter the name in Arabic letters.")
         return value
 
     def validate_code(self, value):
+        if not value:
+            return value
         code = value.lower()
         if School.objects.filter(code=code).exists():
             raise serializers.ValidationError("This code is already in use.")
         return code
+
+    def _generate_unique_code(self, name_en):
+        base = slugify(name_en)[:26] or "school"
+        candidate = base
+        suffix = 1
+        while School.objects.filter(code=candidate).exists():
+            suffix += 1
+            candidate = f"{base}-{suffix}"[:30]
+        return candidate
 
     def _validate_unused_email(self, value):
         if is_email_registered(value):
@@ -128,6 +141,8 @@ class SchoolSerializer(serializers.ModelSerializer):
         return self._validate_unused_email(value)
 
     def validate(self, attrs):
+        if not attrs.get("code"):
+            attrs["code"] = self._generate_unique_code(attrs.get("name_en", ""))
         if attrs["email"].lower() == attrs["admin_email"].lower():
             raise serializers.ValidationError({"admin_email": EMAIL_IN_USE})
         return attrs

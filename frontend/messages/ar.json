@@ -6,6 +6,8 @@
       "usernamePlaceholder": "أدخل اسم المستخدم",
       "passwordLabel": "كلمة المرور",
       "passwordPlaceholder": "أدخل كلمة المرور",
+      "showPassword": "إظهار كلمة المرور",
+      "hidePassword": "إخفاء كلمة المرور",
       "submit": "تسجيل الدخول",
       "submitting": "جارٍ تسجيل الدخول...",
       "errors": {
@@ -595,7 +597,7 @@
       "nameEn": "اسم المدرسة (بالإنجليزية)",
       "nameAr": "اسم المدرسة (بالعربية)",
       "code": "رمز المدرسة",
-      "codeHint": "مثل al-noor. لا يمكن تغييره لاحقًا.",
+      "codeHint": "مثل al-noor. اتركه فارغًا لإنشائه تلقائيًا من الاسم الإنجليزي. لا يمكن تغييره لاحقًا.",
       "adminEmail": "البريد الإلكتروني لمسؤول المدرسة",
       "submit": "إنشاء المدرسة",
       "submitting": "جارٍ الإنشاء...",
@@ -1032,19 +1034,29 @@
         "ip": "عنوان IP"
       },
       "actions": {
-        "school.created": "إنشاء مدرسة",
-        "school.activated": "تفعيل مدرسة",
-        "school.deactivated": "إيقاف مدرسة",
-        "demo_request.updated": "تحديث طلب عرض توضيحي",
-        "plan.created": "إنشاء باقة",
-        "plan.updated": "تحديث باقة",
-        "subscription.activated": "تفعيل اشتراك",
-        "subscription.expired": "إنهاء اشتراك",
-        "quotation.created": "إنشاء عرض سعر",
-        "quotation.updated": "تحديث عرض سعر",
-        "quotation.sent": "إرسال عرض سعر",
-        "quotation.accepted": "قبول عرض سعر",
-        "quotation.rejected": "رفض عرض سعر"
+        "school": {
+          "created": "إنشاء مدرسة",
+          "activated": "تفعيل مدرسة",
+          "deactivated": "إيقاف مدرسة"
+        },
+        "demo_request": {
+          "updated": "تحديث طلب عرض توضيحي"
+        },
+        "plan": {
+          "created": "إنشاء باقة",
+          "updated": "تحديث باقة"
+        },
+        "subscription": {
+          "activated": "تفعيل اشتراك",
+          "expired": "إنهاء اشتراك"
+        },
+        "quotation": {
+          "created": "إنشاء عرض سعر",
+          "updated": "تحديث عرض سعر",
+          "sent": "إرسال عرض سعر",
+          "accepted": "قبول عرض سعر",
+          "rejected": "رفض عرض سعر"
+        }
       },
       "details": {
         "status": "الحالة: {from} ← {to}",

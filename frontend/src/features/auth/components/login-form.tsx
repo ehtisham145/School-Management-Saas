@@ -4,6 +4,7 @@ import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Field } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import { PasswordInput } from "@/components/ui/password-input";
 import { ApiError } from "@/lib/api";
 import { required, useValidatedForm } from "@/lib/use-validated-form";
 import { login } from "../api";
@@ -42,11 +43,12 @@ export function LoginForm({ onResponse, onUseEmailCode }: LoginFormProps) {
       </Field>
 
       <Field id="password" label={t("passwordLabel")} required error={form.errorFor("password")}>
-        <Input
+        <PasswordInput
           {...form.bind("password")}
-          type="password"
           autoComplete="current-password"
           placeholder={t("passwordPlaceholder")}
+          showLabel={t("showPassword")}
+          hideLabel={t("hidePassword")}
         />
       </Field>
 

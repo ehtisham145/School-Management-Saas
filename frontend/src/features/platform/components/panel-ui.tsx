@@ -269,7 +269,7 @@ export function Money({ value, locale }: { value: string; locale: string }) {
 }
 
 export function localName(item: { name_en: string; name_ar: string }, locale: string) {
-  return locale === "ar" ? item.name_ar : item.name_en;
+  return locale === "ar" ? item.name_ar || item.name_en : item.name_en;
 }
 
 /** A notice that a change was saved, or an error, above a list. */

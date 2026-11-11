@@ -176,7 +176,7 @@ def test_invalid_fields_return_400(db):
 
     response = client.post(
         SCHOOLS_URL,
-        {"name_en": "", "name_ar": "", "code": "has spaces", "admin_email": "not-an-email"},
+        {"name_en": "", "name_ar": "English only", "code": "has spaces", "admin_email": "not-an-email"},
     )
 
     assert response.status_code == 400

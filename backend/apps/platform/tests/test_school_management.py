@@ -71,7 +71,7 @@ def test_create_names_a_new_admin_account(platform_client):
     assert admin.get_full_name() == "Sara Ahmed Ali"
 
 
-OPTIONAL_FIELDS = ("code", "phone", "cr_number", "moe_license_number")
+OPTIONAL_FIELDS = ("code", "name_ar", "phone", "cr_number", "moe_license_number")
 
 
 @pytest.mark.parametrize("field", [key for key in VALID_SCHOOL if key not in OPTIONAL_FIELDS])
@@ -151,7 +151,7 @@ def test_create_accepts_arabic_digits_and_saves_them_the_same_way(
     assert getattr(School.objects.get(code="alnoor"), field) == saved
 
 
-@pytest.mark.parametrize("field", ["phone", "cr_number", "moe_license_number"])
+@pytest.mark.parametrize("field", ["name_ar", "phone", "cr_number", "moe_license_number"])
 def test_create_works_without_the_optional_fields(platform_client, field):
     body = {key: value for key, value in VALID_SCHOOL.items() if key != field}
 
@@ -160,12 +160,28 @@ def test_create_works_without_the_optional_fields(platform_client, field):
     assert getattr(School.objects.get(code="alnoor"), field) == ""
 
 
-@pytest.mark.parametrize("field", ["phone", "cr_number", "moe_license_number"])
+@pytest.mark.parametrize("field", ["name_ar", "phone", "cr_number", "moe_license_number"])
 @pytest.mark.parametrize("blank", ["", "   "])
 def test_create_accepts_blank_optional_fields(platform_client, field, blank):
     assert _create(platform_client, **{field: blank}).status_code == 201
 
     assert getattr(School.objects.get(code="alnoor"), field) == ""
+
+
+def test_create_without_a_code_generates_one_from_the_english_name(platform_client):
+    response = _create(platform_client, code="")
+
+    assert response.status_code == 201
+    assert School.objects.get(name_en="Al Noor School").code == "al-noor-school"
+
+
+def test_create_without_a_code_avoids_a_clash(platform_client):
+    School.objects.create(name_en="Existing School", name_ar="مدرسة قائمة", code="al-noor-school")
+
+    response = _create(platform_client, code="")
+
+    assert response.status_code == 201
+    assert School.objects.get(name_en="Al Noor School").code == "al-noor-school-2"
 
 
 # --- Emails can be registered only once

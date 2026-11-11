@@ -17,7 +17,8 @@ export function DashboardView() {
     return null;
   }
 
-  const schoolName = locale === "ar" ? session.school.name_ar : session.school.name_en;
+  const schoolName =
+    locale === "ar" ? session.school.name_ar || session.school.name_en : session.school.name_en;
 
   return (
     <main className="flex flex-1 flex-col items-center justify-center gap-6 p-8">
