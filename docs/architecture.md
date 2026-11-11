@@ -86,6 +86,8 @@ class TenantModel(models.Model):
 - Every email goes through `apps/integrations/email/branded.py` (one shared header, footer and block helpers, tables and inline styles only) and is composed in `adapter.py`. Celery tasks on the `emails` queue send them, so sending never blocks a web request.
 - The public Book a demo and Contact forms post to `/api/platform/demo-requests/` and `/api/platform/contact-messages/`. They use no session, are throttled per IP (`leads` scope) and have a honeypot field. The team is emailed at `LEADS_EMAIL` and submissions are listed in Django admin.
 - The Super Admin panel reads demo requests through `/api/platform/manage/demo-requests/`, kept apart from the public form, which stays write-only. A request moves `new → contacted → demo_scheduled → converted / rejected`. Converted is set only by creating a school from the request (`demo_request` on `POST /api/platform/schools/`), which links the two in one transaction. `is_handled` follows the status.
+- Billing lives under `/api/platform/`: `plans/` (no delete, switched off with `is_active`), `subscriptions/` (activate, `{id}/expire/`, one active per school, the price is copied from the plan so later price changes don't touch it), `quotations/` (draft → sent → accepted / rejected; only a draft can be edited; `{id}/send/` emails the PDF through Celery; `{id}/pdf/` downloads it), `usage/` (members by role and sign-ins in the last 30 days per school), `audit-log/` (read-only) and `choices/` (options for the forms). Money is `Decimal` and travels as text. A quotation is for a school or for a demo request, never both, and keeps its VAT rate (default 15%, `QUOTATION_VAT_RATE`).
+- Every Super Admin change is written to `AuditEvent` in the same transaction as the change, with the actor and IP ([ADR-0019](decisions/0019-platform-audit-log-and-quotation-pdfs.md)).
 - `POST /api/platform/schools/{id}/deactivate/` and `/activate/` switch a school. A deactivated school's memberships stop working on the user's next request: `TenantMiddleware`, `list_active_memberships` and `get_switchable_membership` all ignore them, and no data changes. Login and `/me` return `school_inactive: true` when all of a user's schools are deactivated.
 
 ## 4. Authorization (RBAC)
@@ -127,8 +129,12 @@ fees:           FeeHead, FeeStructure(grade, year), FeeDue(student, amount, due_
 communication:  Announcement(audience), Conversation, Message
 notifications:  Notification(user, type, payload, read_at), PushSubscription
 files:          StoredFile(owner, key, mime, size)
-platform:       DemoRequest(status, admin_notes, converted_school), ContactMessage; later Plan, Subscription(school), Quotation   (no school FK scoping — platform-owned)
-audit:          django-auditlog entries (+ school id, actor, IP)
+platform:       DemoRequest(status, admin_notes, converted_school), ContactMessage,
+                Plan(code, monthly/yearly price, max_students, is_active),
+                Subscription(school, plan, billing_cycle, price, starts_on, ends_on, status)  one active per school,
+                Quotation(number, school | demo_request, recipient, language, vat_rate, totals, status), QuotationItem
+                (no school FK scoping — platform-owned)
+audit:          AuditEvent(actor, action, target, school, ip_address, details) — platform actions, append-only ([ADR-0019](decisions/0019-platform-audit-log-and-quotation-pdfs.md)); django-auditlog for tenant data later
 ```
 
 Money is stored as `DecimalField(max_digits=12, decimal_places=2)` in SAR. Never floats.
@@ -142,7 +148,8 @@ Money is stored as `DecimalField(max_digits=12, decimal_places=2)` in SAR. Never
 | Fee receipts, quotation PDFs | On event |
 | Daily absence digest to parents | Beat, e.g. 10:00 KSA |
 | Fee due reminders | Beat, daily |
-| Subscription expiry checks | Beat, daily |
+| Subscription expiry (`expire_overdue_subscriptions_task`) | Beat, daily 00:15 KSA |
+| Quotation PDF + email (`send_quotation_email_task`) | On send (queue `emails`) |
 | Clean expired OTPs, sessions | Beat, nightly |
 | DB backup → Object Storage (other KSA region) | Cron on host, nightly 02:00 KSA |
 
@@ -196,7 +203,8 @@ lms/
 │   │   ├── core/               TenantModel, TenantScopedViewSet, policies.py, pagination, exceptions
 │   │   ├── accounts/           User, login, email OTP
 │   │   ├── tenancy/            School, Membership, middleware, school switch
-│   │   ├── platform/           super admin APIs, demo requests, contact messages; later plans, subscriptions, quotations
+│   │   ├── platform/           super admin APIs, demo requests, contact messages, plans, subscriptions, quotations, usage
+│   │   ├── audit/              AuditEvent, record_event(), client_ip()
 │   │   ├── academics/          years, terms, grades, sections, subjects, enrollment, guardianship
 │   │   ├── timetable/
 │   │   ├── attendance/
@@ -206,7 +214,7 @@ lms/
 │   │   ├── communication/      announcements, messaging (+ consumers.py)
 │   │   ├── notifications/      in-app, email, push, websocket consumer
 │   │   ├── files/
-│   │   └── integrations/       email/, payments/, ai/ adapters
+│   │   └── integrations/       email/, pdf/ (WeasyPrint), payments/, ai/ adapters
 │   ├── templates/              emails/, pdf/
 │   ├── locale/                 ar/ en/
 │   ├── requirements/           base.txt, dev.txt, prod.txt   (pip, pinned)

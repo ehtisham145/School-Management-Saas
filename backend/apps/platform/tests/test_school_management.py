@@ -4,6 +4,7 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.test import APIClient
 
 from apps.accounts.models import User
+from apps.audit.services import Actor
 from apps.platform.models import DemoRequest
 from apps.platform.services import create_school_with_admin
 from apps.tenancy.models import Membership, School
@@ -266,7 +267,7 @@ def test_a_clash_that_slips_past_validation_is_still_a_field_error(db, clash, fi
     }
 
     with pytest.raises(ValidationError) as error:
-        create_school_with_admin(actor=actor, **{**details, **clash})
+        create_school_with_admin(actor=Actor(user=actor), **{**details, **clash})
 
     assert field in error.value.detail
     assert not School.objects.filter(code="alnoor").exists()

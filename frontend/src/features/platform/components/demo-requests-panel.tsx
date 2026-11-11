@@ -135,6 +135,16 @@ function DemoRequestDialog({
         )}
 
         <div className="flex flex-wrap justify-end gap-2">
+          {(demo.status === "new" ||
+            demo.status === "contacted" ||
+            demo.status === "demo_scheduled") && (
+            <Link
+              href={`/platform/quotations/new?demo=${demo.id}`}
+              className={buttonVariants({ variant: "outline", size: "sm" })}
+            >
+              {t("detail.createQuotation")}
+            </Link>
+          )}
           {!isConverted && (
             <Link
               href={`/platform/schools/new?demo=${demo.id}`}

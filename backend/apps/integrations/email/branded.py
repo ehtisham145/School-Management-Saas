@@ -323,12 +323,14 @@ def _logo_bytes() -> bytes:
     return LOGO_FILE.read_bytes()
 
 
-def _attach_logo(message: EmailMultiAlternatives) -> None:
+def _attach_logo(message: EmailMultiAlternatives, *, related: bool = True) -> None:
     image = MIMEImage(_logo_bytes(), "png")
     image.add_header("Content-ID", f"<{LOGO_CID}>")
     image.add_header("Content-Disposition", "inline", filename="lesson-lab-logo.png")
-    # "related" tells mail clients the image belongs to the HTML, not a download.
-    message.mixed_subtype = "related"
+    # "related" tells mail clients the image belongs to the HTML, not a download. A
+    # message that also carries files stays "mixed", or clients may hide those files.
+    if related:
+        message.mixed_subtype = "related"
     message.attach(image)
 
 
@@ -350,8 +352,12 @@ def build_branded_email(
     preheader: str = "",
     text_body: str | None = None,
     reply_to: str | None = None,
+    attachments: list[tuple[str, bytes, str]] | None = None,
 ) -> EmailMultiAlternatives:
-    """Builds the message without sending it, for send_branded_email() and the previews."""
+    """Builds the message without sending it, for send_branded_email() and the previews.
+
+    attachments = (filename, content, mimetype), such as a quotation PDF.
+    """
     html = render_branded_email(
         heading=heading,
         body_html=body_html,
@@ -374,7 +380,9 @@ def build_branded_email(
     )
     message.attach_alternative(html, "text/html")
     if not settings.BRAND_LOGO_URL:
-        _attach_logo(message)
+        _attach_logo(message, related=not attachments)
+    for filename, content, mimetype in attachments or ():
+        message.attach(filename, content, mimetype)
     return message
 
 

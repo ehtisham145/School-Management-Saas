@@ -1,7 +1,18 @@
 "use client";
 
 import { useEffect, useState, type ReactNode } from "react";
-import { CalendarCheck, LayoutDashboard, Menu, School, X } from "lucide-react";
+import {
+  BarChart3,
+  CalendarCheck,
+  CreditCard,
+  FileText,
+  History,
+  LayoutDashboard,
+  Menu,
+  School,
+  Tags,
+  X,
+} from "lucide-react";
 import { useTranslations } from "next-intl";
 import { cn } from "cn";
 import { Link, usePathname } from "@/i18n/navigation";
@@ -14,6 +25,11 @@ const NAV_ITEMS = [
   { href: "/platform", labelKey: "dashboard", icon: LayoutDashboard },
   { href: "/platform/demo-requests", labelKey: "demoRequests", icon: CalendarCheck },
   { href: "/platform/schools", labelKey: "schools", icon: School },
+  { href: "/platform/subscriptions", labelKey: "subscriptions", icon: CreditCard },
+  { href: "/platform/quotations", labelKey: "quotations", icon: FileText },
+  { href: "/platform/plans", labelKey: "plans", icon: Tags },
+  { href: "/platform/usage", labelKey: "usage", icon: BarChart3 },
+  { href: "/platform/audit-log", labelKey: "auditLog", icon: History },
 ] as const;
 
 function isCurrent(pathname: string, href: string) {

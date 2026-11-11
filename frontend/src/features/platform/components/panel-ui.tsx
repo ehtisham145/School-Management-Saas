@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { Search } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { cn } from "cn";
@@ -8,8 +8,15 @@ import { Link } from "@/i18n/navigation";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Modal } from "@/components/ui/modal";
 import { Spinner } from "@/components/ui/spinner";
-import { LIST_PAGE_SIZE, type DemoStatus } from "../schemas";
+import { ApiError } from "@/lib/api";
+import {
+  LIST_PAGE_SIZE,
+  type DemoStatus,
+  type QuotationStatus,
+  type SubscriptionStatus,
+} from "../schemas";
 import type { LoadState } from "../use-load";
 
 export function PageHeader({
@@ -208,4 +215,184 @@ export function DetailRow({ label, children }: { label: string; children: ReactN
 /** Dates are stored in UTC and shown in Saudi time. */
 export function formatDate(value: string, locale: string) {
   return new Date(value).toLocaleDateString(locale, { timeZone: "Asia/Riyadh" });
+}
+
+/** A timestamp with its time, in Saudi time. */
+export function formatDateTime(value: string, locale: string) {
+  return new Date(value).toLocaleString(locale, {
+    timeZone: "Asia/Riyadh",
+    dateStyle: "medium",
+    timeStyle: "short",
+  });
+}
+
+/** A calendar day from the API ("2026-11-01"), which has no time and no time zone. */
+export function formatDay(value: string, locale: string) {
+  return new Date(`${value}T00:00:00Z`).toLocaleDateString(locale, { timeZone: "UTC" });
+}
+
+/** The same day in the Umm al-Qura calendar, for display only (ADR-0005). */
+export function formatHijriDay(value: string, locale: string) {
+  return new Date(`${value}T00:00:00Z`).toLocaleDateString(`${locale}-u-ca-islamic-umalqura`, {
+    timeZone: "UTC",
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  });
+}
+
+/** Gregorian first, Hijri beside it in smaller text. */
+export function DayWithHijri({ value, locale }: { value: string; locale: string }) {
+  return (
+    <span className="whitespace-nowrap">
+      {formatDay(value, locale)}
+      <span className="block text-xs text-ink-soft">{formatHijriDay(value, locale)}</span>
+    </span>
+  );
+}
+
+/** "1500.00" -> "1,500.00". The API sends money as text; this is display only. */
+export function formatMoney(value: string, locale: string) {
+  return Number(value).toLocaleString(locale, {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
+}
+
+export function Money({ value, locale }: { value: string; locale: string }) {
+  const t = useTranslations("Platform.common");
+  return (
+    <span className="whitespace-nowrap tabular-nums">
+      <bdi>{formatMoney(value, locale)}</bdi> {t("currency")}
+    </span>
+  );
+}
+
+export function localName(item: { name_en: string; name_ar: string }, locale: string) {
+  return locale === "ar" ? item.name_ar : item.name_en;
+}
+
+/** A notice that a change was saved, or an error, above a list. */
+export function Notice({ tone, children }: { tone: "success" | "error"; children: ReactNode }) {
+  return (
+    <p
+      role={tone === "error" ? "alert" : "status"}
+      className={cn(
+        "rounded-control p-3 text-sm",
+        tone === "error" ? "bg-red-50 text-red-800" : "bg-emerald-50 text-emerald-800",
+      )}
+    >
+      {children}
+    </p>
+  );
+}
+
+/** Asks before an action that can't be undone, and shows a failure in place. */
+export function ConfirmDialog({
+  title,
+  description,
+  confirmLabel,
+  destructive = false,
+  onConfirm,
+  onClose,
+}: {
+  title: string;
+  description: string;
+  confirmLabel: string;
+  destructive?: boolean;
+  onConfirm: () => Promise<void>;
+  onClose: () => void;
+}) {
+  const t = useTranslations("Platform.common");
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  async function confirm() {
+    setSaving(true);
+    setError(null);
+    try {
+      await onConfirm();
+    } catch (err) {
+      setError(errorMessage(err) ?? t("actionFailed"));
+      setSaving(false);
+    }
+  }
+
+  return (
+    <Modal open onClose={onClose} title={title} description={description} closeLabel={t("close")}>
+      {error && (
+        <p role="alert" className="mb-3 rounded-control bg-red-50 p-3 text-sm text-red-800">
+          {error}
+        </p>
+      )}
+      <div className="flex justify-end gap-2">
+        <Button variant="ghost" size="sm" onClick={onClose}>
+          {t("cancel")}
+        </Button>
+        <Button
+          variant={destructive ? "destructive" : "default"}
+          size="sm"
+          loading={saving}
+          onClick={confirm}
+        >
+          {confirmLabel}
+        </Button>
+      </div>
+    </Modal>
+  );
+}
+
+/** The first message the API gave for a refused change, such as "already expired". */
+export function errorMessage(err: unknown): string | null {
+  if (!(err instanceof ApiError) || err.status !== 400 || !err.fields) return null;
+  for (const value of Object.values(err.fields)) {
+    if (Array.isArray(value) && typeof value[0] === "string") return value[0];
+    if (typeof value === "string") return value;
+  }
+  return null;
+}
+
+const SUBSCRIPTION_TONES = { active: "success", expired: "neutral" } as const;
+
+export function SubscriptionStatusBadge({ status }: { status: SubscriptionStatus }) {
+  const t = useTranslations("Platform.subscriptions.status");
+  return <Badge tone={SUBSCRIPTION_TONES[status]}>{t(status)}</Badge>;
+}
+
+const QUOTATION_TONES = {
+  draft: "neutral",
+  sent: "info",
+  accepted: "success",
+  rejected: "danger",
+} as const;
+
+export function QuotationStatusBadge({
+  status,
+  isExpired = false,
+}: {
+  status: QuotationStatus;
+  isExpired?: boolean;
+}) {
+  const t = useTranslations("Platform.quotations.status");
+  if (isExpired) return <Badge tone="warning">{t("expired")}</Badge>;
+  return <Badge tone={QUOTATION_TONES[status]}>{t(status)}</Badge>;
+}
+
+/** A number on a dashboard-style card. */
+export function StatCard({
+  label,
+  value,
+  hint,
+}: {
+  label: string;
+  value: ReactNode;
+  hint?: string;
+}) {
+  return (
+    <div className="rounded-card border border-line bg-bg p-4">
+      <p className="text-sm text-ink-soft">{label}</p>
+      <p className="mt-1 text-2xl font-bold text-navy-deep tabular-nums">{value}</p>
+      {hint && <p className="mt-0.5 text-xs text-ink-soft">{hint}</p>}
+    </div>
+  );
 }

@@ -35,11 +35,25 @@ jobs:
           python-version: "3.11"
           cache: pip
           cache-dependency-path: backend/requirements/*.txt
+      # GitHub's runner image already has Pango and DejaVu, so apt runs only when one is
+      # missing. That keeps CI working when the Ubuntu mirrors can't be reached.
+      # libharfbuzz-subset0 is optional for WeasyPrint (it falls back to fontTools); the
+      # real-PDF test (REQUIRE_PDF) fails if anything needed is missing.
+      - name: Install the PDF libraries (WeasyPrint) if missing
+        run: |
+          packages="libpango-1.0-0 libpangoft2-1.0-0 fonts-dejavu-core"
+          if ! dpkg -s $packages >/dev/null 2>&1; then
+            sudo apt-get -o Acquire::Retries=5 update
+            sudo apt-get -o Acquire::Retries=5 install -y --no-install-recommends $packages
+          fi
       - run: pip install -r requirements/dev.txt
       - run: ruff check .
       - run: ruff format --check .
       - run: python manage.py makemigrations --check --dry-run
+      # REQUIRE_PDF makes the PDF tests fail instead of skipping when WeasyPrint can't load.
       - run: pytest
+        env:
+          REQUIRE_PDF: "1"
 
   frontend:
     runs-on: ubuntu-latest
@@ -131,6 +145,10 @@ jobs:
             echo "pip is still in the image"
             exit 1
           fi
+      - name: Makes a PDF on the read-only filesystem
+        run: >-
+          docker run --rm --read-only --tmpfs /tmp "$IMAGE"
+          python -c "from weasyprint import HTML; assert HTML(string='<p dir=rtl>عرض سعر</p>').write_pdf().startswith(b'%PDF')"
       - name: App loads without pip and setuptools
         run: >-
           docker run --rm

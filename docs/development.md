@@ -94,6 +94,8 @@ To use the Super Admin panel at `/platform`, tick **Is platform admin** on your 
 
 `python manage.py preview_emails` writes every email, with sample data, to `backend/.email-previews/` as HTML and text files (dev only). Branded email settings are in `.env.example`. `COMPANY_WEBSITE` defaults to `FRONTEND_URL`. The logo is attached to each email, so it shows in a real inbox even from a local machine. Set `BRAND_LOGO_URL` only to link to a public copy instead.
 
+Quotation PDFs use WeasyPrint, which needs the Pango libraries. The Docker image and CI install them. On Windows, install GTK (the MSYS2 `mingw-w64-x86_64-pango` package) to make PDFs locally; without it the app still runs, the PDF download answers 503 `pdf_unavailable` and the real-PDF test is skipped (CI sets `REQUIRE_PDF=1`, so there it must pass). `COMPANY_VAT_NUMBER`, `QUOTATION_VAT_RATE` (default 15) and `QUOTATION_VALID_DAYS` (default 30) are in `.env.example`.
+
 `LEADS_EMAIL` sets who receives Book a demo and Contact form emails (default `info@lessonlab.me`). Without `EMAIL_HOST` in `.env`, emails are printed in the Django terminal. With it, they go through SMTP (see `.env.example`). Check the settings with `python manage.py sendtestemail you@example.com`. Port 587 uses `EMAIL_USE_TLS=True`; port 465 uses `EMAIL_USE_TLS=False` and `EMAIL_USE_SSL=True`.
 
 If the frontend build complains about pages that no longer exist, or the dev server shows old styles after CSS changes, stop it, delete the generated `frontend/.next` folder and start it again.

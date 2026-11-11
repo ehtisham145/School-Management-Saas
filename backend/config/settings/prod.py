@@ -22,6 +22,8 @@ STORAGES = {
 
 # HTTPS (Caddy terminates TLS and forwards the protocol header)
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+# Caddy replaces X-Forwarded-For with the real client address (staging/caddy/Caddyfile).
+TRUST_X_FORWARDED_FOR = True
 SECURE_SSL_REDIRECT = True
 SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True

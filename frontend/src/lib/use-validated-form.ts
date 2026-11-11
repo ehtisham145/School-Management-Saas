@@ -19,7 +19,14 @@ export type ErrorKey =
   | "students"
   | "englishName"
   | "arabicName"
-  | "slug";
+  | "slug"
+  | "money"
+  | "moneyCharacters"
+  | "percent"
+  | "quantity"
+  | "date"
+  | "pastDate"
+  | "choose";
 
 type Validator = (value: string) => ErrorKey | null;
 
@@ -91,6 +98,40 @@ export const wholeNumberInRange = (min: number, max: number, error: ErrorKey) =>
     return number >= min && number <= max ? null : error;
   });
 export const optional = (max: number) => (value: string) => (value.length > max ? "tooLong" : null);
+
+/** Riyals with up to 2 decimals, below a billion. Matches the API's money fields. */
+const MONEY_PATTERN = /^\d{1,9}(\.\d{1,2})?$/;
+const PERCENT_PATTERN = /^\d{1,3}(\.\d{1,2})?$/;
+const DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
+
+/** Digits and one decimal point, so an amount can be typed with an Arabic keyboard too. */
+export const sanitizeMoney = (value: string) =>
+  toLatinDigits(value)
+    .replace(/[٫،,]/g, ".")
+    .replace(/[^0-9.]/g, "")
+    .replace(/(\..*)\./g, "$1");
+
+export const money = requiredAnd((value) => (MONEY_PATTERN.test(value) ? null : "money"));
+export const optionalMoney = (value: string) =>
+  !value.trim() || MONEY_PATTERN.test(value.trim()) ? null : "money";
+export const percent = requiredAnd((value) =>
+  PERCENT_PATTERN.test(value) && Number(value) <= 100 ? null : "percent",
+);
+export const optionalWholeNumber =
+  (min: number, max: number, error: ErrorKey) => (value: string) => {
+    if (!value.trim()) return null;
+    const number = Number(value);
+    return Number.isInteger(number) && number >= min && number <= max ? null : error;
+  };
+export const requiredChoice = (value: string) => (value ? null : "choose");
+export const requiredDate = requiredAnd((value) => (DATE_PATTERN.test(value) ? null : "date"));
+/** Today in Saudi Arabia, as the API compares dates there. */
+export const todayInRiyadh = () =>
+  new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Riyadh" }).format(new Date());
+export const dateFromToday = requiredAnd((value) => {
+  if (!DATE_PATTERN.test(value)) return "date";
+  return value < todayInRiyadh() ? "pastDate" : null;
+});
 export const email = (value: string) => {
   if (!value.trim()) return "required";
   return EMAIL_PATTERN.test(value.trim()) ? null : "email";

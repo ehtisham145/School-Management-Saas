@@ -34,14 +34,21 @@ LABEL org.opencontainers.image.source="https://github.com/ehtisham145/School-Man
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     DJANGO_SETTINGS_MODULE=config.settings.prod \
-    PATH=/opt/venv/bin:$PATH
+    PATH=/opt/venv/bin:$PATH \
+    XDG_CACHE_HOME=/tmp/cache
 
 WORKDIR /app
 
-# Debian security fix (CVE-2026-85091) that the pinned base image doesn't have
-# yet. Remove this once a newer base image digest ships it.
+# zlib1g: Debian security fix (CVE-2026-85091) that the pinned base image doesn't
+# have yet. Remove its pin once a newer base image digest ships it.
+# Pango, HarfBuzz and DejaVu: WeasyPrint needs them for quotation PDFs, and DejaVu
+# Sans has Arabic letters. Security updates come from the Debian archive at build.
+# XDG_CACHE_HOME points the font cache at /tmp, the only writable place at runtime.
+# hadolint ignore=DL3008
 RUN apt-get update \
-    && apt-get install -y --no-install-recommends zlib1g=1:1.3.dfsg+really1.3.1-1+deb13u1 \
+    && apt-get install -y --no-install-recommends \
+       zlib1g=1:1.3.dfsg+really1.3.1-1+deb13u1 \
+       libpango-1.0-0 libpangoft2-1.0-0 libharfbuzz-subset0 fonts-dejavu-core \
     && rm -rf /var/lib/apt/lists/*
 
 # Nothing installs packages at runtime, so the package tools are removed.

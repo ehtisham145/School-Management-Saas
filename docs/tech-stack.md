@@ -23,8 +23,8 @@ Guiding principles for this project:
 | Real-time | **Django Channels + channels-redis** (WebSockets) | Server-Sent Events — if you only ever need server→client push |
 | Auth | **Django sessions (httpOnly cookies)**, custom email OTP, argon2, django-axes (no 2FA, [ADR-0018](decisions/0018-remove-two-factor-authentication.md)) | JWT (simplejwt) — only if a native mobile app is added |
 | Authorization | Membership-based roles + policy functions + scoped selectors | django-rules — if policies grow very complex |
-| Audit log | **django-auditlog** | Custom `AuditEvent` model |
-| PDF | **WeasyPrint** (handles Arabic shaping + RTL) with Arabic fonts | Headless Chromium (Playwright) — if layouts get very complex |
+| Audit log | **Custom `AuditEvent`** for Super Admin actions ([ADR-0019](decisions/0019-platform-audit-log-and-quotation-pdfs.md)); **django-auditlog** planned for field changes on tenant data | — |
+| PDF | **WeasyPrint** (handles Arabic shaping + RTL), behind `apps/integrations/pdf`; Pango and DejaVu fonts in the image. **hijridate** for Umm al-Qura dates | Headless Chromium (Playwright) — if layouts get very complex |
 | File storage | **OCI Object Storage (S3-compatible) via django-storages**, private bucket + presigned URLs | Local disk volume — acceptable for the first days only |
 | Search | **PostgreSQL full-text + pg_trgm** | Meilisearch — at 100K+ users if name search gets slow |
 | Email (sending) | **SMTP through Django**, settings in `.env`, behind `apps/integrations/email` — **OCI Email Delivery** (Always Free, 3,000 emails/month) is enough at launch scale | `django-anymail` + Amazon SES or Brevo, if volume or delivery becomes a problem |

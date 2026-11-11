@@ -68,15 +68,18 @@ Goal: one or two real schools can run daily operations.
 - [ ] Teacher–parent messaging
 - [ ] In-app notifications live via WebSocket; email notifications via Celery
 - [ ] Hijri + Gregorian date display everywhere
-- [ ] Audit log wired on sensitive models
+- [ ] Audit log wired on sensitive tenant models (Super Admin actions are already logged)
 - [ ] Security checklist ([security.md](security.md) §9), backups + restore test, Sentry, uptime monitor
 - [ ] **Production deploy**, onboard pilot school, training session
 
 If week 3 slips, move **homework** to month 2 first, then **messaging** (announcements stay).
 
 ## Phase 1.5 — SaaS layer (Weeks 5–8)
-- [ ] Super Admin panel additions: plans, subscriptions (manual activate/expire), usage overview (schools list and onboarding moved to Week 1)
-- [ ] Quotation builder → PDF → email to school's business email; quotation status tracking
+- [x] Super Admin panel additions: plans, subscriptions (manual activate/expire, daily automatic expiry), usage overview (`feature/platform-billing-usage-audit`)
+- [x] Quotation builder → PDF (English/Arabic, VAT, Hijri dates) → email to a school or a demo request; draft/sent/accepted/rejected
+- [x] Audit log of Super Admin actions, read-only page in the panel ([ADR-0019](decisions/0019-platform-audit-log-and-quotation-pdfs.md))
+- [ ] Bundle IBM Plex Sans Arabic for PDFs (they use DejaVu Sans today)
+- [ ] Translate quotation and other emails into Arabic (the PDF is already bilingual)
 - [x] Public marketing site rebuilt to the approved design (`design/`): Home, About Us, LMS, Pricing (sample prices), Contact, Arabic and English, RTL, language menu (`feature/brand-home-redesign`)
 - [x] Book a demo and Contact forms: saved through `/api/platform/demo-requests/` and `/contact-messages/`, listed in Django admin, emailed to `LEADS_EMAIL`
 - [x] Site effects: typewriter on every page heading, cards slide into place on scroll, status cards on each hero (`feature/brand-home-redesign`)
