@@ -90,7 +90,7 @@ pre-commit install
 pre-commit run --all-files          # first run may "fail" after auto-fixing files; run it again
 ```
 
-To use the Super Admin panel at `/platform`, tick **Is platform admin** on your user in Django admin (`createsuperuser` does not set it). The first website login asks you to set up 2FA.
+To use the Super Admin panel at `/platform`, tick **Is platform admin** on your user in Django admin (`createsuperuser` does not set it).
 
 `python manage.py preview_emails` writes every email, with sample data, to `backend/.email-previews/` as HTML and text files (dev only). Branded email settings are in `.env.example`. `COMPANY_WEBSITE` defaults to `FRONTEND_URL`. The logo is attached to each email, so it shows in a real inbox even from a local machine. Set `BRAND_LOGO_URL` only to link to a public copy instead.
 
@@ -148,7 +148,7 @@ To take Lesson Lab off this server, follow [staging-teardown.md](staging-teardow
 - `main` is always deployable. No direct commits to `main`.
 - One branch per task: `feature/attendance`, `fix/login-otp`, `docs/...`, `chore/...`.
 - Open a PR, CI must be green, run an AI review, then merge. Delete the branch after merging.
-- Scope a PR to one complete, working module — not a tiny fragment (e.g. "add a model" alone), and not a sprawling grab-bag either. When two pieces share real infrastructure (e.g. TOTP 2FA and email OTP both need the same Celery/email setup), build them together in one PR rather than splitting purely for size. The bar: after merge, that one thing works end-to-end.
+- Scope a PR to one complete, working module — not a tiny fragment (e.g. "add a model" alone), and not a sprawling grab-bag either. When two pieces share real infrastructure (e.g. email OTP and the welcome email both need the same Celery/email setup), build them together in one PR rather than splitting purely for size. The bar: after merge, that one thing works end-to-end.
 - Merging to `main` deploys automatically (once CI/CD is set up).
 
 ### Git aliases: ship and cleanup

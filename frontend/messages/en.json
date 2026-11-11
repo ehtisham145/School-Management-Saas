@@ -43,52 +43,8 @@
         "generic": "Something went wrong. Please try again."
       }
     },
-    "totp": {
-      "description": "Enter the 6-digit code from your authenticator app.",
-      "resetDescription": "We emailed you a 6-digit code. Entering it signs you in and turns off two-factor authentication.",
-      "codeLabel": "Authenticator code",
-      "resetCodeLabel": "Email code",
-      "verify": "Verify",
-      "lostDevice": "I can't access my authenticator",
-      "backToLogin": "Back to sign in",
-      "errors": {
-        "invalidCode": "That code is incorrect.",
-        "expired": "Your sign-in expired. Please start again.",
-        "noEmail": "No email is on file. Please contact your school admin.",
-        "rateLimited": "Too many attempts. Please try again in a few minutes.",
-        "generic": "Something went wrong. Please try again.",
-        "wait": "Too many wrong codes. Please wait {seconds, plural, one {# second} other {# seconds}} and try again."
-      }
-    },
-    "totpSetup": {
-      "title": "Set up two-factor authentication",
-      "stepsLabel": "Setup progress",
-      "stepScan": "Scan QR code",
-      "stepVerify": "Enter code",
-      "stepDone": "completed",
-      "scanTitle": "Scan the QR code",
-      "scanDescription": "Open an authenticator app, such as Google Authenticator or Microsoft Authenticator, and scan this code with it.",
-      "qrLabel": "QR code to scan with your authenticator app",
-      "manualToggle": "Can't scan it? Enter a key instead",
-      "manualHelp": "Type this key into your authenticator app:",
-      "copy": "Copy",
-      "copied": "Copied",
-      "scanned": "I've scanned the QR code",
-      "retry": "Try again",
-      "verifyTitle": "Enter the 6-digit code",
-      "verifyDescription": "Your authenticator app now shows a 6-digit code. Enter it here to finish. The code changes every 30 seconds.",
-      "codeLabel": "Code from the app",
-      "submit": "Verify and continue",
-      "back": "Back to QR code",
-      "loading": "Preparing...",
-      "errors": {
-        "invalidCode": "That code is incorrect. Try the latest code from the app.",
-        "rateLimited": "Too many attempts. Please try again in a few minutes.",
-        "generic": "Something went wrong. Please try again.",
-        "wait": "Too many wrong codes. Please wait {seconds, plural, one {# second} other {# seconds}} and try again."
-      }
-    },
-    "schoolInactive": "Your school's account is currently inactive. Please contact Lesson Lab support."
+    "schoolInactive": "Your school's account is currently inactive. Please contact Lesson Lab support.",
+    "backToLogin": "Back to sign in"
   },
   "Dashboard": {
     "title": "Dashboard",
@@ -221,7 +177,6 @@
           "items": [
             "All traffic is encrypted with HTTPS.",
             "Passwords are stored as one-way hashes, never as plain text.",
-            "School and platform administrators must use two-factor authentication.",
             "Repeated failed sign-ins are blocked for a time."
           ]
         },
@@ -592,7 +547,7 @@
       "page": "Page {page} of {pages}",
       "loadFailed": "Couldn't load schools.",
       "retry": "Try again",
-      "accessDenied": "This page needs a sign-in with two-factor authentication.",
+      "accessDenied": "This page is for platform admins only.",
       "signIn": "Sign in",
       "subtitle": "Every school on the platform, and whether it is active.",
       "searchLabel": "Search by name, code or city",
@@ -668,7 +623,7 @@
       "loading": "Loading...",
       "loadFailed": "Couldn't load this page.",
       "retry": "Try again",
-      "accessDenied": "This page needs a sign-in with two-factor authentication.",
+      "accessDenied": "This page is for platform admins only.",
       "signIn": "Sign in",
       "previous": "Previous",
       "next": "Next",
@@ -746,9 +701,7 @@
       "username": "Username",
       "email": "Email",
       "role": "Role",
-      "roleValue": "Platform admin",
-      "twoFactor": "Two-factor authentication",
-      "twoFactorOn": "On"
+      "roleValue": "Platform admin"
     },
     "options": {
       "type": {

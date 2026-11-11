@@ -221,10 +221,10 @@ def test_summary_counts_every_status(platform_client):
     }
 
 
-def test_everyone_else_is_denied(two_schools, school_admin_client, unverified_platform_client):
+def test_everyone_else_is_denied(two_schools, school_admin_client):
     demo = _demo(email="private@example.com")
 
-    for client in (APIClient(), school_admin_client, unverified_platform_client):
+    for client in (APIClient(), school_admin_client):
         assert client.get(MANAGE_URL).status_code == 403
         assert client.get(SUMMARY_URL).status_code == 403
         assert client.get(_detail(demo)).status_code == 403

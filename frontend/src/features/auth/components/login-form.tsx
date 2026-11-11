@@ -7,10 +7,10 @@ import { Input } from "@/components/ui/input";
 import { ApiError } from "@/lib/api";
 import { required, useValidatedForm } from "@/lib/use-validated-form";
 import { login } from "../api";
-import type { LoginResponse } from "../schemas";
+import type { AuthenticatedResponse } from "../schemas";
 
 type LoginFormProps = {
-  onResponse: (response: LoginResponse) => void;
+  onResponse: (response: AuthenticatedResponse) => void;
   onUseEmailCode: () => void;
 };
 

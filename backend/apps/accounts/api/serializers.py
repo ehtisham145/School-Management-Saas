@@ -10,14 +10,6 @@ class LoginSerializer(serializers.Serializer):
     password = serializers.CharField(trim_whitespace=False)
 
 
-class TOTPConfirmSerializer(serializers.Serializer):
-    token = serializers.CharField(max_length=6, min_length=6)
-
-
-class EmailOTPConfirmSerializer(serializers.Serializer):
-    code = serializers.CharField(max_length=6, min_length=6)
-
-
 class EmailOTPRequestSerializer(serializers.Serializer):
     email = serializers.EmailField()
 

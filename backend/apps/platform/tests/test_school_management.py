@@ -384,8 +384,8 @@ def test_list_query_count_does_not_grow_with_schools(
         School(name_en=f"S{i}", name_ar=f"S{i}", code=f"s{i}") for i in range(20)
     )
 
-    # Session, user, 2FA device, page count and page rows.
-    with django_assert_max_num_queries(6):
+    # Session, user, page count and page rows.
+    with django_assert_max_num_queries(5):
         assert platform_client.get(SCHOOLS_URL).status_code == 200
 
 
@@ -451,23 +451,19 @@ def test_status_change_needs_post(platform_client, two_schools, action):
 
 
 @pytest.mark.parametrize("action", ["activate", "deactivate"])
-def test_status_change_is_denied_to_everyone_else(
-    two_schools, school_admin_client, unverified_platform_client, action
-):
+def test_status_change_is_denied_to_everyone_else(two_schools, school_admin_client, action):
     school_b = two_schools[1]
     School.objects.filter(pk=school_b.pk).update(is_active=action == "deactivate")
 
-    for client in (APIClient(), school_admin_client, unverified_platform_client):
+    for client in (APIClient(), school_admin_client):
         assert client.post(_status_url(school_b, action)).status_code == 403
 
     school_b.refresh_from_db()
     assert school_b.is_active is (action == "deactivate")
 
 
-def test_summary_is_denied_to_everyone_else(
-    two_schools, school_admin_client, unverified_platform_client
-):
-    for client in (APIClient(), school_admin_client, unverified_platform_client):
+def test_summary_is_denied_to_everyone_else(two_schools, school_admin_client):
+    for client in (APIClient(), school_admin_client):
         assert client.get(SUMMARY_URL).status_code == 403
 
 

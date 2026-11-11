@@ -1,42 +1,22 @@
 from django.contrib.auth import authenticate, login, logout
-from django.db import transaction
-from django_otp import login as otp_login
-from django_otp.plugins.otp_totp.models import TOTPDevice
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.throttling import ScopedRateThrottle
 from rest_framework.views import APIView
 
 from apps.accounts.api.serializers import (
-    EmailOTPConfirmSerializer,
     EmailOTPLoginVerifySerializer,
     EmailOTPRequestSerializer,
     LoginSerializer,
     SwitchSchoolSerializer,
-    TOTPConfirmSerializer,
 )
 from apps.accounts.models import User
-from apps.accounts.selectors import needs_2fa_setup
-from apps.accounts.services import request_email_otp, totp_wait_seconds, verify_email_otp
+from apps.accounts.services import request_email_otp, verify_email_otp
 from apps.tenancy.selectors import (
     get_switchable_membership,
     is_locked_out_by_inactive_school,
     list_active_memberships,
 )
-
-
-def _totp_wait_response(seconds):
-    return Response(
-        {
-            "error": {
-                "code": "totp_wait",
-                "message": f"Too many wrong codes. Please wait {seconds} seconds and try again.",
-                "retry_after": seconds,
-            }
-        },
-        status=429,
-        headers={"Retry-After": str(seconds)},
-    )
 
 
 def _serialize_memberships(memberships):
@@ -66,7 +46,6 @@ def _active_memberships(request):
 def _session_payload(request):
     return {
         "is_platform_admin": request.user.is_platform_admin,
-        "requires_2fa_setup": needs_2fa_setup(request.user),
         "school_inactive": is_locked_out_by_inactive_school(request.user),
         "memberships": _serialize_memberships(_active_memberships(request)),
     }
@@ -78,11 +57,6 @@ def _login_response(request):
 
 # The public sign-in endpoints skip session authentication: an old session in the
 # browser must never stop someone from signing in.
-
-
-def _pending_2fa_user(request):
-    user_id = request.session.get("pending_2fa_user_id")
-    return User.objects.filter(id=user_id).first() if user_id else None
 
 
 class SwitchSchoolView(APIView):
@@ -140,99 +114,7 @@ class LoginView(APIView):
                 status=401,
             )
 
-        if TOTPDevice.objects.filter(user=user, confirmed=True).exists():
-            request.session["pending_2fa_user_id"] = user.id
-            return Response({"requires_2fa": True})
-
         login(request, user)
-        return _login_response(request)
-
-
-class TOTPVerifyView(APIView):
-    authentication_classes = []
-    permission_classes = [AllowAny]
-    throttle_classes = [ScopedRateThrottle]
-    throttle_scope = "twofa"
-
-    def post(self, request):
-        serializer = TOTPConfirmSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-
-        user = _pending_2fa_user(request)
-        if user is None:
-            return Response(
-                {"error": {"code": "no_pending_login", "message": "No 2FA login in progress."}},
-                status=400,
-            )
-
-        device = TOTPDevice.objects.filter(user=user, confirmed=True).first()
-        if device is not None and (wait := totp_wait_seconds(device)):
-            return _totp_wait_response(wait)
-
-        if device is None or not device.verify_token(serializer.validated_data["token"]):
-            return Response(
-                {"error": {"code": "invalid_token", "message": "Invalid code."}}, status=401
-            )
-
-        del request.session["pending_2fa_user_id"]
-        login(request, user, backend="django.contrib.auth.backends.ModelBackend")
-        otp_login(request, device)
-        return _login_response(request)
-
-
-class TOTPResetRequestView(APIView):
-    authentication_classes = []
-    permission_classes = [AllowAny]
-    throttle_classes = [ScopedRateThrottle]
-    throttle_scope = "twofa"
-
-    def post(self, request):
-        user = _pending_2fa_user(request)
-        if user is None:
-            return Response(
-                {"error": {"code": "no_pending_login", "message": "No 2FA login in progress."}},
-                status=400,
-            )
-        if not user.email:
-            return Response(
-                {
-                    "error": {
-                        "code": "no_email",
-                        "message": "No email on file. Contact your school admin.",
-                    }
-                },
-                status=400,
-            )
-
-        request_email_otp(user, "totp_reset")
-        return Response(status=204)
-
-
-class TOTPResetConfirmView(APIView):
-    authentication_classes = []
-    permission_classes = [AllowAny]
-    throttle_classes = [ScopedRateThrottle]
-    throttle_scope = "twofa"
-
-    def post(self, request):
-        serializer = EmailOTPConfirmSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-
-        user = _pending_2fa_user(request)
-        if user is None:
-            return Response(
-                {"error": {"code": "no_pending_login", "message": "No 2FA login in progress."}},
-                status=400,
-            )
-
-        if not verify_email_otp(user, "totp_reset", serializer.validated_data["code"]):
-            return Response(
-                {"error": {"code": "invalid_token", "message": "Invalid code."}}, status=401
-            )
-
-        TOTPDevice.objects.filter(user=user).delete()
-        del request.session["pending_2fa_user_id"]
-        login(request, user, backend="django.contrib.auth.backends.ModelBackend")
         return _login_response(request)
 
 
@@ -240,7 +122,7 @@ class EmailOTPRequestView(APIView):
     authentication_classes = []
     permission_classes = [AllowAny]
     throttle_classes = [ScopedRateThrottle]
-    throttle_scope = "twofa"
+    throttle_scope = "email_code"
 
     def post(self, request):
         serializer = EmailOTPRequestSerializer(data=request.data)
@@ -257,7 +139,7 @@ class EmailOTPVerifyView(APIView):
     authentication_classes = []
     permission_classes = [AllowAny]
     throttle_classes = [ScopedRateThrottle]
-    throttle_scope = "twofa"
+    throttle_scope = "email_code"
 
     def post(self, request):
         serializer = EmailOTPLoginVerifySerializer(data=request.data)
@@ -269,10 +151,6 @@ class EmailOTPVerifyView(APIView):
                 {"error": {"code": "invalid_credentials", "message": "Invalid email or code."}},
                 status=401,
             )
-
-        if TOTPDevice.objects.filter(user=user, confirmed=True).exists():
-            request.session["pending_2fa_user_id"] = user.id
-            return Response({"requires_2fa": True})
 
         login(request, user, backend="django.contrib.auth.backends.ModelBackend")
         return _login_response(request)
@@ -297,56 +175,4 @@ class MeView(APIView):
 class LogoutView(APIView):
     def post(self, request):
         logout(request)
-        return Response(status=204)
-
-
-class TOTPSetupView(APIView):
-    def post(self, request):
-        if TOTPDevice.objects.filter(user=request.user, confirmed=True).exists():
-            return Response(
-                {
-                    "error": {
-                        "code": "already_enabled",
-                        "message": "2FA is already enabled. Use the reset flow to replace it.",
-                    }
-                },
-                status=400,
-            )
-        # Locks the user row so a double submit can't create two pending devices.
-        with transaction.atomic():
-            User.objects.select_for_update().get(pk=request.user.pk)
-            device = TOTPDevice.objects.filter(user=request.user, confirmed=False).first()
-            if device is None:
-                device = TOTPDevice.objects.create(
-                    user=request.user, confirmed=False, name="default"
-                )
-        return Response({"otpauth_url": device.config_url, "secret": device.bin_key.hex()})
-
-
-class TOTPConfirmView(APIView):
-    throttle_classes = [ScopedRateThrottle]
-    throttle_scope = "twofa"
-
-    def post(self, request):
-        serializer = TOTPConfirmSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-
-        device = TOTPDevice.objects.filter(user=request.user, confirmed=False).first()
-        if device is None:
-            return Response(
-                {"error": {"code": "not_found", "message": "No pending 2FA setup found."}},
-                status=404,
-            )
-
-        if wait := totp_wait_seconds(device):
-            return _totp_wait_response(wait)
-
-        if not device.verify_token(serializer.validated_data["token"]):
-            return Response(
-                {"error": {"code": "invalid_token", "message": "Invalid code."}}, status=400
-            )
-
-        device.confirmed = True
-        device.save(update_fields=["confirmed"])
-        otp_login(request, device)
         return Response(status=204)

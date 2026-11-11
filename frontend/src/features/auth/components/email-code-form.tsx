@@ -8,11 +8,11 @@ import { Input } from "@/components/ui/input";
 import { ApiError } from "@/lib/api";
 import { email, sanitizeCode, sixDigitCode, useValidatedForm } from "@/lib/use-validated-form";
 import { requestEmailOtp, verifyEmailOtp } from "../api";
-import type { LoginResponse } from "../schemas";
+import type { AuthenticatedResponse } from "../schemas";
 import { CodeInput } from "./code-input";
 
 type EmailCodeFormProps = {
-  onResponse: (response: LoginResponse) => void;
+  onResponse: (response: AuthenticatedResponse) => void;
   onBack: () => void;
 };
 
@@ -75,7 +75,7 @@ function CodeStep({
   onChangeEmail,
 }: {
   address: string;
-  onResponse: (response: LoginResponse) => void;
+  onResponse: (response: AuthenticatedResponse) => void;
   onChangeEmail: () => void;
 }) {
   const t = useTranslations("Auth.emailCode");

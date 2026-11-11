@@ -29,16 +29,14 @@ from apps.platform.services import (
 )
 
 
-class IsVerifiedPlatformAdmin(BasePermission):
-    """A password-only session, such as a Django admin login, is not enough here."""
-
+class IsPlatformAdmin(BasePermission):
     def has_permission(self, request, view):
         user = request.user
-        return user.is_authenticated and user.is_platform_admin and user.is_verified()
+        return user.is_authenticated and user.is_platform_admin
 
 
 class SchoolViewSet(mixins.ListModelMixin, mixins.CreateModelMixin, viewsets.GenericViewSet):
-    permission_classes = [IsVerifiedPlatformAdmin]
+    permission_classes = [IsPlatformAdmin]
     serializer_class = SchoolSerializer
 
     def get_queryset(self):
@@ -79,7 +77,7 @@ class DemoRequestAdminViewSet(
 ):
     """The panel's inbox. It is separate from the public form, which stays write-only."""
 
-    permission_classes = [IsVerifiedPlatformAdmin]
+    permission_classes = [IsPlatformAdmin]
     serializer_class = DemoRequestAdminSerializer
     http_method_names = ["get", "patch", "head", "options"]
 
@@ -104,7 +102,7 @@ class DemoRequestAdminViewSet(
 
 
 class DashboardView(APIView):
-    permission_classes = [IsVerifiedPlatformAdmin]
+    permission_classes = [IsPlatformAdmin]
 
     def get(self, request):
         overview = get_dashboard_overview()

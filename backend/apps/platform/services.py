@@ -20,7 +20,7 @@ def _create_admin_user(code, email, name):
         raise ValidationError({"code": "This code is not available."})
 
     first_name, _, last_name = name.partition(" ")
-    # No password: the new admin signs in with an email code, then sets up 2FA.
+    # No password: the new admin signs in with an email code.
     return User.objects.create_user(
         username=username, email=email, password=None, first_name=first_name, last_name=last_name
     )

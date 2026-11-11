@@ -9,13 +9,9 @@ import { me } from "../api";
 import { toActiveSession, type Membership } from "../schemas";
 import { useSession } from "../session-store";
 import { SchoolPicker } from "./school-picker";
-import { TotpSetup } from "./totp-setup";
 
 type GuardState =
-  | { name: "loading" }
-  | { name: "totp-setup" }
-  | { name: "choose-school"; memberships: Membership[] }
-  | { name: "failed" };
+  { name: "loading" } | { name: "choose-school"; memberships: Membership[] } | { name: "failed" };
 
 function CenteredCard({ children }: { children: ReactNode }) {
   return (
@@ -53,9 +49,7 @@ export function RequireSession({ children }: { children: ReactNode }) {
           (membership) => membership.membership_id === result.active_membership_id,
         );
 
-        if (result.requires_2fa_setup) {
-          setGuard({ name: "totp-setup" });
-        } else if (active) {
+        if (active) {
           setSession(toActiveSession(active));
         } else if (result.memberships.length > 1) {
           setGuard({ name: "choose-school", memberships: result.memberships });
@@ -80,14 +74,6 @@ export function RequireSession({ children }: { children: ReactNode }) {
 
   if (session) {
     return children;
-  }
-
-  if (guard.name === "totp-setup") {
-    return (
-      <CenteredCard>
-        <TotpSetup onDone={reload} />
-      </CenteredCard>
-    );
   }
 
   if (guard.name === "choose-school") {

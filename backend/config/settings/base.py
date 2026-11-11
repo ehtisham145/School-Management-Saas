@@ -26,8 +26,6 @@ THIRD_PARTY_APPS = [
     "drf_spectacular",
     "channels",
     "axes",
-    "django_otp",
-    "django_otp.plugins.otp_totp",
 ]
 LOCAL_APPS: list[str] = [
     "apps.accounts",
@@ -46,7 +44,6 @@ MIDDLEWARE = [
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
-    "django_otp.middleware.OTPMiddleware",
     "apps.tenancy.middleware.TenantMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
@@ -98,7 +95,6 @@ BRAND_HEADER_LABEL = env("BRAND_HEADER_LABEL", default="School Management")
 BRAND_LOGO_URL = env("BRAND_LOGO_URL", default="")
 BRAND_LOGO_WIDTH = 155
 BRAND_LOGO_HEIGHT = 36
-OTP_TOTP_ISSUER = "Lesson Lab"
 
 # ---------------------------------------------------------------- Passwords
 PASSWORD_HASHERS = [
@@ -120,7 +116,7 @@ AUTHENTICATION_BACKENDS = [
     "axes.backends.AxesStandaloneBackend",  # must be first
     "django.contrib.auth.backends.ModelBackend",
 ]
-AXES_FAILURE_LIMIT = 5
+AXES_FAILURE_LIMIT = 15
 AXES_COOLOFF_TIME = 1  # hours
 AXES_LOCKOUT_PARAMETERS = ["username", "ip_address"]
 
@@ -145,7 +141,7 @@ REST_FRAMEWORK = {
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
     "PAGE_SIZE": 25,
-    "DEFAULT_THROTTLE_RATES": {"login": "20/min", "twofa": "50/min", "leads": "10/hour"},
+    "DEFAULT_THROTTLE_RATES": {"login": "20/min", "email_code": "50/min", "leads": "10/hour"},
     "EXCEPTION_HANDLER": "apps.core.exceptions.api_exception_handler",
 }
 SPECTACULAR_SETTINGS = {
