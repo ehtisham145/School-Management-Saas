@@ -13,6 +13,7 @@ import { Select } from "@/components/ui/select";
 import { ApiError } from "@/lib/api";
 import {
   email,
+  emailOtherThan,
   englishName,
   optionalArabicName,
   optionalRegistrationNumber,
@@ -101,7 +102,7 @@ function SchoolForm({ demo }: { demo?: DemoRequest }) {
       cr_number: optionalRegistrationNumber(REGISTRATION_NUMBER_MAX),
       moe_license_number: optionalRegistrationNumber(REGISTRATION_NUMBER_MAX),
       admin_name: required(120),
-      admin_email: email,
+      admin_email: emailOtherThan("email"),
       admin_phone: requiredMobile,
     },
     sanitizers: {

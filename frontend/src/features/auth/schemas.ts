@@ -19,7 +19,10 @@ export type LoginRequest = {
 };
 
 export type AuthenticatedResponse = {
+  username: string;
   is_platform_admin: boolean;
+  /** Staff created without a password must choose one before using the app. */
+  needs_password: boolean;
   /** The user belongs to schools, but all of them are deactivated. */
   school_inactive: boolean;
   memberships: Membership[];
@@ -36,7 +39,6 @@ export type SwitchSchoolResponse = {
 };
 
 export type MeResponse = AuthenticatedResponse & {
-  username: string;
   email: string | null;
   full_name: string;
   active_membership_id: number | null;

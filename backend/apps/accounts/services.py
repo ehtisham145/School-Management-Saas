@@ -19,6 +19,12 @@ def request_email_otp(user, purpose):
     send_otp_email_task.delay(user.email, code)
 
 
+def set_first_password(user, password):
+    """Gives a password to a user who has none. The caller has validated it."""
+    user.set_password(password)
+    user.save(update_fields=["password"])
+
+
 def verify_email_otp(user, purpose, code):
     otp = (
         EmailOTP.objects.filter(user=user, purpose=purpose, used_at__isnull=True)

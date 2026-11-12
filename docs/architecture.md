@@ -80,7 +80,7 @@ class TenantModel(models.Model):
 - Public sign-in endpoints skip session authentication, so an old session or a missing CSRF cookie in the browser can't block a login. Endpoints for signed-in users still require CSRF.
 - There is no two-factor authentication: a password or an email code alone signs a user in ([ADR-0018](decisions/0018-remove-two-factor-authentication.md)).
 - `/api/platform/` needs a signed-in user with `is_platform_admin`.
-- A new School Admin gets no password: the Super Admin enters their email, and they sign in with an email code.
+- A new School Admin gets no password: the Super Admin enters their email, and the welcome email gives their username (`<school code>.admin`). The first sign-in is by email code. Staff without a usable password (School Admin, Principal, Teacher, or a platform admin) get `needs_password: true` from login and `/api/auth/me/`, and the website sends them to `/set-password` before anything else. `POST /api/auth/password/set/` sets it once, checked by Django's password validators (10+ characters, not common, not all digits, not like the username), and keeps the session. Parents and students are never asked.
 - A new school's email and its admin's email must both be unused. Neither can match any user account, including a Super Admin's, or any school's email, in any letter case, and the two can't be the same. A database constraint backs up school emails, and `accounts_user` email is already unique.
 - Demo request phone numbers must be Saudi mobiles and are saved as `+9665XXXXXXXX`. The frontend blocks other characters, and the backend checks again.
 - Every email goes through `apps/integrations/email/branded.py` (one shared header, footer and block helpers, tables and inline styles only) and is composed in `adapter.py`. Celery tasks on the `emails` queue send them, so sending never blocks a web request.
@@ -222,7 +222,7 @@ lms/
 ├── frontend/
 │   ├── src/app/[locale]/
 │   │   ├── (marketing)/        home, features, pricing, about, contact   ← SSG
-│   │   ├── (auth)/             login, email code
+│   │   ├── (auth)/             login, email code, set password
 │   │   ├── (app)/              dashboard, students, attendance, exams, ...  ← logged-in
 │   │   └── (platform)/         super admin
 │   ├── src/features/<module>/  components/, api.ts, schemas.ts (auth, leads, marketing, platform)

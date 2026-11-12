@@ -96,7 +96,7 @@ def _create_school_with_admin(
         details={"code": code, "demo_request": demo.pk if demo else None},
     )
     transaction.on_commit(
-        lambda: send_school_admin_welcome_email_task.delay(admin.email, name_en),
+        lambda: send_school_admin_welcome_email_task.delay(admin.email, name_en, admin.username),
         robust=True,
     )
     return school
