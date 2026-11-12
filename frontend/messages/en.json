@@ -46,7 +46,23 @@
       }
     },
     "schoolInactive": "Your school's account is currently inactive. Please contact Lesson Lab support.",
-    "backToLogin": "Back to sign in"
+    "backToLogin": "Back to sign in",
+    "setPassword": {
+      "title": "Set your password",
+      "description": "Choose a password for your account. You'll use it with your username next time.",
+      "usernameLabel": "Your username",
+      "usernameHint": "Keep it, you'll need it to sign in.",
+      "passwordLabel": "New password",
+      "passwordHint": "At least 10 characters. Avoid common passwords and your username.",
+      "confirmLabel": "Confirm password",
+      "submit": "Save password",
+      "submitting": "Saving...",
+      "errors": {
+        "weak": "Choose a stronger password: not a common one and not like your username.",
+        "alreadySet": "This account already has a password. Please sign in.",
+        "generic": "Something went wrong. Please try again."
+      }
+    }
   },
   "Dashboard": {
     "title": "Dashboard",
@@ -1179,7 +1195,11 @@
       "quantity": "Enter a whole number from 1 to 10,000.",
       "date": "Choose a date.",
       "pastDate": "Choose today or a later date.",
-      "choose": "Choose one."
+      "choose": "Choose one.",
+      "passwordShort": "Use at least 10 characters.",
+      "passwordNumeric": "Use letters as well as numbers.",
+      "passwordMismatch": "The passwords don't match.",
+      "sameEmail": "Use a different email from the school email."
     },
     "demo": {
       "title": "Book a demo",

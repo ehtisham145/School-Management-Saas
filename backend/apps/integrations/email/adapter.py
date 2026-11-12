@@ -43,21 +43,23 @@ def otp_email_content(to_email, code):
     }
 
 
-def school_admin_welcome_content(to_email, school_name):
+def school_admin_welcome_content(to_email, school_name, username=None):
     school = user_text(school_name)
+    steps = [
+        "Open the sign-in page using the button below.",
+        "Choose <strong>Sign in with an email code</strong>.",
+        "Enter this email address, then the code we send you.",
+        "Choose your password. After that, sign in with your username and password.",
+    ]
+    body = checklist(steps, title="How to sign in the first time")
+    if username:
+        body = detail_table([("Your username", username)]) + body
     return {
         "subject": f"Your {school_name} account is ready",
         "to": to_email,
         "heading": "Welcome to Lesson Lab",
         "intro": f"You are now the administrator of <strong>{school}</strong>.",
-        "body_html": checklist(
-            [
-                "Open the sign-in page using the button below.",
-                "Choose <strong>Sign in with an email code</strong>.",
-                "Enter this email address, then the code we send you.",
-            ],
-            title="How to sign in",
-        ),
+        "body_html": body,
         "cta_label": "Sign in to Lesson Lab",
         "cta_url": f"{settings.FRONTEND_URL}/login",
         "preheader": f"Your {school} account is ready. Here is how to sign in.",
@@ -116,8 +118,8 @@ def send_otp_email(to_email, code):
     send_branded_email(**otp_email_content(to_email, code))
 
 
-def send_school_admin_welcome_email(to_email, school_name):
-    send_branded_email(**school_admin_welcome_content(to_email, school_name))
+def send_school_admin_welcome_email(to_email, school_name, username=None):
+    send_branded_email(**school_admin_welcome_content(to_email, school_name, username))
 
 
 def send_quotation_email(**content):
@@ -153,7 +155,9 @@ def preview_messages():
     ]
     contents = {
         "otp": otp_email_content("admin@example.com", "123456"),
-        "school-admin-welcome": school_admin_welcome_content("admin@example.com", "Al Noor School"),
+        "school-admin-welcome": school_admin_welcome_content(
+            "admin@example.com", "Al Noor School", "alnoor.admin"
+        ),
         "demo-request": lead_notification_content(
             subject="Demo request: Al Noor School",
             heading="New demo request",

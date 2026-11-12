@@ -19,6 +19,13 @@ export function switchSchool(body: SwitchSchoolRequest) {
   return apiFetch<SwitchSchoolResponse>("/auth/switch-school/", { method: "POST", body });
 }
 
+export function setPassword(password: string) {
+  return apiFetch<AuthenticatedResponse>("/auth/password/set/", {
+    method: "POST",
+    body: { password },
+  });
+}
+
 export function logout() {
   return apiFetch<void>("/auth/logout/", { method: "POST" });
 }

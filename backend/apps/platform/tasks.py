@@ -8,8 +8,8 @@ from apps.integrations.email.adapter import (
 
 
 @shared_task(queue="emails")
-def send_school_admin_welcome_email_task(to_email, school_name):
-    send_school_admin_welcome_email(to_email, school_name)
+def send_school_admin_welcome_email_task(to_email, school_name, username=None):
+    send_school_admin_welcome_email(to_email, school_name, username)
 
 
 @shared_task(queue="emails")

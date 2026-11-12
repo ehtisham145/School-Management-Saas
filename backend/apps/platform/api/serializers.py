@@ -17,6 +17,7 @@ LETTER_OR_DIGIT = re.compile(r"[^\W_]")
 MAX_STUDENTS = 100_000
 SEARCH_MAX_LENGTH = 100
 EMAIL_IN_USE = "This email is already in use."
+SAME_AS_SCHOOL_EMAIL = "Use a different email from the school email."
 REQUIRED_TEXT = {"required": True, "allow_blank": False}
 
 
@@ -144,7 +145,7 @@ class SchoolSerializer(serializers.ModelSerializer):
         if not attrs.get("code"):
             attrs["code"] = self._generate_unique_code(attrs.get("name_en", ""))
         if attrs["email"].lower() == attrs["admin_email"].lower():
-            raise serializers.ValidationError({"admin_email": EMAIL_IN_USE})
+            raise serializers.ValidationError({"admin_email": SAME_AS_SCHOOL_EMAIL})
         return attrs
 
     def validate_education_stages(self, value):

@@ -1,4 +1,4 @@
-from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth import authenticate, login, logout, update_session_auth_hash
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.throttling import ScopedRateThrottle
@@ -8,10 +8,12 @@ from apps.accounts.api.serializers import (
     EmailOTPLoginVerifySerializer,
     EmailOTPRequestSerializer,
     LoginSerializer,
+    SetPasswordSerializer,
     SwitchSchoolSerializer,
 )
 from apps.accounts.models import User
-from apps.accounts.services import request_email_otp, verify_email_otp
+from apps.accounts.selectors import needs_password_setup
+from apps.accounts.services import request_email_otp, set_first_password, verify_email_otp
 from apps.tenancy.selectors import (
     get_switchable_membership,
     is_locked_out_by_inactive_school,
@@ -45,7 +47,9 @@ def _active_memberships(request):
 
 def _session_payload(request):
     return {
+        "username": request.user.username,
         "is_platform_admin": request.user.is_platform_admin,
+        "needs_password": needs_password_setup(request.user),
         "school_inactive": is_locked_out_by_inactive_school(request.user),
         "memberships": _serialize_memberships(_active_memberships(request)),
     }
@@ -153,6 +157,33 @@ class EmailOTPVerifyView(APIView):
             )
 
         login(request, user, backend="django.contrib.auth.backends.ModelBackend")
+        return _login_response(request)
+
+
+class SetPasswordView(APIView):
+    """A signed-in user with no password yet chooses one, after a first email-code sign-in."""
+
+    throttle_classes = [ScopedRateThrottle]
+    throttle_scope = "login"
+
+    def post(self, request):
+        if not needs_password_setup(request.user):
+            return Response(
+                {
+                    "error": {
+                        "code": "password_already_set",
+                        "message": "This account already has a password.",
+                    }
+                },
+                status=409,
+            )
+
+        serializer = SetPasswordSerializer(data=request.data, context={"user": request.user})
+        serializer.is_valid(raise_exception=True)
+
+        set_first_password(request.user, serializer.validated_data["password"])
+        # A new password ends every session; keep this one signed in.
+        update_session_auth_hash(request, request.user)
         return _login_response(request)
 
 

@@ -36,8 +36,16 @@ function LoginSteps() {
   const [step, setStep] = useState<Step>({ name: "password" });
 
   const continueToApp = useCallback(
-    ({ is_platform_admin, memberships, school_inactive }: AuthenticatedResponse) => {
-      if (is_platform_admin) {
+    ({
+      needs_password,
+      is_platform_admin,
+      memberships,
+      school_inactive,
+    }: AuthenticatedResponse) => {
+      if (needs_password) {
+        // First sign-in by email code: choose a password before anything else.
+        router.push("/set-password");
+      } else if (is_platform_admin) {
         markFreshLogin();
         router.push("/platform");
       } else if (memberships.length === 0) {

@@ -239,7 +239,9 @@ def test_school_and_admin_cannot_share_one_email(platform_client):
     response = _create(platform_client, admin_email="OFFICE@alnoor.example")
 
     assert response.status_code == 400
-    assert "admin_email" in response.data["error"]["fields"]
+    assert response.data["error"]["fields"]["admin_email"] == [
+        "Use a different email from the school email."
+    ]
     assert not School.objects.filter(code="alnoor").exists()
 
 

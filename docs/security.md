@@ -12,6 +12,7 @@ This system stores **children's personal data** for multiple organisations. A cr
 
 ## 2. Authentication
 - [x] Argon2 password hashing; Django password validators on.
+- [x] Staff created without a password (a new School Admin) sign in once with an email code and must set a password before using the app. The set-password endpoint works only while the account has no password, runs the password validators, and keeps the current session.
 - [x] `django-axes`: lock after 15 failed attempts (per user + IP), with a 1-hour cool-off.
 - [x] Emails: anything a user typed, including names, goes through `user_text()` before it is placed in email markup. Codes and links are never logged, and a code is never in a subject or preheader.
 - [ ] Email OTP: random 6 digits, stored **hashed**, 10-min expiry, single use, 5 attempts max, resend throttled (e.g. 1/min, 5/hour).

@@ -109,6 +109,7 @@ def test_create_makes_school_admin_and_sends_welcome_email(db, django_capture_on
 
     assert [message.to for message in mail.outbox] == [[VALID_SCHOOL["admin_email"]]]
     assert "Al Noor School" in mail.outbox[0].body
+    assert "alnoor.admin" in mail.outbox[0].body
 
 
 def test_new_admin_signs_in_with_an_email_code(db, django_capture_on_commit_callbacks):

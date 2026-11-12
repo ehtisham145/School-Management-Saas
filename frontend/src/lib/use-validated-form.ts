@@ -26,9 +26,14 @@ export type ErrorKey =
   | "quantity"
   | "date"
   | "pastDate"
-  | "choose";
+  | "choose"
+  | "passwordShort"
+  | "passwordNumeric"
+  | "passwordMismatch"
+  | "sameEmail";
 
-type Validator = (value: string) => ErrorKey | null;
+/** Gets the field value, and every value of the form for checks that compare fields. */
+type Validator = (value: string, all: Record<string, string>) => ErrorKey | null;
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const SAUDI_MOBILE_PATTERN = /^(?:\+?966|0)?5[0-9]{8}$/;
@@ -153,6 +158,31 @@ export const sixDigitCode = (value: string) => {
   return /^[0-9]{6}$/.test(value) ? null : "code";
 };
 
+/** Matches the server's minimum; the server also rejects common passwords. */
+export const PASSWORD_MIN_LENGTH = 10;
+export const newPassword = (value: string) => {
+  if (!value) return "required";
+  if (value.length < PASSWORD_MIN_LENGTH) return "passwordShort";
+  if (/^[0-9]+$/.test(value)) return "passwordNumeric";
+  return value.length > 128 ? "tooLong" : null;
+};
+/** The value must repeat another field, such as a password confirmation. */
+export const repeats =
+  (field: string): Validator =>
+  (value, all) => {
+    if (!value) return "required";
+    return value === all[field] ? null : "passwordMismatch";
+  };
+/** An email that must not be the same as the one in another field. */
+export const emailOtherThan =
+  (field: string): Validator =>
+  (value, all) => {
+    const error = email(value);
+    if (error) return error;
+    const other = all[field]?.trim().toLowerCase();
+    return other && other === value.trim().toLowerCase() ? "sameEmail" : null;
+  };
+
 type Options<F extends Record<string, string>> = {
   initial: F;
   validators: Partial<Record<keyof F, Validator>>;
@@ -212,7 +242,7 @@ export function useValidatedForm<F extends Record<string, string>>({
     if (rejectedKey) return t(rejectedKey);
     if (!touched[name]) return undefined;
 
-    const key: ErrorKey | null | undefined = validators[name]?.(values[name]);
+    const key: ErrorKey | null | undefined = validators[name]?.(values[name], values);
     if (key) return t(key);
     if (!serverErrors[name]) return undefined;
     return describeFieldError?.(name) ?? t("invalid");
@@ -232,7 +262,7 @@ export function useValidatedForm<F extends Record<string, string>>({
       id,
       name,
       value: values[name],
-      "aria-required": validators[name]?.("") ? true : undefined,
+      "aria-required": validators[name]?.("", values) ? true : undefined,
       "aria-invalid": Boolean(error),
       "aria-describedby": error ? `${id}-error` : undefined,
       onChange: (
@@ -271,7 +301,7 @@ export function useValidatedForm<F extends Record<string, string>>({
     const names = Object.keys(values) as (keyof F & string)[];
     setTouched(Object.fromEntries(names.map((name) => [name, true])) as Record<keyof F, boolean>);
 
-    const firstInvalid = names.find((name) => validators[name]?.(values[name]));
+    const firstInvalid = names.find((name) => validators[name]?.(values[name], values));
     if (firstInvalid) {
       bringIntoView(form, firstInvalid);
       return;
