@@ -86,7 +86,10 @@ If week 3 slips, move **homework** to month 2 first, then **messaging** (announc
 - [x] Forms: required-field asterisks, live validation that clears at once, scroll to the first error, Saudi mobile validation on the frontend and backend, compact Book a demo popup (`feature/forms-validation`)
 - [x] Sign in page: brand beside a sign-in card on a plain page, no image, Book a demo link, validation on every step
 - [x] SMTP email settings through `.env`; `sendtestemail` ran without an error against the real provider. Inbox delivery and SPF/DKIM/DMARC still to be confirmed
+- [x] Pricing page: For schools (yearly: Basic, Premium, Custom) and For teachers (monthly: Teacher, Teacher Pro) tabs, each plan with its own features; plan requests go to Demo requests
 - [ ] Replace sample prices and plan contents with confirmed ones
+- [ ] Individual teacher accounts: decide the features with the client, then build them (likely a one-teacher workspace on the existing tenancy)
+- [ ] Plans in the Super Admin panel: mark a plan as for schools or for teachers, and allow a plan with no list price (Custom)
 - [ ] Translate backend validation and email text into Arabic
 - [x] SEO: page metadata and Arabic/English `hreflang`, server-rendered text
 - [ ] SEO: sitemap, Open Graph images

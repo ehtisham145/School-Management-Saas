@@ -100,7 +100,7 @@ export type DemoRequest = {
   school_name: string;
   email: string;
   phone: string;
-  plan: "basic" | "premium" | "advanced" | "";
+  plan: "basic" | "premium" | "custom" | "teacher" | "teacher_pro" | "";
   message: string;
   status: DemoStatus;
   admin_notes: string;

@@ -22,9 +22,12 @@ class Lead(models.Model):
 
 class DemoRequest(Lead):
     class Plan(models.TextChoices):
+        # School plans are yearly; teacher plans are monthly (see the pricing page).
         BASIC = "basic", "Basic"
         PREMIUM = "premium", "Premium"
-        ADVANCED = "advanced", "Advanced"
+        CUSTOM = "custom", "Custom"
+        TEACHER = "teacher", "Teacher"
+        TEACHER_PRO = "teacher_pro", "Teacher Pro"
 
     class Status(models.TextChoices):
         NEW = "new", "New"
