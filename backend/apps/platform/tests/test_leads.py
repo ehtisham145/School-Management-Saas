@@ -38,6 +38,14 @@ def test_demo_request_is_saved(api_client):
     assert demo.is_handled is False
 
 
+@pytest.mark.parametrize("plan", ["basic", "premium", "custom", "teacher", "teacher_pro", ""])
+def test_demo_request_accepts_every_pricing_plan(api_client, plan):
+    response = api_client.post(DEMO_URL, {**VALID_DEMO, "plan": plan})
+
+    assert response.status_code == 201
+    assert DemoRequest.objects.get().plan == plan
+
+
 def test_demo_request_needs_only_name_school_and_email(api_client):
     response = api_client.post(
         DEMO_URL, {"name": "A", "school_name": "B", "email": "a@example.com"}
@@ -91,6 +99,7 @@ def test_line_breaks_cannot_inject_email_headers(api_client, django_capture_on_c
         ("phone", "050123456"),
         ("phone", "05012345678"),
         ("plan", "free"),
+        ("plan", "advanced"),
     ],
 )
 def test_demo_request_rejects_invalid_fields(api_client, field, value):

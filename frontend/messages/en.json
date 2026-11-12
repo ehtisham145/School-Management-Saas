@@ -422,56 +422,100 @@
         "words": [
           "50-student school.",
           "500-student school.",
-          "five-campus network.",
-          "single pilot section."
+          "five-campus group.",
+          "single teacher."
         ]
       },
+      "tabs": {
+        "label": "Choose who the plans are for",
+        "schools": "For schools",
+        "teachers": "For teachers"
+      },
+      "schoolsIntro": "Yearly plans for private schools, priced per school.",
+      "teachersIntro": "Monthly plans for teachers who work on their own.",
+      "perYear": "per year",
       "perMonth": "per month",
-      "note": "Prices are per school, per month. Your quote depends on your student count and the modules you need.",
       "popular": "Most popular",
       "includes": "What's included",
-      "choose": "Book a demo",
+      "bookDemo": "Book a demo",
+      "talkToUs": "Talk to us",
+      "requestAccess": "Request access",
+      "schoolsNote": "Prices are per school, per year, before VAT. Your final quote depends on your student count and the modules you need.",
+      "teachersNote": "Prices are per teacher, per month, before VAT. Our team activates your account, usually within one working day. If your school joins Lesson Lab later, your classes and lesson plans move with you.",
       "tiers": {
         "basic": {
           "name": "Basic",
-          "price": "SAR 1,500",
-          "tagline": "One school, getting started.",
+          "price": "SAR 15,000",
+          "billing": "Billed yearly, per school.",
+          "tagline": "The essentials for a single school.",
           "features": [
             "Student, parent and staff records",
             "Daily attendance",
             "Class timetables",
-            "Announcements and parent messages",
+            "Announcements to parents",
             "Arabic and English, on any device",
-            "Up to 2 academic years of history",
+            "Up to 300 students",
             "Email support"
           ]
         },
         "premium": {
           "name": "Premium",
-          "price": "SAR 3,000",
-          "tagline": "For a growing private school.",
+          "price": "SAR 30,000",
+          "billing": "Billed yearly, per school.",
+          "tagline": "Everything a growing private school needs.",
           "features": [
             "Everything in Basic",
             "Exams, marks and report cards",
             "Fee plans, payments and receipts",
             "Homework with attachments",
-            "Hijri and Gregorian dates",
-            "Dashboards for principals and teachers",
+            "Teacher and parent messaging",
+            "Lesson plans and presentations",
+            "Up to 1,000 students",
             "Priority WhatsApp support"
           ]
         },
-        "advanced": {
-          "name": "Advanced",
-          "price": "SAR 5,000",
-          "tagline": "Multiple campuses, one group.",
+        "custom": {
+          "name": "Custom",
+          "price": "Tailored to you",
+          "billing": "Quoted for your school or group.",
+          "tagline": "Built around your school or group.",
           "features": [
             "Everything in Premium",
             "Several campuses under one group",
-            "Shared staff across campuses",
-            "Group-level reporting",
-            "Full academic history",
-            "A dedicated setup and training call",
+            "No student limit",
+            "AI lesson plans and slides",
+            "Data import from your current system",
+            "Setup and staff training",
             "A named account manager"
+          ]
+        },
+        "teacher": {
+          "name": "Teacher",
+          "price": "SAR 49",
+          "billing": "Billed monthly. Cancel anytime.",
+          "tagline": "Everything you need to run your own classes.",
+          "features": [
+            "Lesson plans you can save and reuse",
+            "Presentations, downloadable as PowerPoint",
+            "Up to 5 classes and 100 students",
+            "Attendance for your classes",
+            "Marks and results",
+            "Homework you set and check",
+            "Arabic and English"
+          ]
+        },
+        "teacher_pro": {
+          "name": "Teacher Pro",
+          "price": "SAR 99",
+          "billing": "Billed monthly. Cancel anytime.",
+          "tagline": "For teachers who want to save hours every week.",
+          "features": [
+            "Everything in Teacher",
+            "AI lesson plans and slides, 50 a month",
+            "Unlimited classes and students",
+            "Report cards as PDF",
+            "Messages and announcements to parents",
+            "Online quizzes"
           ]
         }
       },
@@ -479,25 +523,33 @@
       "faqTitle": "What people usually ask first.",
       "faq": [
         {
-          "q": "Do you charge per student or per school?",
-          "a": "Per school, based on student count and modules you need — not a per-seat fee that punishes growth."
+          "q": "Why are school plans yearly?",
+          "a": "Schools plan their budget around the academic year, so one yearly price is simpler to approve and has no surprises in the middle of term."
         },
         {
-          "q": "Can we start with one grade before the whole school?",
-          "a": "Yes. Many schools pilot with a single grade or campus for a term before rolling out further."
+          "q": "Do you charge per student?",
+          "a": "No. Schools pay per school, with a student limit for each plan. Teachers pay one monthly price."
+        },
+        {
+          "q": "Can we start with one grade first?",
+          "a": "Yes. Many schools try one grade or campus for a term before the whole school moves over."
+        },
+        {
+          "q": "How does a teacher account start?",
+          "a": "Send a request and our team activates your account, usually within one working day."
         },
         {
           "q": "What happens to our data if we leave?",
-          "a": "You get a full export of your school's records. Nothing is held hostage in the system."
+          "a": "You get a full export of your records. Nothing is held back."
         },
         {
           "q": "Is support available in Arabic?",
-          "a": "Yes — WhatsApp and email support both work in Arabic or English, whichever your staff prefer."
+          "a": "Yes. WhatsApp and email support work in Arabic or English, whichever you prefer."
         }
       ],
       "cta": {
         "title": "Get a price for your school, not a price list.",
-        "description": "Tell us your grade count and modules you need — we'll quote it on the call.",
+        "description": "Tell us your student count and the modules you need, and we'll quote it on the call.",
         "button": "Book a demo"
       }
     },

@@ -41,6 +41,7 @@ A person can hold roles in more than one school (e.g. a parent with children in 
 ### Phase 1.5 (weeks 5–8)
 - Super Admin: quotation builder → PDF (English or Arabic, with VAT and Hijri dates) → email, for a school or a demo request. Draft, sent, accepted, rejected
 - Subscription plans with monthly and yearly prices, set by the Super Admin in the panel (real prices **TBC with client**), manual activation/expiry, automatic expiry at the end date
+- Plans (client decision, 2026-11-12): **school plans are yearly** (Basic, Premium, and Custom, which is quoted per school or group); **individual teacher plans are monthly** (Teacher, Teacher Pro). A teacher account is activated by the team on request. Each plan differs in features, not only in limits
 - Usage overview per school (students, teachers, parents, recent sign-ins, plan student limit) and an audit log of Super Admin actions
 - Public website with five pages: Home, About Us, LMS, Pricing, Contact (Arabic/English, SEO). Book a demo and Contact forms are saved and emailed to the team
 - PWA (installable, web push notifications)
@@ -82,8 +83,8 @@ Traffic: peaks during school hours (07:00–14:00 KSA), spikes at morning attend
 | Timeline | Client wants it in ~1 month → MVP in 4 weeks, SaaS layer in month 2 |
 
 ## 6. Open questions for the client (TBC)
-- Subscription billing: monthly, yearly or both; pricing tiers
-- Pricing: the site shows **sample** plans and prices (Basic SAR 1,500, Premium SAR 3,000, Advanced SAR 5,000 per month). Confirm the real ones
+- Pricing: the site shows **sample** prices. Confirm the real ones for every plan, and each plan's student and class limits and features
+- Individual teachers: which features a teacher account gets (the site lists a suggestion), and whether there is a free trial or a yearly discount
 - Do any parents lack email? (fallback: school-issued username/password for parents)
 - Fee structure specifics: installments, discounts, sibling discounts, VAT on receipts?
 - Report card format — does the client have a template (Ministry of Education format)?

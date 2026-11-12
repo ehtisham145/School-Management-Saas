@@ -1,6 +1,6 @@
 import { apiFetch } from "@/lib/api";
 
-export const PLANS = ["basic", "premium", "advanced"] as const;
+export const PLANS = ["basic", "premium", "custom", "teacher", "teacher_pro"] as const;
 export type Plan = (typeof PLANS)[number];
 
 export type DemoRequestBody = {
