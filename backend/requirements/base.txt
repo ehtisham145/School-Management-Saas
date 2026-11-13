@@ -12,7 +12,7 @@ channels>=4.2,<5.0
 channels-redis>=4.3.0,<5.0
 
 # Security
-argon2-cffi>=23.1  # passowrd hasing algorithm
+argon2-cffi>=25.1.0  # passowrd hasing algorithm
 
 django-axes>=7.0,<8.0  # lockout after repeated failed logins
 
