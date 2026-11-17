@@ -5,7 +5,10 @@ import { cn } from "cn";
 export function Table({ className, ...props }: ComponentProps<"table">) {
   return (
     <div className="min-w-0 overflow-x-auto rounded-card border border-line">
-      <table className={cn("min-w-full text-sm tabular-nums whitespace-nowrap", className)} {...props} />
+      <table
+        className={cn("min-w-full text-sm whitespace-nowrap tabular-nums", className)}
+        {...props}
+      />
     </div>
   );
 }
