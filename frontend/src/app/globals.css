@@ -126,6 +126,36 @@
   }
 }
 
+@keyframes marquee-x {
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.marquee-track {
+  animation: marquee-x 35s linear infinite;
+}
+
+.marquee-track--reverse {
+  animation-direction: reverse;
+}
+
+/* translateX is a physical transform, so in RTL (where the cards already lay out
+   right-to-left) it has to run in the opposite direction to still read as the
+   same logical flow instead of visibly fighting the text direction. */
+html[dir="rtl"] .marquee-track {
+  animation-direction: reverse;
+}
+
+html[dir="rtl"] .marquee-track--reverse {
+  animation-direction: normal;
+}
+
+.marquee-group:hover .marquee-track,
+.marquee-group.is-slow .marquee-track {
+  animation-duration: 100s;
+}
+
 @layer base {
   * {
     @apply border-border;

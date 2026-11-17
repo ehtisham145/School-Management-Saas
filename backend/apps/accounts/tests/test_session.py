@@ -41,29 +41,30 @@ def test_login_does_not_pick_a_school_when_user_has_several(api_client, two_scho
     assert api_client.get("/api/academics/years/").status_code == 403
 
 
-def _email_code(client, email):
-    client.post("/api/auth/email-otp/request/", {"email": email})
-    return re.search(r"\b\d{6}\b", mail.outbox[-1].body).group()
+def _reset_password(client, email, password="Blue-river-2026!"):  # noqa: S107
+    client.post("/api/auth/password/reset/request/", {"email": email})
+    code = re.search(r"\b\d{6}\b", mail.outbox[-1].body).group()
+    return client.post(
+        "/api/auth/password/reset/confirm/", {"email": email, "code": code, "password": password}
+    )
 
 
-def test_email_otp_activates_the_only_school(api_client, two_schools):
+def test_password_reset_activates_the_only_school(api_client, two_schools):
     school_a, _ = two_schools
     user = _user(email="parent@example.com")
     membership = Membership.objects.create(school=school_a, user=user, role=Role.PARENT)
 
-    code = _email_code(api_client, user.email)
-    api_client.post("/api/auth/email-otp/verify/", {"email": user.email, "code": code})
+    _reset_password(api_client, user.email)
 
     assert api_client.session["active_membership_id"] == membership.id
 
 
-def test_school_admin_signs_in_with_an_email_code_alone(api_client, two_schools):
+def test_school_admin_signs_in_through_password_reset(api_client, two_schools):
     school_a, _ = two_schools
     user = _user(email="admin@example.com")
     Membership.objects.create(school=school_a, user=user, role=Role.SCHOOL_ADMIN)
 
-    code = _email_code(api_client, user.email)
-    response = api_client.post("/api/auth/email-otp/verify/", {"email": user.email, "code": code})
+    response = _reset_password(api_client, user.email)
 
     assert response.status_code == 200
     assert "requires_2fa" not in response.data

@@ -15,7 +15,7 @@
         "rateLimited": "Too many attempts. Please try again in a few minutes.",
         "generic": "Something went wrong. Please try again."
       },
-      "useEmailCode": "Sign in with an email code"
+      "forgotPassword": "Forgot password?"
     },
     "schoolPicker": {
       "title": "Choose a school",
@@ -31,37 +31,50 @@
       "loadFailed": "Couldn't load your account. Check your connection.",
       "retry": "Try again"
     },
-    "emailCode": {
+    "forgotPassword": {
       "emailLabel": "Email address",
-      "codeLabel": "6-digit code",
       "sendCode": "Send code",
-      "verify": "Sign in",
+      "codeLabel": "6-digit code",
       "codeSent": "If <email></email> is registered, a code is on its way. Check your inbox.",
+      "resend": "Resend code",
+      "resendIn": "Resend code in {seconds}s",
+      "codeResent": "A new code is on its way.",
+      "continue": "Continue",
       "changeEmail": "Use a different email",
-      "usePassword": "Sign in with a password",
+      "passwordLabel": "New password",
+      "passwordHint": "At least 10 characters. Avoid common passwords and your username.",
+      "confirmLabel": "Confirm password",
+      "submit": "Reset password",
+      "submitting": "Resetting...",
       "errors": {
         "invalidCode": "That code is incorrect or has expired.",
+        "weak": "Choose a stronger password: not a common one and not like your username.",
         "rateLimited": "Too many attempts. Please try again in a few minutes.",
         "generic": "Something went wrong. Please try again."
       }
     },
     "schoolInactive": "Your school's account is currently inactive. Please contact Lesson Lab support.",
     "backToLogin": "Back to sign in",
-    "setPassword": {
-      "title": "Set your password",
-      "description": "Choose a password for your account. You'll use it with your username next time.",
-      "usernameLabel": "Your username",
-      "usernameHint": "Keep it, you'll need it to sign in.",
-      "passwordLabel": "New password",
-      "passwordHint": "At least 10 characters. Avoid common passwords and your username.",
-      "confirmLabel": "Confirm password",
-      "submit": "Save password",
-      "submitting": "Saving...",
-      "errors": {
-        "weak": "Choose a stronger password: not a common one and not like your username.",
-        "alreadySet": "This account already has a password. Please sign in.",
-        "generic": "Something went wrong. Please try again."
-      }
+    "passwordResetSuccess": "Your password has been reset. Sign in with your new password."
+  },
+  "Chatbot": {
+    "open": "Open chat assistant",
+    "close": "Close chat assistant",
+    "title": "Lesson Lab Assistant",
+    "online": "Online",
+    "greeting": "Hi! Ask me anything about Lesson Lab.",
+    "placeholder": "Type a message...",
+    "send": "Send",
+    "thinking": "Thinking...",
+    "error": "Something went wrong. Please try again.",
+    "rateLimited": "Too many messages. Please wait {seconds} seconds and try again.",
+    "helpful": "Mark as helpful",
+    "notHelpful": "Mark as not helpful",
+    "newConversation": "Start a new conversation",
+    "quickReplies": {
+      "pricing": "What are your pricing plans?",
+      "features": "What features does Lesson Lab offer?",
+      "demo": "How can I book a demo?"
     }
   },
   "Dashboard": {
@@ -242,14 +255,96 @@
         "highlights": ["Lesson Lab", "from one place.", "without paperwork.", "in two languages."]
       },
       "strip": {
-        "a1": "Two languages",
-        "a2": "Full Arabic, right to left",
-        "b1": "Five roles",
-        "b2": "Each sees only what they need",
-        "c1": "Sunday to Thursday",
-        "c2": "Follows the Saudi school week",
-        "d1": "Separate by school",
-        "d2": "Every school's data stays private"
+        "row1": [
+          { "title": "Bilingual by design", "desc": "Arabic and English, both native" },
+          {
+            "title": "Five roles, one system",
+            "desc": "Admin, teacher, student, parent, principal"
+          },
+          {
+            "title": "Built for the Saudi week",
+            "desc": "Sunday to Thursday, no workaround needed"
+          },
+          { "title": "Hijri and Gregorian together", "desc": "Both dates, every time" }
+        ],
+        "row2": [
+          { "title": "Every school, walled off", "desc": "No data ever crosses between schools" },
+          { "title": "One record, not five exports", "desc": "Update once, everyone sees it" },
+          {
+            "title": "Fees without spreadsheets",
+            "desc": "Dues, receipts, overdue, all in one place"
+          },
+          { "title": "Reports in both languages", "desc": "Print-ready, Arabic or English" }
+        ]
+      },
+      "choosePath": {
+        "eyebrow": "Your school support platform",
+        "title": "Choose your plan",
+        "description": "Smart tools for educators, better learning for students. Whether you manage an entire school or teach your own classes, we have a plan for you.",
+        "school": {
+          "title": "For schools & institutions",
+          "tagline": "Complete school management and academic support.",
+          "listLabel": "Everything your school needs",
+          "items": [
+            {
+              "title": "Admin dashboard",
+              "desc": "One place to run enrolment, staff and daily operations."
+            },
+            {
+              "title": "Teacher performance monitoring",
+              "desc": "See attendance, workload and progress across every class."
+            },
+            {
+              "title": "Student homework and assessments",
+              "desc": "Set, track and mark work for every grade."
+            },
+            {
+              "title": "Parent progress reports",
+              "desc": "Share results and updates with families automatically."
+            },
+            {
+              "title": "School-wide analytics",
+              "desc": "Attendance, fees and results in one dashboard."
+            }
+          ],
+          "cta": "Explore school plans"
+        },
+        "teacher": {
+          "badge": "Independent teacher plan",
+          "title": "For individual educators",
+          "tagline": "No school subscription required",
+          "description": "Your personal AI-powered teaching assistant. Everything you need to plan, prepare, assess and organise your teaching.",
+          "listLabel": "Your teaching toolkit",
+          "items": [
+            {
+              "title": "Create lesson presentations",
+              "desc": "Prepare engaging classroom presentations with ease."
+            },
+            {
+              "title": "AI-powered lesson planning",
+              "desc": "Generate lesson plans aligned with your curriculum."
+            },
+            {
+              "title": "Automated grading",
+              "desc": "Simplify checking, marking and evaluating student work."
+            },
+            {
+              "title": "Smart file uploads",
+              "desc": "Upload and organise your teaching materials automatically."
+            },
+            {
+              "title": "Control other portals",
+              "desc": "Switch into a school's workspace too, if you join one."
+            },
+            {
+              "title": "Automated reports",
+              "desc": "Generate student performance reports and academic summaries."
+            }
+          ],
+          "cta": "Get started as an educator",
+          "note": "Affordable individual subscription, independent access."
+        },
+        "footnote": "One platform. Two flexible ways to work."
       },
       "features": {
         "kicker": "Everything in one system",
@@ -305,16 +400,19 @@
     },
     "about": {
       "hero": {
-        "titleLead": "Built for schools",
-        "words": ["in Riyadh.", "in Jeddah.", "in Dammam.", "across Saudi Arabia."]
+        "titleLead": "",
+        "words": [
+          "Not yesterday's system with new features.",
+          "A new approach to educational technology."
+        ]
       },
       "story": {
         "eyebrow": "Why we're building this",
-        "title": "Software that fits the school, not the other way round.",
+        "title": "Education is evolving. School technology should evolve with it.",
         "paragraphs": [
-          "Most school software sold in this region is built for a different school system first, then translated. Fields get relabelled, but the week underneath still assumes a Monday start and a single calendar.",
-          "Lesson Lab is built around a Sunday–Thursday week, Hijri and Gregorian dates shown together, and Arabic as a first-class language throughout — not a toggle bolted on afterward.",
-          "It's early. We're working directly with a small number of pilot schools in Saudi Arabia to get the daily details right before opening up further."
+          "AI is changing the way teachers teach, students learn and schools operate.",
+          "Traditional school software often adds new features to systems designed for yesterday's needs. We believe modern education deserves a different foundation.",
+          "That's why we're building an AI-ready education platform from the ground up, with intelligent automation and the evolving needs of schools and educators at its core."
         ]
       },
       "values": {
@@ -513,10 +611,12 @@
           "features": [
             "Lesson plans you can save and reuse",
             "Presentations, downloadable as PowerPoint",
+            "Smart file uploads, organised automatically",
             "Up to 5 classes and 100 students",
             "Attendance for your classes",
             "Marks and results",
             "Homework you set and check",
+            "Switch to your school's workspace too, if you join one",
             "Arabic and English"
           ]
         },
@@ -528,8 +628,9 @@
           "features": [
             "Everything in Teacher",
             "AI lesson plans and slides, 50 a month",
+            "Automated grading for student work",
+            "Automated performance reports, including PDF report cards",
             "Unlimited classes and students",
-            "Report cards as PDF",
             "Messages and announcements to parents",
             "Online quizzes"
           ]

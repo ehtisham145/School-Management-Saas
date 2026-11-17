@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { Badge } from "@/components/ui/badge";
+import { CardList, CardListFields, CardListHeader, CardListItem } from "@/components/ui/card-list";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Table, TableCell, TableHead, TableHeaderCell, TableRow } from "@/components/ui/table";
 import { getUsageTotals, listUsage } from "../api";
@@ -10,6 +11,7 @@ import { SCHOOL_STATUS_FILTERS, type SchoolStatusFilter } from "../schemas";
 import { useLoad } from "../use-load";
 import {
   DayWithHijri,
+  DetailRow,
   FilterTabs,
   LoadFeedback,
   localName,
@@ -154,6 +156,62 @@ export function UsagePanel() {
               ))}
             </tbody>
           </Table>
+
+          <CardList>
+            {list.state.data.results.map((school) => (
+              <CardListItem key={school.id}>
+                <CardListHeader>
+                  <div className="min-w-0">
+                    <span className="block truncate font-semibold text-ink">
+                      <bdi>{localName(school, locale)}</bdi>
+                    </span>
+                    <span className="block text-xs text-ink-soft" dir="ltr">
+                      {school.code}
+                    </span>
+                  </div>
+                  <SchoolStatusBadge isActive={school.is_active} />
+                </CardListHeader>
+
+                <CardListFields>
+                  <DetailRow label={t("columns.plan")}>
+                    {school.plan ? (
+                      <>
+                        <span className="block">{localName(school.plan, locale)}</span>
+                        {school.subscription_ends_on && (
+                          <span className="block text-xs text-ink-soft">
+                            {t("until")}{" "}
+                            <DayWithHijri value={school.subscription_ends_on} locale={locale} />
+                          </span>
+                        )}
+                      </>
+                    ) : (
+                      <Badge tone="warning">{t("noPlan")}</Badge>
+                    )}
+                  </DetailRow>
+                  <DetailRow label={t("columns.students")}>
+                    <span className="whitespace-nowrap">
+                      {number(school.students)}
+                      {school.plan?.max_students != null && (
+                        <span className="text-ink-soft"> / {number(school.plan.max_students)}</span>
+                      )}
+                    </span>
+                    {school.over_student_limit && (
+                      <Badge tone="danger" className="mt-1">
+                        {t("overLimit")}
+                      </Badge>
+                    )}
+                  </DetailRow>
+                  <DetailRow label={t("columns.teachers")}>{number(school.teachers)}</DetailRow>
+                  <DetailRow label={t("columns.parents")}>{number(school.parents)}</DetailRow>
+                  <DetailRow label={t("columns.staff")}>{number(school.staff)}</DetailRow>
+                  <DetailRow label={t("columns.activeUsers")}>
+                    {number(school.active_users)}
+                  </DetailRow>
+                </CardListFields>
+              </CardListItem>
+            ))}
+          </CardList>
+
           <Pagination
             page={query.page}
             count={list.state.data.count}

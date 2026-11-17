@@ -8,6 +8,7 @@ import {
   FileText,
   History,
   LayoutDashboard,
+  LogOut,
   Menu,
   School,
   Tags,
@@ -16,6 +17,7 @@ import {
 import { useTranslations } from "next-intl";
 import { cn } from "cn";
 import { Link, usePathname } from "@/i18n/navigation";
+import { useLogout } from "@/features/auth/use-logout";
 import type { MeResponse } from "@/features/auth/schemas";
 import { LanguageMenu } from "@/features/marketing/components/language-menu";
 import { Logo } from "@/features/marketing/components/logo";
@@ -38,8 +40,10 @@ function isCurrent(pathname: string, href: string) {
 
 export function PlatformShell({ user, children }: { user: MeResponse; children: ReactNode }) {
   const t = useTranslations("Platform.nav");
+  const tCommon = useTranslations("Platform");
   const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
+  const { handleLogout, isLoggingOut } = useLogout();
 
   useEffect(() => {
     if (!menuOpen) return;
@@ -112,6 +116,18 @@ export function PlatformShell({ user, children }: { user: MeResponse; children: 
             })}
           </ul>
         </nav>
+
+        <div className="border-t border-on-dark-line px-3 py-2">
+          <button
+            type="button"
+            disabled={isLoggingOut}
+            onClick={handleLogout}
+            className="flex min-h-11 w-full cursor-pointer items-center gap-3 rounded-control px-3 text-sm font-semibold text-on-dark-soft transition-colors hover:bg-on-dark-line hover:text-on-dark disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            <LogOut aria-hidden="true" className="size-[18px] shrink-0" />
+            {isLoggingOut ? tCommon("loggingOut") : tCommon("logout")}
+          </button>
+        </div>
       </aside>
 
       <div className="flex min-w-0 flex-1 flex-col">

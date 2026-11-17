@@ -1,11 +1,18 @@
 import type { ComponentProps } from "react";
 import { cn } from "cn";
 
-/** Wide tables scroll inside this container, never the whole page. */
+/**
+ * Wide tables scroll inside this container, never the whole page. Below `sm`,
+ * the table itself hides — too many columns to read on a phone — and the
+ * caller shows a `CardList` of the same rows instead.
+ */
 export function Table({ className, ...props }: ComponentProps<"table">) {
   return (
-    <div className="overflow-x-auto rounded-card border border-line">
-      <table className={cn("w-full text-sm tabular-nums", className)} {...props} />
+    <div className="min-w-0 overflow-x-auto rounded-card border border-line max-sm:hidden">
+      <table
+        className={cn("min-w-full text-sm whitespace-nowrap tabular-nums", className)}
+        {...props}
+      />
     </div>
   );
 }

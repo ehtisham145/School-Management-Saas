@@ -6,6 +6,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { useSearchParams } from "next/navigation";
 import { Link, usePathname, useRouter } from "@/i18n/navigation";
 import { Button, buttonVariants } from "@/components/ui/button";
+import { CardList, CardListFields, CardListHeader, CardListItem } from "@/components/ui/card-list";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Modal } from "@/components/ui/modal";
 import { Table, TableCell, TableHead, TableHeaderCell, TableRow } from "@/components/ui/table";
@@ -137,6 +138,24 @@ function QuotationDialog({
           ))}
         </tbody>
       </Table>
+
+      <CardList className="mt-4">
+        {quotation.items.map((item, index) => (
+          <CardListItem key={index}>
+            <span className="font-semibold text-ink">
+              <bdi>{item.description}</bdi>
+            </span>
+            <CardListFields>
+              <DetailRow label={t("detail.quantity")}>
+                {item.quantity.toLocaleString(locale)}
+              </DetailRow>
+              <DetailRow label={t("detail.amount")}>
+                <Money value={item.amount} locale={locale} />
+              </DetailRow>
+            </CardListFields>
+          </CardListItem>
+        ))}
+      </CardList>
 
       <dl className="ms-auto mt-3 grid max-w-xs grid-cols-2 gap-x-4 gap-y-1 text-sm">
         <dt className="text-ink-soft">{t("detail.subtotal")}</dt>
@@ -356,6 +375,49 @@ export function QuotationsPanel() {
               ))}
             </tbody>
           </Table>
+
+          <CardList>
+            {list.state.data.results.map((quotation) => (
+              <CardListItem key={quotation.id}>
+                <CardListHeader>
+                  <div className="min-w-0">
+                    <span className="block truncate font-semibold text-ink" dir="ltr">
+                      {quotation.number}
+                    </span>
+                    <span className="block truncate text-xs text-ink-soft">
+                      <bdi>{quotation.recipient_organization}</bdi>
+                    </span>
+                  </div>
+                  <QuotationStatusBadge
+                    status={quotation.status}
+                    isExpired={quotation.is_expired}
+                  />
+                </CardListHeader>
+
+                <CardListFields>
+                  <DetailRow label={t("columns.total")}>
+                    <Money value={quotation.total} locale={locale} />
+                  </DetailRow>
+                  <DetailRow label={t("columns.validUntil")}>
+                    <DayWithHijri value={quotation.valid_until} locale={locale} />
+                  </DetailRow>
+                </CardListFields>
+
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="self-start"
+                  onClick={() => {
+                    setNotice(null);
+                    setSelected(quotation);
+                  }}
+                >
+                  {tCommon("view")}
+                </Button>
+              </CardListItem>
+            ))}
+          </CardList>
+
           <Pagination
             page={query.page}
             count={list.state.data.count}

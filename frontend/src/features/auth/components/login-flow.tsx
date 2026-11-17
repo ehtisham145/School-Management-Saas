@@ -8,13 +8,13 @@ import { logout } from "../api";
 import { toActiveSession, type AuthenticatedResponse, type Membership } from "../schemas";
 import { useSession } from "../session-store";
 import { markFreshLogin } from "../welcome";
-import { EmailCodeForm } from "./email-code-form";
+import { ForgotPasswordForm } from "./forgot-password-form";
 import { LoginForm } from "./login-form";
 import { SchoolPicker } from "./school-picker";
 
 type Step =
-  | { name: "password" }
-  | { name: "email-code" }
+  | { name: "password"; justReset?: boolean }
+  | { name: "forgot-password" }
   | { name: "choose-school"; memberships: Membership[] }
   | { name: "no-school"; schoolInactive: boolean };
 
@@ -36,16 +36,8 @@ function LoginSteps() {
   const [step, setStep] = useState<Step>({ name: "password" });
 
   const continueToApp = useCallback(
-    ({
-      needs_password,
-      is_platform_admin,
-      memberships,
-      school_inactive,
-    }: AuthenticatedResponse) => {
-      if (needs_password) {
-        // First sign-in by email code: choose a password before anything else.
-        router.push("/set-password");
-      } else if (is_platform_admin) {
+    ({ is_platform_admin, memberships, school_inactive }: AuthenticatedResponse) => {
+      if (is_platform_admin) {
         markFreshLogin();
         router.push("/platform");
       } else if (memberships.length === 0) {
@@ -64,16 +56,30 @@ function LoginSteps() {
 
   const backToPassword = () => setStep({ name: "password" });
 
+  // The new password just proved itself; sign the session back out so the user
+  // signs in with it deliberately, instead of landing in the app automatically.
+  const afterReset = useCallback(async () => {
+    await logout();
+    setStep({ name: "password", justReset: true });
+  }, []);
+
   switch (step.name) {
     case "password":
       return (
-        <LoginForm
-          onResponse={continueToApp}
-          onUseEmailCode={() => setStep({ name: "email-code" })}
-        />
+        <div className="flex flex-col gap-3">
+          {step.justReset && (
+            <p role="status" className="rounded-control bg-emerald-50 p-3 text-sm text-emerald-800">
+              {t("passwordResetSuccess")}
+            </p>
+          )}
+          <LoginForm
+            onResponse={continueToApp}
+            onForgotPassword={() => setStep({ name: "forgot-password" })}
+          />
+        </div>
       );
-    case "email-code":
-      return <EmailCodeForm onResponse={continueToApp} onBack={backToPassword} />;
+    case "forgot-password":
+      return <ForgotPasswordForm onResponse={afterReset} onBack={backToPassword} />;
     case "choose-school":
       return (
         <SchoolPicker memberships={step.memberships} locale={locale} onSelected={markFreshLogin} />

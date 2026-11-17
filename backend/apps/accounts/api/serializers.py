@@ -24,10 +24,11 @@ class SetPasswordSerializer(serializers.Serializer):
         return value
 
 
-class EmailOTPRequestSerializer(serializers.Serializer):
+class PasswordResetRequestSerializer(serializers.Serializer):
     email = serializers.EmailField()
 
 
-class EmailOTPLoginVerifySerializer(serializers.Serializer):
+class PasswordResetConfirmSerializer(serializers.Serializer):
     email = serializers.EmailField()
     code = serializers.CharField(max_length=6, min_length=6)
+    password = serializers.CharField(trim_whitespace=False, max_length=128)

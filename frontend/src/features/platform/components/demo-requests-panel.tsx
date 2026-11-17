@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { Button, buttonVariants } from "@/components/ui/button";
+import { CardList, CardListFields, CardListHeader, CardListItem } from "@/components/ui/card-list";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Field } from "@/components/ui/field";
 import { Modal } from "@/components/ui/modal";
@@ -290,6 +291,49 @@ export function DemoRequestsPanel() {
               ))}
             </tbody>
           </Table>
+
+          <CardList>
+            {list.state.data.results.map((demo) => (
+              <CardListItem key={demo.id}>
+                <CardListHeader>
+                  <div className="min-w-0">
+                    <span className="block truncate font-semibold text-ink">
+                      <bdi>{demo.name}</bdi>
+                    </span>
+                    <span className="block truncate text-xs text-ink-soft">
+                      <bdi>{demo.email}</bdi>
+                    </span>
+                  </div>
+                  <DemoStatusBadge status={demo.status} />
+                </CardListHeader>
+
+                <CardListFields>
+                  <DetailRow label={t("columns.school")}>
+                    <bdi>{demo.school_name}</bdi>
+                  </DetailRow>
+                  <DetailRow label={t("columns.plan")}>
+                    {demo.plan ? tPlans(`tiers.${demo.plan}.name`) : "-"}
+                  </DetailRow>
+                  <DetailRow label={t("columns.received")}>
+                    {formatDate(demo.created_at, locale)}
+                  </DetailRow>
+                </CardListFields>
+
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="self-start"
+                  onClick={() => {
+                    setSavedNotice(false);
+                    setSelected(demo);
+                  }}
+                >
+                  {tCommon("view")}
+                </Button>
+              </CardListItem>
+            ))}
+          </CardList>
+
           <Pagination
             page={query.page}
             count={list.state.data.count}

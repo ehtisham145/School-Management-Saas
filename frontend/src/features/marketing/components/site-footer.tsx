@@ -8,7 +8,7 @@ export async function SiteFooter() {
   const tNav = await getTranslations("Marketing.nav");
 
   const linkClass = "transition-colors hover:text-on-dark";
-  const headingClass = "mb-3 text-sm font-bold tracking-normal text-on-dark";
+  const headingClass = "mb-3 text-lg font-bold tracking-normal text-on-dark";
 
   return (
     <footer className="bg-navy-deep text-[14.5px] text-on-dark-soft">

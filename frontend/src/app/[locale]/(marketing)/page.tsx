@@ -21,6 +21,8 @@ import {
   TeacherIcon,
   TimetableIcon,
 } from "@/features/marketing/components/icons";
+import { ChoosePathSection } from "@/features/marketing/components/choose-path";
+import { MarqueeStrip } from "@/features/marketing/components/marquee-strip";
 import { Reveal } from "@/features/marketing/components/reveal";
 import { Typewriter } from "@/features/marketing/components/typewriter";
 import { pageMetadata } from "@/i18n/metadata";
@@ -42,12 +44,6 @@ const ROLES = [
   { icon: ParentIcon, title: "parent", description: "parentD" },
 ] as const;
 
-const STRIP = [
-  { key: "a", className: "ps-0 sm:ps-0" },
-  { key: "b", className: "border-s" },
-  { key: "c", className: "border-t ps-0 sm:ps-0 lg:border-s lg:border-t-0 lg:ps-[22px]" },
-  { key: "d", className: "border-s border-t lg:border-t-0" },
-] as const;
 const STEPS = ["s1", "s2", "s3"] as const;
 
 export async function generateMetadata({ params }: PageProps<"/[locale]">) {
@@ -71,19 +67,13 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
         />
       </PhotoHero>
 
-      <section aria-label={t("hero.eyebrow")} className="bg-navy-deep text-on-dark">
-        <div className="page-wrap grid grid-cols-2 lg:grid-cols-4">
-          {STRIP.map(({ key, className }) => (
-            <div
-              key={key}
-              className={`border-on-dark-line px-3.5 py-[18px] sm:px-[22px] sm:py-6 ${className}`}
-            >
-              <b className="block text-[17px] font-bold">{t(`strip.${key}1`)}</b>
-              <span className="text-[13.5px] text-on-dark-soft">{t(`strip.${key}2`)}</span>
-            </div>
-          ))}
-        </div>
-      </section>
+      <MarqueeStrip
+        eyebrow={t("hero.eyebrow")}
+        row1={t.raw("strip.row1") as { title: string; desc: string }[]}
+        row2={t.raw("strip.row2") as { title: string; desc: string }[]}
+      />
+
+      <ChoosePathSection />
 
       <Section id="features">
         <SectionHeading

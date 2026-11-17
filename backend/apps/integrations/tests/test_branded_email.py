@@ -297,7 +297,7 @@ def test_welcome_email_escapes_the_school_name_and_keeps_the_login_link(settings
     assert ESCAPED in html
     assert 'href="https://app.example/login"' in html
     assert "https://app.example/login" in mail.outbox[0].body
-    assert "Sign in with an email code" in html
+    assert "Forgot password?" in html
     assert "<script>" not in school_admin_welcome_content("a@b.co", ATTACK)["preheader"]
 
 

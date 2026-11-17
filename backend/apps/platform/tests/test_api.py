@@ -112,16 +112,19 @@ def test_create_makes_school_admin_and_sends_welcome_email(db, django_capture_on
     assert "alnoor.admin" in mail.outbox[0].body
 
 
-def test_new_admin_signs_in_with_an_email_code(db, django_capture_on_commit_callbacks):
+def test_new_admin_signs_in_through_forgot_password(db, django_capture_on_commit_callbacks):
     platform = _platform_client()
     with django_capture_on_commit_callbacks(execute=True):
         platform.post(SCHOOLS_URL, VALID_SCHOOL)
     email = VALID_SCHOOL["admin_email"]
     client = APIClient()
 
-    client.post("/api/auth/email-otp/request/", {"email": email})
+    client.post("/api/auth/password/reset/request/", {"email": email})
     code = re.search(r"\b\d{6}\b", mail.outbox[-1].body).group()
-    response = client.post("/api/auth/email-otp/verify/", {"email": email, "code": code})
+    response = client.post(
+        "/api/auth/password/reset/confirm/",
+        {"email": email, "code": code, "password": "Blue-river-2026!"},
+    )
 
     assert response.status_code == 200
     assert len(response.data["memberships"]) == 1
