@@ -4,8 +4,8 @@ import { cn } from "cn";
 /** Wide tables scroll inside this container, never the whole page. */
 export function Table({ className, ...props }: ComponentProps<"table">) {
   return (
-    <div className="overflow-x-auto rounded-card border border-line">
-      <table className={cn("w-full text-sm tabular-nums", className)} {...props} />
+    <div className="min-w-0 overflow-x-auto rounded-card border border-line">
+      <table className={cn("min-w-full text-sm tabular-nums whitespace-nowrap", className)} {...props} />
     </div>
   );
 }

@@ -230,14 +230,27 @@
         "highlights": ["Lesson Lab", "from one place.", "without paperwork.", "in two languages."]
       },
       "strip": {
-        "a1": "Two languages",
-        "a2": "Full Arabic, right to left",
-        "b1": "Five roles",
-        "b2": "Each sees only what they need",
-        "c1": "Sunday to Thursday",
-        "c2": "Follows the Saudi school week",
-        "d1": "Separate by school",
-        "d2": "Every school's data stays private"
+        "row1": [
+          { "title": "Bilingual by design", "desc": "Arabic and English, both native" },
+          {
+            "title": "Five roles, one system",
+            "desc": "Admin, teacher, student, parent, principal"
+          },
+          {
+            "title": "Built for the Saudi week",
+            "desc": "Sunday to Thursday, no workaround needed"
+          },
+          { "title": "Hijri and Gregorian together", "desc": "Both dates, every time" }
+        ],
+        "row2": [
+          { "title": "Every school, walled off", "desc": "No data ever crosses between schools" },
+          { "title": "One record, not five exports", "desc": "Update once, everyone sees it" },
+          {
+            "title": "Fees without spreadsheets",
+            "desc": "Dues, receipts, overdue, all in one place"
+          },
+          { "title": "Reports in both languages", "desc": "Print-ready, Arabic or English" }
+        ]
       },
       "features": {
         "kicker": "Everything in one system",
@@ -293,16 +306,19 @@
     },
     "about": {
       "hero": {
-        "titleLead": "Built for schools",
-        "words": ["in Riyadh.", "in Jeddah.", "in Dammam.", "across Saudi Arabia."]
+        "titleLead": "",
+        "words": [
+          "Not yesterday's system with new features.",
+          "A new approach to educational technology."
+        ]
       },
       "story": {
         "eyebrow": "Why we're building this",
-        "title": "Software that fits the school, not the other way round.",
+        "title": "Education is evolving. School technology should evolve with it.",
         "paragraphs": [
-          "Most school software sold in this region is built for a different school system first, then translated. Fields get relabelled, but the week underneath still assumes a Monday start and a single calendar.",
-          "Lesson Lab is built around a Sunday–Thursday week, Hijri and Gregorian dates shown together, and Arabic as a first-class language throughout — not a toggle bolted on afterward.",
-          "It's early. We're working directly with a small number of pilot schools in Saudi Arabia to get the daily details right before opening up further."
+          "AI is changing the way teachers teach, students learn and schools operate.",
+          "Traditional school software often adds new features to systems designed for yesterday's needs. We believe modern education deserves a different foundation.",
+          "That's why we're building an AI-ready education platform from the ground up, with intelligent automation and the evolving needs of schools and educators at its core."
         ]
       },
       "values": {
