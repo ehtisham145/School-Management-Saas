@@ -19,8 +19,8 @@ def request_email_otp(user, purpose):
     send_otp_email_task.delay(user.email, code)
 
 
-def set_first_password(user, password):
-    """Gives a password to a user who has none. The caller has validated it."""
+def set_password(user, password):
+    """Sets a user's password, whether they had one before or not. The caller has validated it."""
     user.set_password(password)
     user.save(update_fields=["password"])
 

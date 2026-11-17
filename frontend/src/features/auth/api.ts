@@ -19,24 +19,17 @@ export function switchSchool(body: SwitchSchoolRequest) {
   return apiFetch<SwitchSchoolResponse>("/auth/switch-school/", { method: "POST", body });
 }
 
-export function setPassword(password: string) {
-  return apiFetch<AuthenticatedResponse>("/auth/password/set/", {
-    method: "POST",
-    body: { password },
-  });
-}
-
 export function logout() {
   return apiFetch<void>("/auth/logout/", { method: "POST" });
 }
 
-export function requestEmailOtp(email: string) {
-  return apiFetch<void>("/auth/email-otp/request/", { method: "POST", body: { email } });
+export function requestPasswordReset(email: string) {
+  return apiFetch<void>("/auth/password/reset/request/", { method: "POST", body: { email } });
 }
 
-export function verifyEmailOtp(email: string, code: string) {
-  return apiFetch<AuthenticatedResponse>("/auth/email-otp/verify/", {
+export function confirmPasswordReset(body: { email: string; code: string; password: string }) {
+  return apiFetch<AuthenticatedResponse>("/auth/password/reset/confirm/", {
     method: "POST",
-    body: { email, code },
+    body,
   });
 }

@@ -1,7 +1,4 @@
-import re
-
 import pytest
-from django.core import mail
 
 from apps.accounts.models import User
 from apps.tenancy.models import Membership
@@ -146,60 +143,3 @@ def test_two_factor_endpoints_are_gone(api_client, path):
     assert api_client.post(path).status_code == 404
 
 
-@pytest.mark.django_db
-def test_email_otp_request_sends_code_for_existing_user(api_client):
-    User.objects.create_user(username="parent1", password="x" * 12, email="parent1@example.com")
-
-    response = api_client.post("/api/auth/email-otp/request/", {"email": "parent1@example.com"})
-
-    assert response.status_code == 204
-    assert len(mail.outbox) == 1
-
-
-@pytest.mark.django_db
-def test_email_otp_request_is_silent_for_unknown_email(api_client):
-    response = api_client.post("/api/auth/email-otp/request/", {"email": "nobody@example.com"})
-
-    assert response.status_code == 204
-    assert len(mail.outbox) == 0
-
-
-@pytest.mark.django_db
-def test_email_otp_verify_completes_login(api_client, two_schools):
-    school_a, _ = two_schools
-    user = User.objects.create_user(
-        username="parent1", password="x" * 12, email="parent1@example.com"
-    )
-    Membership.objects.create(school=school_a, user=user, role=Membership.Role.PARENT)
-
-    api_client.post("/api/auth/email-otp/request/", {"email": "parent1@example.com"})
-    code = re.search(r"code is: (\d{6})", mail.outbox[0].body).group(1)
-
-    response = api_client.post(
-        "/api/auth/email-otp/verify/", {"email": "parent1@example.com", "code": code}
-    )
-
-    assert response.status_code == 200
-    assert response.data["memberships"][0]["school"]["id"] == school_a.id
-
-
-@pytest.mark.django_db
-def test_email_otp_verify_rejects_invalid_code(api_client):
-    User.objects.create_user(username="parent1", password="x" * 12, email="parent1@example.com")
-    api_client.post("/api/auth/email-otp/request/", {"email": "parent1@example.com"})
-
-    response = api_client.post(
-        "/api/auth/email-otp/verify/", {"email": "parent1@example.com", "code": "000000"}
-    )
-
-    assert response.status_code == 401
-    assert response.data["error"]["code"] == "invalid_credentials"
-
-
-@pytest.mark.django_db
-def test_email_otp_verify_rejects_unknown_email(api_client):
-    response = api_client.post(
-        "/api/auth/email-otp/verify/", {"email": "nobody@example.com", "code": "123456"}
-    )
-
-    assert response.status_code == 401

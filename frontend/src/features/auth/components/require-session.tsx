@@ -45,11 +45,6 @@ export function RequireSession({ children }: { children: ReactNode }) {
       .then((result) => {
         if (cancelled) return;
 
-        if (result.needs_password) {
-          router.replace("/set-password");
-          return;
-        }
-
         const active = result.memberships.find(
           (membership) => membership.membership_id === result.active_membership_id,
         );

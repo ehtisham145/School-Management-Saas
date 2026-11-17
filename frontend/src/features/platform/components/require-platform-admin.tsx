@@ -30,9 +30,7 @@ export function RequirePlatformAdmin({ children }: { children: ReactNode }) {
       .then((result) => {
         if (cancelled) return;
 
-        if (result.needs_password) {
-          router.replace("/set-password");
-        } else if (!result.is_platform_admin) {
+        if (!result.is_platform_admin) {
           router.replace("/dashboard");
         } else {
           setGuard({ name: "ready", user: result });

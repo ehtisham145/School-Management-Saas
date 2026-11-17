@@ -15,7 +15,7 @@
         "rateLimited": "Too many attempts. Please try again in a few minutes.",
         "generic": "Something went wrong. Please try again."
       },
-      "useEmailCode": "Sign in with an email code"
+      "forgotPassword": "Forgot password?"
     },
     "schoolPicker": {
       "title": "Choose a school",
@@ -31,38 +31,26 @@
       "loadFailed": "Couldn't load your account. Check your connection.",
       "retry": "Try again"
     },
-    "emailCode": {
+    "forgotPassword": {
       "emailLabel": "Email address",
-      "codeLabel": "6-digit code",
       "sendCode": "Send code",
-      "verify": "Sign in",
+      "codeLabel": "6-digit code",
       "codeSent": "If <email></email> is registered, a code is on its way. Check your inbox.",
       "changeEmail": "Use a different email",
-      "usePassword": "Sign in with a password",
+      "passwordLabel": "New password",
+      "passwordHint": "At least 10 characters. Avoid common passwords and your username.",
+      "confirmLabel": "Confirm password",
+      "submit": "Reset password",
+      "submitting": "Resetting...",
       "errors": {
         "invalidCode": "That code is incorrect or has expired.",
+        "weak": "Choose a stronger password: not a common one and not like your username.",
         "rateLimited": "Too many attempts. Please try again in a few minutes.",
         "generic": "Something went wrong. Please try again."
       }
     },
     "schoolInactive": "Your school's account is currently inactive. Please contact Lesson Lab support.",
-    "backToLogin": "Back to sign in",
-    "setPassword": {
-      "title": "Set your password",
-      "description": "Choose a password for your account. You'll use it with your username next time.",
-      "usernameLabel": "Your username",
-      "usernameHint": "Keep it, you'll need it to sign in.",
-      "passwordLabel": "New password",
-      "passwordHint": "At least 10 characters. Avoid common passwords and your username.",
-      "confirmLabel": "Confirm password",
-      "submit": "Save password",
-      "submitting": "Saving...",
-      "errors": {
-        "weak": "Choose a stronger password: not a common one and not like your username.",
-        "alreadySet": "This account already has a password. Please sign in.",
-        "generic": "Something went wrong. Please try again."
-      }
-    }
+    "backToLogin": "Back to sign in"
   },
   "Dashboard": {
     "title": "Dashboard",

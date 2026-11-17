@@ -12,10 +12,10 @@ import type { AuthenticatedResponse } from "../schemas";
 
 type LoginFormProps = {
   onResponse: (response: AuthenticatedResponse) => void;
-  onUseEmailCode: () => void;
+  onForgotPassword: () => void;
 };
 
-export function LoginForm({ onResponse, onUseEmailCode }: LoginFormProps) {
+export function LoginForm({ onResponse, onForgotPassword }: LoginFormProps) {
   const t = useTranslations("Auth.login");
 
   const form = useValidatedForm({
@@ -62,8 +62,8 @@ export function LoginForm({ onResponse, onUseEmailCode }: LoginFormProps) {
         {form.saving ? t("submitting") : t("submit")}
       </Button>
 
-      <Button type="button" variant="ghost" onClick={onUseEmailCode}>
-        {t("useEmailCode")}
+      <Button type="button" variant="ghost" onClick={onForgotPassword}>
+        {t("forgotPassword")}
       </Button>
     </form>
   );

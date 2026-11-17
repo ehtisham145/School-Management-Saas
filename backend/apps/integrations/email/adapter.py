@@ -21,7 +21,7 @@ def otp_email_content(to_email, code):
         "subject": "Your Lesson Lab verification code",
         "to": to_email,
         "heading": "Your verification code",
-        "intro": "Use this code to sign in to Lesson Lab.",
+        "intro": "Use this code to reset your password.",
         "body_html": (
             code_box(code)
             + notice(f"{expiry} It can only be used once.", tone="warning")
@@ -47,7 +47,7 @@ def school_admin_welcome_content(to_email, school_name, username=None):
     school = user_text(school_name)
     steps = [
         "Open the sign-in page using the button below.",
-        "Choose <strong>Sign in with an email code</strong>.",
+        "Choose <strong>Forgot password?</strong>",
         "Enter this email address, then the code we send you.",
         "Choose your password. After that, sign in with your username and password.",
     ]

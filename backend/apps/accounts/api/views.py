@@ -1,19 +1,18 @@
-from django.contrib.auth import authenticate, login, logout, update_session_auth_hash
+from django.contrib.auth import authenticate, login, logout
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.throttling import ScopedRateThrottle
 from rest_framework.views import APIView
 
 from apps.accounts.api.serializers import (
-    EmailOTPLoginVerifySerializer,
-    EmailOTPRequestSerializer,
     LoginSerializer,
+    PasswordResetConfirmSerializer,
+    PasswordResetRequestSerializer,
     SetPasswordSerializer,
     SwitchSchoolSerializer,
 )
 from apps.accounts.models import User
-from apps.accounts.selectors import needs_password_setup
-from apps.accounts.services import request_email_otp, set_first_password, verify_email_otp
+from apps.accounts.services import request_email_otp, set_password, verify_email_otp
 from apps.tenancy.selectors import (
     get_switchable_membership,
     is_locked_out_by_inactive_school,
@@ -49,7 +48,6 @@ def _session_payload(request):
     return {
         "username": request.user.username,
         "is_platform_admin": request.user.is_platform_admin,
-        "needs_password": needs_password_setup(request.user),
         "school_inactive": is_locked_out_by_inactive_school(request.user),
         "memberships": _serialize_memberships(_active_memberships(request)),
     }
@@ -122,68 +120,54 @@ class LoginView(APIView):
         return _login_response(request)
 
 
-class EmailOTPRequestView(APIView):
+class PasswordResetRequestView(APIView):
+    """Anyone can ask for a code: a brand-new staff account with no password yet, or someone who
+    forgot theirs. Silent for an unknown email, so the response can't be used to find accounts."""
+
     authentication_classes = []
     permission_classes = [AllowAny]
     throttle_classes = [ScopedRateThrottle]
     throttle_scope = "email_code"
 
     def post(self, request):
-        serializer = EmailOTPRequestSerializer(data=request.data)
+        serializer = PasswordResetRequestSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
         user = User.objects.filter(email=serializer.validated_data["email"]).first()
         if user is not None:
-            request_email_otp(user, "login")
+            request_email_otp(user, "password_reset")
 
         return Response(status=204)
 
 
-class EmailOTPVerifyView(APIView):
+class PasswordResetConfirmView(APIView):
+    """The code proves the mailbox; the new password replaces whatever the account had (or had
+    none of) before. Signs the user in straight away, same as a normal login."""
+
     authentication_classes = []
     permission_classes = [AllowAny]
     throttle_classes = [ScopedRateThrottle]
     throttle_scope = "email_code"
 
     def post(self, request):
-        serializer = EmailOTPLoginVerifySerializer(data=request.data)
+        serializer = PasswordResetConfirmSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
+        data = serializer.validated_data
 
-        user = User.objects.filter(email=serializer.validated_data["email"]).first()
-        if user is None or not verify_email_otp(user, "login", serializer.validated_data["code"]):
+        user = User.objects.filter(email=data["email"]).first()
+        if user is None or not verify_email_otp(user, "password_reset", data["code"]):
             return Response(
                 {"error": {"code": "invalid_credentials", "message": "Invalid email or code."}},
                 status=401,
             )
 
+        password_serializer = SetPasswordSerializer(
+            data={"password": data["password"]}, context={"user": user}
+        )
+        password_serializer.is_valid(raise_exception=True)
+
+        set_password(user, password_serializer.validated_data["password"])
         login(request, user, backend="django.contrib.auth.backends.ModelBackend")
-        return _login_response(request)
-
-
-class SetPasswordView(APIView):
-    """A signed-in user with no password yet chooses one, after a first email-code sign-in."""
-
-    throttle_classes = [ScopedRateThrottle]
-    throttle_scope = "login"
-
-    def post(self, request):
-        if not needs_password_setup(request.user):
-            return Response(
-                {
-                    "error": {
-                        "code": "password_already_set",
-                        "message": "This account already has a password.",
-                    }
-                },
-                status=409,
-            )
-
-        serializer = SetPasswordSerializer(data=request.data, context={"user": request.user})
-        serializer.is_valid(raise_exception=True)
-
-        set_first_password(request.user, serializer.validated_data["password"])
-        # A new password ends every session; keep this one signed in.
-        update_session_auth_hash(request, request.user)
         return _login_response(request)
 
 
