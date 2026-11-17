@@ -21,6 +21,7 @@ import {
   TeacherIcon,
   TimetableIcon,
 } from "@/features/marketing/components/icons";
+import { ChoosePathSection } from "@/features/marketing/components/choose-path";
 import { MarqueeStrip } from "@/features/marketing/components/marquee-strip";
 import { Reveal } from "@/features/marketing/components/reveal";
 import { Typewriter } from "@/features/marketing/components/typewriter";
@@ -71,6 +72,8 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
         row1={t.raw("strip.row1") as { title: string; desc: string }[]}
         row2={t.raw("strip.row2") as { title: string; desc: string }[]}
       />
+
+      <ChoosePathSection />
 
       <Section id="features">
         <SectionHeading

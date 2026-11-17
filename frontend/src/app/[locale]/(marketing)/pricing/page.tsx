@@ -152,18 +152,6 @@ export default async function PricingPage({ params }: PageProps<"/[locale]/prici
           label={t("tabs.label")}
           tabs={[
             {
-              key: "schools",
-              label: t("tabs.schools"),
-              panel: (
-                <PlanGroup
-                  intro={t("schoolsIntro")}
-                  note={t("schoolsNote")}
-                  plans={SCHOOL_PLANS}
-                  className="lg:grid-cols-3"
-                />
-              ),
-            },
-            {
               key: "teachers",
               label: t("tabs.teachers"),
               panel: (
@@ -172,6 +160,18 @@ export default async function PricingPage({ params }: PageProps<"/[locale]/prici
                   note={t("teachersNote")}
                   plans={TEACHER_PLANS}
                   className="mx-auto max-w-[860px] md:grid-cols-2"
+                />
+              ),
+            },
+            {
+              key: "schools",
+              label: t("tabs.schools"),
+              panel: (
+                <PlanGroup
+                  intro={t("schoolsIntro")}
+                  note={t("schoolsNote")}
+                  plans={SCHOOL_PLANS}
+                  className="lg:grid-cols-3"
                 />
               ),
             },

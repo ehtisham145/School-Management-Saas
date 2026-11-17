@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
+import { CardList, CardListFields, CardListHeader, CardListItem } from "@/components/ui/card-list";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Select } from "@/components/ui/select";
 import { Table, TableCell, TableHead, TableHeaderCell, TableRow } from "@/components/ui/table";
@@ -9,6 +10,7 @@ import { listAuditEvents } from "../api";
 import { AUDIT_ACTIONS, type AuditAction, type AuditEvent } from "../schemas";
 import { useLoad } from "../use-load";
 import {
+  DetailRow,
   formatDateTime,
   LoadFeedback,
   localName,
@@ -158,6 +160,46 @@ export function AuditLogPanel() {
               ))}
             </tbody>
           </Table>
+
+          <CardList>
+            {list.state.data.results.map((event) => (
+              <CardListItem key={event.id}>
+                <CardListHeader>
+                  <div className="min-w-0">
+                    <span className="block truncate font-semibold text-ink">
+                      {t(`actions.${event.action}`)}
+                    </span>
+                    <span className="block text-xs text-ink-soft">
+                      {formatDateTime(event.created_at, locale)}
+                    </span>
+                  </div>
+                </CardListHeader>
+
+                <CardListFields>
+                  <DetailRow label={t("columns.who")}>
+                    <bdi>{event.actor_label || t("system")}</bdi>
+                  </DetailRow>
+                  <DetailRow label={t("columns.target")}>
+                    <bdi>{event.target_label}</bdi>
+                    {event.school && (
+                      <span className="block text-xs text-ink-soft">
+                        <bdi>{localName(event.school, locale)}</bdi>
+                      </span>
+                    )}
+                  </DetailRow>
+                  <div className="col-span-2">
+                    <DetailRow label={t("columns.details")}>
+                      <EventDetails event={event} />
+                    </DetailRow>
+                  </div>
+                  <DetailRow label={t("columns.ip")}>
+                    <span dir="ltr">{event.ip_address ?? "-"}</span>
+                  </DetailRow>
+                </CardListFields>
+              </CardListItem>
+            ))}
+          </CardList>
+
           <Pagination
             page={query.page}
             count={list.state.data.count}

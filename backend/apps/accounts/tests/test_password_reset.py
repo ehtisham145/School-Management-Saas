@@ -45,9 +45,7 @@ def test_confirm_sets_the_first_password_for_new_staff(api_client, two_schools):
     user = _new_staff(two_schools[0])
     code = _request_code(api_client, user.email)
 
-    response = api_client.post(
-        CONFIRM_URL, {"email": user.email, "code": code, "password": STRONG}
-    )
+    response = api_client.post(CONFIRM_URL, {"email": user.email, "code": code, "password": STRONG})
 
     assert response.status_code == 200
     assert len(response.data["memberships"]) == 1
@@ -63,9 +61,7 @@ def test_confirm_replaces_an_existing_password(api_client, two_schools):
     Membership.objects.create(school=two_schools[0], user=user, role=Membership.Role.TEACHER)
     code = _request_code(api_client, user.email)
 
-    response = api_client.post(
-        CONFIRM_URL, {"email": user.email, "code": code, "password": STRONG}
-    )
+    response = api_client.post(CONFIRM_URL, {"email": user.email, "code": code, "password": STRONG})
 
     assert response.status_code == 200
     user.refresh_from_db()
@@ -124,9 +120,7 @@ def test_a_platform_admin_without_a_password_can_reset_one(api_client):
     )
     code = _request_code(api_client, user.email)
 
-    response = api_client.post(
-        CONFIRM_URL, {"email": user.email, "code": code, "password": STRONG}
-    )
+    response = api_client.post(CONFIRM_URL, {"email": user.email, "code": code, "password": STRONG})
 
     assert response.status_code == 200
     assert response.data["is_platform_admin"] is True

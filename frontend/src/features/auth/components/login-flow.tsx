@@ -13,7 +13,7 @@ import { LoginForm } from "./login-form";
 import { SchoolPicker } from "./school-picker";
 
 type Step =
-  | { name: "password" }
+  | { name: "password"; justReset?: boolean }
   | { name: "forgot-password" }
   | { name: "choose-school"; memberships: Membership[] }
   | { name: "no-school"; schoolInactive: boolean };
@@ -56,16 +56,30 @@ function LoginSteps() {
 
   const backToPassword = () => setStep({ name: "password" });
 
+  // The new password just proved itself; sign the session back out so the user
+  // signs in with it deliberately, instead of landing in the app automatically.
+  const afterReset = useCallback(async () => {
+    await logout();
+    setStep({ name: "password", justReset: true });
+  }, []);
+
   switch (step.name) {
     case "password":
       return (
-        <LoginForm
-          onResponse={continueToApp}
-          onForgotPassword={() => setStep({ name: "forgot-password" })}
-        />
+        <div className="flex flex-col gap-3">
+          {step.justReset && (
+            <p role="status" className="rounded-control bg-emerald-50 p-3 text-sm text-emerald-800">
+              {t("passwordResetSuccess")}
+            </p>
+          )}
+          <LoginForm
+            onResponse={continueToApp}
+            onForgotPassword={() => setStep({ name: "forgot-password" })}
+          />
+        </div>
       );
     case "forgot-password":
-      return <ForgotPasswordForm onResponse={continueToApp} onBack={backToPassword} />;
+      return <ForgotPasswordForm onResponse={afterReset} onBack={backToPassword} />;
     case "choose-school":
       return (
         <SchoolPicker memberships={step.memberships} locale={locale} onSelected={markFreshLogin} />

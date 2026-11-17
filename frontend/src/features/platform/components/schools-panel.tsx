@@ -6,6 +6,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { useSearchParams } from "next/navigation";
 import { Link, usePathname, useRouter } from "@/i18n/navigation";
 import { Button, buttonVariants } from "@/components/ui/button";
+import { CardList, CardListFields, CardListHeader, CardListItem } from "@/components/ui/card-list";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Modal } from "@/components/ui/modal";
 import { Table, TableCell, TableHead, TableHeaderCell, TableRow } from "@/components/ui/table";
@@ -360,6 +361,67 @@ export function SchoolsPanel() {
               ))}
             </tbody>
           </Table>
+
+          <CardList>
+            {list.state.data.results.map((school) => (
+              <CardListItem key={school.id}>
+                <CardListHeader>
+                  <div className="min-w-0">
+                    <span className="block truncate font-semibold text-ink">
+                      <bdi>{schoolName(school)}</bdi>
+                    </span>
+                    <span className="block font-mono text-xs text-ink-soft">
+                      <bdi>{school.code}</bdi>
+                    </span>
+                  </div>
+                  <SchoolStatusBadge isActive={school.is_active} />
+                </CardListHeader>
+
+                <CardListFields>
+                  <DetailRow label={t("location")}>
+                    {school.city || school.region ? (
+                      <>
+                        <bdi>{school.city}</bdi>
+                        {school.region && (
+                          <span className="block text-xs text-ink-soft">
+                            {tOptions(`region.${school.region}`)}
+                          </span>
+                        )}
+                      </>
+                    ) : (
+                      "-"
+                    )}
+                  </DetailRow>
+                  <DetailRow label={t("admin")}>
+                    <bdi>{school.school_admin_email ?? "-"}</bdi>
+                  </DetailRow>
+                  <DetailRow label={t("students")}>{school.estimated_students ?? "-"}</DetailRow>
+                  <DetailRow label={t("members")}>{school.member_count}</DetailRow>
+                  <DetailRow label={t("created")}>
+                    {formatDate(school.created_at, locale)}
+                  </DetailRow>
+                </CardListFields>
+
+                <div className="flex gap-1.5">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setDialog({ name: "detail", school })}
+                  >
+                    {tCommon("view")}
+                  </Button>
+                  <Button
+                    variant={school.is_active ? "ghost" : "secondary"}
+                    size="sm"
+                    onClick={() => setDialog({ name: "status", school })}
+                  >
+                    {school.is_active ? t("deactivate") : t("activate")}
+                  </Button>
+                </div>
+              </CardListItem>
+            ))}
+          </CardList>
+
           <Pagination
             page={query.page}
             count={list.state.data.count}

@@ -1,4 +1,5 @@
 import { setRequestLocale } from "next-intl/server";
+import { ChatbotWidget } from "@/features/chatbot/components/chatbot-widget";
 import { DemoDialogProvider } from "@/features/leads/components/demo-dialog";
 import { SiteFooter } from "@/features/marketing/components/site-footer";
 import { SiteHeader } from "@/features/marketing/components/site-header";
@@ -23,6 +24,7 @@ export default async function MarketingLayout({ children, params }: LayoutProps<
         </main>
         <SiteFooter />
         <WhatsAppFloat />
+        <ChatbotWidget />
         <HeroPreloader />
       </div>
     </DemoDialogProvider>

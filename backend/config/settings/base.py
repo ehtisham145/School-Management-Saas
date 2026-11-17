@@ -35,6 +35,7 @@ LOCAL_APPS: list[str] = [
     "apps.core",
     "apps.platform",
     "apps.tenancy",
+    "apps.chatbot",
 ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
@@ -86,6 +87,8 @@ EMAIL_USE_SSL = env.bool("EMAIL_USE_SSL", default=False)
 EMAIL_TIMEOUT = 15
 FRONTEND_URL = env("FRONTEND_URL", default="http://localhost:3000")
 LEADS_EMAIL = env("LEADS_EMAIL", default="info@lessonlab.me")
+
+OPENAI_API_KEY = env("OPENAI_API_KEY", default="")
 
 # Branded emails (apps/integrations/email/branded.py). A blank value hides that footer part.
 COMPANY_NAME = "Lesson Lab"
@@ -153,7 +156,12 @@ REST_FRAMEWORK = {
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
     "PAGE_SIZE": 25,
-    "DEFAULT_THROTTLE_RATES": {"login": "20/min", "email_code": "50/min", "leads": "10/hour"},
+    "DEFAULT_THROTTLE_RATES": {
+        "login": "20/min",
+        "email_code": "50/min",
+        "leads": "10/hour",
+        "chatbot": "30/hour",
+    },
     "EXCEPTION_HANDLER": "apps.core.exceptions.api_exception_handler",
 }
 SPECTACULAR_SETTINGS = {

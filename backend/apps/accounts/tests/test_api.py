@@ -141,5 +141,3 @@ def test_login_locks_out_after_fifteen_failed_attempts(api_client):
 )
 def test_two_factor_endpoints_are_gone(api_client, path):
     assert api_client.post(path).status_code == 404
-
-

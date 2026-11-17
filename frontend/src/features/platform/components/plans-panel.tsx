@@ -5,6 +5,7 @@ import { Plus } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { CardList, CardListFields, CardListHeader, CardListItem } from "@/components/ui/card-list";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Field } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
@@ -25,7 +26,7 @@ import {
 import { createPlan, listPlans, updatePlan } from "../api";
 import type { Plan } from "../schemas";
 import { useLoad } from "../use-load";
-import { LoadFeedback, localName, Money, Notice, PageHeader } from "./panel-ui";
+import { DetailRow, LoadFeedback, localName, Money, Notice, PageHeader } from "./panel-ui";
 
 const MAX_STUDENTS = 100_000;
 const NAME_MAX = 100;
@@ -277,6 +278,57 @@ export function PlansPanel() {
             ))}
           </tbody>
         </Table>
+      )}
+
+      {plans.state.name === "ready" && plans.state.data.length > 0 && (
+        <CardList>
+          {plans.state.data.map((plan) => (
+            <CardListItem key={plan.id}>
+              <CardListHeader>
+                <div className="min-w-0">
+                  <span className="block truncate font-semibold text-ink">
+                    {localName(plan, locale)}
+                  </span>
+                  <span className="block text-xs text-ink-soft" dir="ltr">
+                    {plan.code}
+                  </span>
+                </div>
+                <Badge tone={plan.is_active ? "success" : "neutral"}>
+                  {plan.is_active ? t("offered") : t("notOffered")}
+                </Badge>
+              </CardListHeader>
+
+              <CardListFields>
+                <DetailRow label={t("columns.monthly")}>
+                  <Money value={plan.monthly_price} locale={locale} />
+                </DetailRow>
+                <DetailRow label={t("columns.yearly")}>
+                  <Money value={plan.yearly_price} locale={locale} />
+                </DetailRow>
+                <DetailRow label={t("columns.students")}>
+                  {plan.max_students === null
+                    ? t("unlimited")
+                    : plan.max_students.toLocaleString(locale)}
+                </DetailRow>
+                <DetailRow label={t("columns.subscriptions")}>
+                  {plan.active_subscriptions.toLocaleString(locale)}
+                </DetailRow>
+              </CardListFields>
+
+              <Button
+                variant="outline"
+                size="sm"
+                className="self-start"
+                onClick={() => {
+                  setSavedNotice(false);
+                  setEditing(plan);
+                }}
+              >
+                {tCommon("edit")}
+              </Button>
+            </CardListItem>
+          ))}
+        </CardList>
       )}
 
       {editing !== undefined && (

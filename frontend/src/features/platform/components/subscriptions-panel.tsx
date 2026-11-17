@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Plus } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
+import { CardList, CardListFields, CardListHeader, CardListItem } from "@/components/ui/card-list";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Field } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
@@ -39,6 +40,7 @@ import { useLoad } from "../use-load";
 import {
   ConfirmDialog,
   DayWithHijri,
+  DetailRow,
   FilterTabs,
   LoadFeedback,
   localName,
@@ -361,6 +363,57 @@ export function SubscriptionsPanel() {
               ))}
             </tbody>
           </Table>
+
+          <CardList>
+            {list.state.data.results.map((subscription) => (
+              <CardListItem key={subscription.id}>
+                <CardListHeader>
+                  <div className="min-w-0">
+                    <span className="block truncate font-semibold text-ink">
+                      <bdi>{localName(subscription.school, locale)}</bdi>
+                    </span>
+                    <span className="block text-xs text-ink-soft" dir="ltr">
+                      {subscription.school.code}
+                    </span>
+                  </div>
+                  <SubscriptionStatusBadge status={subscription.status} />
+                </CardListHeader>
+
+                <CardListFields>
+                  <DetailRow label={t("columns.plan")}>
+                    {localName(subscription.plan, locale)}
+                  </DetailRow>
+                  <DetailRow label={t("columns.price")}>
+                    <Money value={subscription.price} locale={locale} />
+                    <span className="block text-xs text-ink-soft">
+                      {tCommon(`cycles.${subscription.billing_cycle}`)}
+                    </span>
+                  </DetailRow>
+                  <DetailRow label={t("columns.startsOn")}>
+                    <DayWithHijri value={subscription.starts_on} locale={locale} />
+                  </DetailRow>
+                  <DetailRow label={t("columns.endsOn")}>
+                    <DayWithHijri value={subscription.ends_on} locale={locale} />
+                  </DetailRow>
+                </CardListFields>
+
+                {subscription.status === "active" && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="self-start"
+                    onClick={() => {
+                      setNotice(null);
+                      setExpiring(subscription);
+                    }}
+                  >
+                    {t("expire")}
+                  </Button>
+                )}
+              </CardListItem>
+            ))}
+          </CardList>
+
           <Pagination
             page={query.page}
             count={list.state.data.count}

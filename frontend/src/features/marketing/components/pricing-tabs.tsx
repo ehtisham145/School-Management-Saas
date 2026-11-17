@@ -1,6 +1,6 @@
 "use client";
 
-import { useId, useRef, useState, type KeyboardEvent, type ReactNode } from "react";
+import { useEffect, useId, useRef, useState, type KeyboardEvent, type ReactNode } from "react";
 import { cn } from "cn";
 
 type Tab = { key: string; label: string; panel: ReactNode };
@@ -14,6 +14,16 @@ export function PricingTabs({ label, tabs }: { label: string; tabs: Tab[] }) {
   const [active, setActive] = useState(0);
   const buttons = useRef<(HTMLButtonElement | null)[]>([]);
   const baseId = useId();
+
+  // Lets links like /pricing#schools open directly on that tab.
+  useEffect(() => {
+    const index = tabs.findIndex((tab) => tab.key === window.location.hash.slice(1));
+    if (index >= 0) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- location.hash exists only in the browser
+      setActive(index);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   function select(index: number) {
     setActive(index);

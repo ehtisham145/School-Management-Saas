@@ -36,6 +36,10 @@
       "sendCode": "Send code",
       "codeLabel": "6-digit code",
       "codeSent": "If <email></email> is registered, a code is on its way. Check your inbox.",
+      "resend": "Resend code",
+      "resendIn": "Resend code in {seconds}s",
+      "codeResent": "A new code is on its way.",
+      "continue": "Continue",
       "changeEmail": "Use a different email",
       "passwordLabel": "New password",
       "passwordHint": "At least 10 characters. Avoid common passwords and your username.",
@@ -50,7 +54,28 @@
       }
     },
     "schoolInactive": "Your school's account is currently inactive. Please contact Lesson Lab support.",
-    "backToLogin": "Back to sign in"
+    "backToLogin": "Back to sign in",
+    "passwordResetSuccess": "Your password has been reset. Sign in with your new password."
+  },
+  "Chatbot": {
+    "open": "Open chat assistant",
+    "close": "Close chat assistant",
+    "title": "Lesson Lab Assistant",
+    "online": "Online",
+    "greeting": "Hi! Ask me anything about Lesson Lab.",
+    "placeholder": "Type a message...",
+    "send": "Send",
+    "thinking": "Thinking...",
+    "error": "Something went wrong. Please try again.",
+    "rateLimited": "Too many messages. Please wait {seconds} seconds and try again.",
+    "helpful": "Mark as helpful",
+    "notHelpful": "Mark as not helpful",
+    "newConversation": "Start a new conversation",
+    "quickReplies": {
+      "pricing": "What are your pricing plans?",
+      "features": "What features does Lesson Lab offer?",
+      "demo": "How can I book a demo?"
+    }
   },
   "Dashboard": {
     "title": "Dashboard",
@@ -251,6 +276,75 @@
           },
           { "title": "Reports in both languages", "desc": "Print-ready, Arabic or English" }
         ]
+      },
+      "choosePath": {
+        "eyebrow": "Your school support platform",
+        "title": "Choose your plan",
+        "description": "Smart tools for educators, better learning for students. Whether you manage an entire school or teach your own classes, we have a plan for you.",
+        "school": {
+          "title": "For schools & institutions",
+          "tagline": "Complete school management and academic support.",
+          "listLabel": "Everything your school needs",
+          "items": [
+            {
+              "title": "Admin dashboard",
+              "desc": "One place to run enrolment, staff and daily operations."
+            },
+            {
+              "title": "Teacher performance monitoring",
+              "desc": "See attendance, workload and progress across every class."
+            },
+            {
+              "title": "Student homework and assessments",
+              "desc": "Set, track and mark work for every grade."
+            },
+            {
+              "title": "Parent progress reports",
+              "desc": "Share results and updates with families automatically."
+            },
+            {
+              "title": "School-wide analytics",
+              "desc": "Attendance, fees and results in one dashboard."
+            }
+          ],
+          "cta": "Explore school plans"
+        },
+        "teacher": {
+          "badge": "Independent teacher plan",
+          "title": "For individual educators",
+          "tagline": "No school subscription required",
+          "description": "Your personal AI-powered teaching assistant. Everything you need to plan, prepare, assess and organise your teaching.",
+          "listLabel": "Your teaching toolkit",
+          "items": [
+            {
+              "title": "Create lesson presentations",
+              "desc": "Prepare engaging classroom presentations with ease."
+            },
+            {
+              "title": "AI-powered lesson planning",
+              "desc": "Generate lesson plans aligned with your curriculum."
+            },
+            {
+              "title": "Automated grading",
+              "desc": "Simplify checking, marking and evaluating student work."
+            },
+            {
+              "title": "Smart file uploads",
+              "desc": "Upload and organise your teaching materials automatically."
+            },
+            {
+              "title": "Control other portals",
+              "desc": "Switch into a school's workspace too, if you join one."
+            },
+            {
+              "title": "Automated reports",
+              "desc": "Generate student performance reports and academic summaries."
+            }
+          ],
+          "cta": "Get started as an educator",
+          "note": "Affordable individual subscription, independent access."
+        },
+        "footnote": "One platform. Two flexible ways to work."
       },
       "features": {
         "kicker": "Everything in one system",
@@ -517,10 +611,12 @@
           "features": [
             "Lesson plans you can save and reuse",
             "Presentations, downloadable as PowerPoint",
+            "Smart file uploads, organised automatically",
             "Up to 5 classes and 100 students",
             "Attendance for your classes",
             "Marks and results",
             "Homework you set and check",
+            "Switch to your school's workspace too, if you join one",
             "Arabic and English"
           ]
         },
@@ -532,8 +628,9 @@
           "features": [
             "Everything in Teacher",
             "AI lesson plans and slides, 50 a month",
+            "Automated grading for student work",
+            "Automated performance reports, including PDF report cards",
             "Unlimited classes and students",
-            "Report cards as PDF",
             "Messages and announcements to parents",
             "Online quizzes"
           ]
