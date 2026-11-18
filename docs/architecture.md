@@ -70,17 +70,20 @@ class TenantModel(models.Model):
 | Parent without email | Username + password (fallback) | Issued by school admin |
 | Teacher / Principal / Admin | Email + password, or email + one-time code | No second factor ([ADR-0018](decisions/0018-remove-two-factor-authentication.md)) |
 | Super Admin | Email + password, or email + one-time code | No second factor |
+| Individual teacher | Email + password | Signs up alone at `/start-trial` ([ADR-0021](decisions/0021-individual-teacher-workspace-and-trial.md)) |
 
-- Sessions: Django DB/Redis sessions, cookie `HttpOnly; Secure; SameSite=Lax`, 12h idle timeout for staff, longer for parents on PWA.
+- Sessions: Django DB/Redis sessions, cookie `HttpOnly; Secure; SameSite=Lax`, and a session ends 12 hours after sign-in.
 - Passwords: Argon2, Django password validators, `django-axes` lockout after 15 failed attempts for the same username and IP, for 1 hour.
 - CSRF: Django CSRF cookie + `X-CSRFToken` header from the Next.js client.
 - Same origin (`https://app.<domain>`): Caddy routes `/api` and `/ws` to Django, so there is no CORS. In development the Next.js rewrite does the same job, so `dev.py` lists port 3000 in `CSRF_TRUSTED_ORIGINS`.
 - A user with one active membership has it activated automatically at login. Users with several choose one through `POST /api/auth/switch-school/`.
 - `GET /api/auth/me/` returns the user, memberships and active membership. The frontend uses it to restore the session after a refresh.
-- Public sign-in endpoints skip session authentication, so an old session or a missing CSRF cookie in the browser can't block a login. Endpoints for signed-in users still require CSRF.
+- Public sign-in endpoints skip session authentication, so an old session or a missing CSRF cookie in the browser can't block a login. Sign-in, teacher sign-up and password reset refuse a browser request whose `Origin` isn't this site. Endpoints for signed-in users still require CSRF.
 - There is no two-factor authentication: a password or an email code alone signs a user in ([ADR-0018](decisions/0018-remove-two-factor-authentication.md)).
 - `/api/platform/` needs a signed-in user with `is_platform_admin`.
 - A new School Admin gets no password: the Super Admin enters their email, and the welcome email gives their username (`<school code>.admin`). The first sign-in is by email code. Staff without a usable password (School Admin, Principal, Teacher, or a platform admin) get `needs_password: true` from login and `/api/auth/me/`, and the website sends them to `/set-password` before anything else. `POST /api/auth/password/set/` sets it once, checked by Django's password validators (10+ characters, not common, not all digits, not like the username), and keeps the session. Parents and students are never asked.
+- An individual teacher signs up through `POST /api/auth/teacher-signup/request/` (emails a 6-digit code, same answer for a registered email, `teacher_signup` throttle, honeypot) and `POST /api/auth/teacher-signup/verify/`. A correct code creates the user, a private workspace (`School.kind = individual`), a `TEACHER` membership and a 7-day trial subscription in one transaction, then signs them in. Login and `/api/auth/me/` return `trial` with `ends_on` and `days_left` while it runs.
+- The individual teacher's app is `/teacher` on the website and `/api/classroom/` on the backend. Only the `TEACHER` of an individual workspace can use it. Plan rules live in `apps/classroom/entitlements.py`, and a workspace with no subscription covering today is read-only ([ADR-0022](decisions/0022-teacher-classroom-app.md)). The Super Admin manages teachers through `/api/platform/teachers/`.
 - A new school's email and its admin's email must both be unused. Neither can match any user account, including a Super Admin's, or any school's email, in any letter case, and the two can't be the same. A database constraint backs up school emails, and `accounts_user` email is already unique.
 - Demo request phone numbers must be Saudi mobiles and are saved as `+9665XXXXXXXX`. The frontend blocks other characters, and the backend checks again.
 - Every email goes through `apps/integrations/email/branded.py` (one shared header, footer and block helpers, tables and inline styles only) and is composed in `adapter.py`. Celery tasks on the `emails` queue send them, so sending never blocks a web request.
@@ -116,7 +119,7 @@ The frontend hides buttons by role for UX only. **The backend is the only author
 ## 5. Core data model (MVP)
 
 ```
-tenancy:        School (with onboarding details: type, stages, contact, location, admin contact, and optional phone, CR and MOE license numbers), Membership, SchoolSettings
+tenancy:        School (kind: school or individual teacher workspace; onboarding details: type, stages, contact, location, admin contact, and optional phone, CR and MOE license numbers), Membership, SchoolSettings
 accounts:       User, EmailOTP
 academics:      AcademicYear, Term, Grade, Section, Subject,
                 Enrollment(student, section, year), TeacherAssignment(teacher, section, subject, year),
@@ -131,9 +134,13 @@ notifications:  Notification(user, type, payload, read_at), PushSubscription
 files:          StoredFile(owner, key, mime, size)
 platform:       DemoRequest(status, admin_notes, converted_school), ContactMessage,
                 Plan(code, monthly/yearly price, max_students, is_active),
-                Subscription(school, plan, billing_cycle, price, starts_on, ends_on, status)  one active per school,
+                Subscription(school, plan, billing_cycle, price, starts_on, ends_on, status, is_trial)  one active per school,
+                TeacherSignupCode(email, code_hash, expires_at, attempts, sent_at),
                 Quotation(number, school | demo_request, recipient, language, vat_rate, totals, status), QuotationItem
                 (no school FK scoping — platform-owned)
+classroom:      TeacherProfile, Classroom, Student(parent_email), LessonPlan, PresentationExport, AIGeneration,
+                AttendanceRecord unique(student, date), Assessment, Mark unique(assessment, student),
+                ParentMessage, UpgradeRequest one pending per workspace ([ADR-0022](decisions/0022-teacher-classroom-app.md))
 audit:          AuditEvent(actor, action, target, school, ip_address, details) — platform actions, append-only ([ADR-0019](decisions/0019-platform-audit-log-and-quotation-pdfs.md)); django-auditlog for tenant data later
 ```
 
@@ -222,7 +229,7 @@ lms/
 ├── frontend/
 │   ├── src/app/[locale]/
 │   │   ├── (marketing)/        home, features, pricing, about, contact   ← SSG
-│   │   ├── (auth)/             login, email code, set password
+│   │   ├── (auth)/             login, email code, set password, teacher free trial sign-up
 │   │   ├── (app)/              dashboard, students, attendance, exams, ...  ← logged-in
 │   │   └── (platform)/         super admin
 │   ├── src/features/<module>/  components/, api.ts, schemas.ts (auth, leads, marketing, platform)

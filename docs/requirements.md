@@ -41,7 +41,8 @@ A person can hold roles in more than one school (e.g. a parent with children in 
 ### Phase 1.5 (weeks 5–8)
 - Super Admin: quotation builder → PDF (English or Arabic, with VAT and Hijri dates) → email, for a school or a demo request. Draft, sent, accepted, rejected
 - Subscription plans with monthly and yearly prices, set by the Super Admin in the panel (real prices **TBC with client**), manual activation/expiry, automatic expiry at the end date
-- Plans (client decision, 2026-11-12): **school plans are yearly** (Basic, Premium, and Custom, which is quoted per school or group); **individual teacher plans are monthly** (Teacher, Teacher Pro). A teacher account is activated by the team on request. Each plan differs in features, not only in limits
+- Plans (client decision, 2026-11-12): **school plans are yearly** (Basic, Premium, and Custom, which is quoted per school or group); **individual teacher plans are monthly** (Teacher, Teacher Pro). Each plan differs in features, not only in limits
+- Individual teachers (client decision, 2026-11-18): a teacher signs up alone with an email, needs no credit card, and gets a **7-day free trial of the Teacher plan** in a private workspace ([ADR-0021](decisions/0021-individual-teacher-workspace-and-trial.md))
 - Usage overview per school (students, teachers, parents, recent sign-ins, plan student limit) and an audit log of Super Admin actions
 - Public website with five pages: Home, About Us, LMS, Pricing, Contact (Arabic/English, SEO). Book a demo and Contact forms are saved and emailed to the team
 - PWA (installable, web push notifications)
@@ -84,7 +85,7 @@ Traffic: peaks during school hours (07:00–14:00 KSA), spikes at morning attend
 
 ## 6. Open questions for the client (TBC)
 - Pricing: the site shows **sample** prices. Confirm the real ones for every plan, and each plan's student and class limits and features
-- Individual teachers: which features a teacher account gets (the site lists a suggestion), and whether there is a free trial or a yearly discount
+- Individual teachers: confirm the trial limits now in use (2 classes, 30 students, 10 lesson plans, 3 PowerPoint downloads), whether AI lesson plans may use OpenAI, how a teacher pays after the trial, who can register (suggested: Saudi Arabia only), and how long data is kept after a trial ends (suggested: deleted after 37 days)
 - Do any parents lack email? (fallback: school-issued username/password for parents)
 - Fee structure specifics: installments, discounts, sibling discounts, VAT on receipts?
 - Report card format — does the client have a template (Ministry of Education format)?

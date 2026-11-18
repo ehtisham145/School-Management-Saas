@@ -115,6 +115,9 @@ class Subscription(models.Model):
         max_length=10, choices=Status.choices, default=Status.ACTIVE, db_index=True
     )
     expired_at = models.DateTimeField(null=True, blank=True)
+    is_trial = models.BooleanField(default=False)
+    # 0 none yet, 1 two days left, 2 last day, 3 trial ended.
+    trial_reminder_stage = models.PositiveSmallIntegerField(default=0)
     notes = models.TextField(max_length=1000, blank=True)
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL, related_name="+"
@@ -124,6 +127,13 @@ class Subscription(models.Model):
 
     class Meta:
         ordering = ["-starts_on", "-id"]
+        indexes = [
+            models.Index(
+                fields=["status", "ends_on"],
+                condition=Q(is_trial=True),
+                name="trial_status_ends_on_idx",
+            ),
+        ]
         constraints = [
             models.UniqueConstraint(
                 fields=["school"],
@@ -140,6 +150,23 @@ class Subscription(models.Model):
 
     def __str__(self):
         return f"{self.school} - {self.plan} ({self.billing_cycle})"
+
+
+class TeacherSignupCode(models.Model):
+    """Proves a teacher owns an email before any account exists.
+
+    The name and password are sent again with the code, so nobody can replace the
+    password of a sign-up that someone else is finishing.
+    """
+
+    email = models.EmailField(unique=True)
+    code_hash = models.CharField(max_length=255)
+    expires_at = models.DateTimeField()
+    attempts = models.PositiveSmallIntegerField(default=0)
+    sent_at = models.DateTimeField()
+
+    def __str__(self):
+        return self.email
 
 
 class Quotation(models.Model):

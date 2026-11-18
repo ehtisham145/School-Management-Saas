@@ -327,6 +327,11 @@ def test_every_email_can_be_previewed():
     assert set(preview_messages()) == {
         "otp",
         "school-admin-welcome",
+        "teacher-signup-code",
+        "teacher-account-exists",
+        "trial-reminder",
+        "trial-ended",
+        "parent-message",
         "demo-request",
         "quotation",
         "contact-message",
@@ -340,7 +345,7 @@ def test_preview_command_writes_html_and_text_files(settings, tmp_path):
 
     assert Path(tmp_path, "otp.html").read_text(encoding="utf8").startswith("<!DOCTYPE html>")
     assert "Subject:" in Path(tmp_path, "otp.txt").read_text(encoding="utf8")
-    assert len(list(tmp_path.iterdir())) == 10
+    assert len(list(tmp_path.iterdir())) == 20
 
 
 # --- Attachments

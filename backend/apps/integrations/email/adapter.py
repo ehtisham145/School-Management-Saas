@@ -43,6 +43,91 @@ def otp_email_content(to_email, code):
     }
 
 
+def teacher_signup_code_content(to_email, code):
+    expiry = f"This code expires in {OTP_EXPIRY_MINUTES} minutes."
+    return {
+        "subject": "Confirm your email for Lesson Lab",
+        "to": to_email,
+        "heading": "Confirm your email",
+        "intro": "Enter this code to start your 7-day free trial.",
+        "body_html": (
+            code_box(code)
+            + notice(f"{expiry} It can only be used once.", tone="warning")
+            + paragraph(
+                "If you didn't try to sign up, you can ignore this email.", muted=True, spacing=0
+            )
+        ),
+        "preheader": expiry,
+        "text_body": (
+            f"Your verification code is: {code}\n\n"
+            f"{expiry} It can only be used once.\n\n"
+            "If you didn't try to sign up, you can ignore this email."
+        ),
+    }
+
+
+def teacher_account_exists_content(to_email):
+    return {
+        "subject": "You already have a Lesson Lab account",
+        "to": to_email,
+        "heading": "You already have an account",
+        "intro": "Someone tried to start a free trial with this email address.",
+        "body_html": paragraph(
+            "If it was you, sign in instead. If you forgot your password, you can reset it on "
+            "the sign-in page. If it wasn't you, you can ignore this email.",
+            spacing=0,
+        ),
+        "cta_label": "Sign in to Lesson Lab",
+        "cta_url": f"{settings.FRONTEND_URL}/login",
+        "preheader": "Sign in with your existing account.",
+    }
+
+
+def trial_reminder_content(to_email, name, days_left):
+    when = "tomorrow" if days_left <= 1 else f"in {days_left} days"
+    return {
+        "subject": f"Your Lesson Lab free trial ends {when}",
+        "to": to_email,
+        "heading": f"Your free trial ends {when}",
+        "intro": f"Hello {user_text(name)}, we hope your classes are going well.",
+        "body_html": paragraph(
+            "Choose a plan to keep adding classes, lessons and results. "
+            "Everything you have created stays safe in your account.",
+            spacing=0,
+        ),
+        "cta_label": "Choose a plan",
+        "cta_url": f"{settings.FRONTEND_URL}/teacher/plan",
+        "preheader": "Choose a plan to keep working without a break.",
+    }
+
+
+def trial_ended_content(to_email, name):
+    return {
+        "subject": "Your Lesson Lab free trial has ended",
+        "to": to_email,
+        "heading": "Your free trial has ended",
+        "intro": f"Hello {user_text(name)}, thank you for trying Lesson Lab.",
+        "body_html": paragraph(
+            "You can still sign in and see your work. Choose a plan to make changes again.",
+            spacing=0,
+        ),
+        "cta_label": "Choose a plan",
+        "cta_url": f"{settings.FRONTEND_URL}/teacher/plan",
+        "preheader": "Your work is safe. Choose a plan to continue.",
+    }
+
+
+def parent_message_content(*, to_email, teacher_name, class_name, subject, body):
+    return {
+        "subject": subject,
+        "to": to_email,
+        "heading": user_text(subject),
+        "intro": f"A message from {user_text(teacher_name)} about {user_text(class_name)}.",
+        "body_html": paragraph(user_text(body), spacing=0),
+        "preheader": f"A message from {user_text(teacher_name)}.",
+    }
+
+
 def school_admin_welcome_content(to_email, school_name, username=None):
     school = user_text(school_name)
     steps = [
@@ -118,6 +203,26 @@ def send_otp_email(to_email, code):
     send_branded_email(**otp_email_content(to_email, code))
 
 
+def send_teacher_signup_code_email(to_email, code):
+    send_branded_email(**teacher_signup_code_content(to_email, code))
+
+
+def send_trial_reminder_email(to_email, name, days_left):
+    send_branded_email(**trial_reminder_content(to_email, name, days_left))
+
+
+def send_trial_ended_email(to_email, name):
+    send_branded_email(**trial_ended_content(to_email, name))
+
+
+def send_parent_message_email(**content):
+    send_branded_email(**parent_message_content(**content))
+
+
+def send_teacher_account_exists_email(to_email):
+    send_branded_email(**teacher_account_exists_content(to_email))
+
+
 def send_school_admin_welcome_email(to_email, school_name, username=None):
     send_branded_email(**school_admin_welcome_content(to_email, school_name, username))
 
@@ -157,6 +262,17 @@ def preview_messages():
         "otp": otp_email_content("admin@example.com", "123456"),
         "school-admin-welcome": school_admin_welcome_content(
             "admin@example.com", "Al Noor School", "alnoor.admin"
+        ),
+        "teacher-signup-code": teacher_signup_code_content("teacher@example.com", "123456"),
+        "teacher-account-exists": teacher_account_exists_content("teacher@example.com"),
+        "trial-reminder": trial_reminder_content("teacher@example.com", "Sara Ahmed", 2),
+        "trial-ended": trial_ended_content("teacher@example.com", "Sara Ahmed"),
+        "parent-message": parent_message_content(
+            to_email="parent@example.com",
+            teacher_name="Sara Ahmed",
+            class_name="Grade 5 Science",
+            subject="Science test next week",
+            body="Please help your child revise chapter three.",
         ),
         "demo-request": lead_notification_content(
             subject="Demo request: Al Noor School",

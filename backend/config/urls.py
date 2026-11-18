@@ -25,4 +25,5 @@ urlpatterns = [
     path("api/academics/", include("apps.academics.api.urls")),
     path("api/platform/", include("apps.platform.api.urls")),
     path("api/chatbot/", include("apps.chatbot.api.urls")),
+    path("api/classroom/", include("apps.classroom.api.urls")),
 ]

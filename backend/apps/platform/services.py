@@ -1,14 +1,19 @@
 import calendar
+import secrets
 from datetime import date, timedelta
 from decimal import ROUND_HALF_UP, Decimal
+from functools import partial
 
 from django.conf import settings
+from django.contrib.auth.hashers import check_password, make_password
 from django.db import IntegrityError, transaction
+from django.db.models import OuterRef, Subquery
 from django.utils import timezone
 from rest_framework.exceptions import ValidationError
 
 from apps.accounts.models import User
-from apps.audit.services import SYSTEM, Action, record_event
+from apps.audit.services import SYSTEM, Action, Actor, record_event
+from apps.classroom.services import complete_upgrade_requests
 from apps.platform.models import (
     BillingCycle,
     ContactMessage,
@@ -17,11 +22,17 @@ from apps.platform.models import (
     Quotation,
     QuotationItem,
     Subscription,
+    TeacherSignupCode,
 )
+from apps.platform.selectors import is_email_registered
 from apps.platform.tasks import (
     send_lead_notification_email_task,
     send_quotation_email_task,
     send_school_admin_welcome_email_task,
+    send_teacher_account_exists_email_task,
+    send_teacher_signup_code_email_task,
+    send_trial_ended_email_task,
+    send_trial_reminder_email_task,
 )
 from apps.tenancy.models import Membership, School
 
@@ -333,6 +344,267 @@ def expire_overdue_subscriptions(today=None):
         _expire(subscription, SYSTEM, "ended")
         count += 1
     return count
+
+
+# --- Individual teachers
+
+TRIAL_DAYS = 7
+SIGNUP_CODE_MINUTES = 10
+SIGNUP_CODE_MAX_ATTEMPTS = 5
+SIGNUP_RESEND_SECONDS = 30
+# Used only if the Super Admin hasn't created the Teacher plan yet.
+TEACHER_PLAN_DEFAULTS = {
+    "name_en": "Teacher",
+    "name_ar": "المعلم",
+    "monthly_price": Decimal("49.00"),
+    "yearly_price": Decimal("588.00"),
+    "max_students": 100,
+}
+
+
+@transaction.atomic
+def request_teacher_signup_code(email):
+    """Emails a code, or a sign-in reminder when the email already has an account."""
+    if is_email_registered(email):
+        transaction.on_commit(
+            lambda: send_teacher_account_exists_email_task.delay(email), robust=True
+        )
+        return
+
+    now = timezone.now()
+    pending = TeacherSignupCode.objects.select_for_update().filter(email=email).first()
+    if pending and (now - pending.sent_at).total_seconds() < SIGNUP_RESEND_SECONDS:
+        return
+
+    code = f"{secrets.randbelow(1_000_000):06d}"
+    TeacherSignupCode.objects.update_or_create(
+        email=email,
+        defaults={
+            "code_hash": make_password(code),
+            "expires_at": now + timedelta(minutes=SIGNUP_CODE_MINUTES),
+            "attempts": 0,
+            "sent_at": now,
+        },
+    )
+    transaction.on_commit(
+        lambda: send_teacher_signup_code_email_task.delay(email, code), robust=True
+    )
+
+
+@transaction.atomic
+def complete_teacher_signup(*, full_name, email, password, code, ip_address=None):
+    """Creates the teacher, a private workspace and a free trial. None if the code is wrong."""
+    pending = TeacherSignupCode.objects.select_for_update().filter(email=email).first()
+    if (
+        pending is None
+        or pending.expires_at <= timezone.now()
+        or pending.attempts >= SIGNUP_CODE_MAX_ATTEMPTS
+    ):
+        return None
+
+    pending.attempts += 1
+    pending.save(update_fields=["attempts"])
+    if not check_password(code, pending.code_hash):
+        return None
+    if is_email_registered(email):
+        pending.delete()
+        return None
+
+    first_name, _, last_name = full_name.partition(" ")
+    user = User.objects.create_user(
+        username=email,
+        email=email,
+        password=password,
+        first_name=first_name,
+        last_name=last_name.strip(),
+    )
+    workspace = School.objects.create(
+        kind=School.Kind.INDIVIDUAL,
+        name_en=full_name,
+        code=f"teacher-{secrets.token_hex(6)}",
+    )
+    Membership.objects.create(school=workspace, user=user, role=Membership.Role.TEACHER)
+
+    plan, _ = Plan.objects.get_or_create(code="teacher", defaults=TEACHER_PLAN_DEFAULTS)
+    today = timezone.localdate()
+    subscription = Subscription.objects.create(
+        school=workspace,
+        plan=plan,
+        billing_cycle=BillingCycle.MONTHLY,
+        price=Decimal("0.00"),
+        starts_on=today,
+        ends_on=today + timedelta(days=TRIAL_DAYS),
+        is_trial=True,
+        notes=f"{TRIAL_DAYS}-day free trial",
+        created_by=user,
+    )
+    record_event(
+        Actor(user=user, ip_address=ip_address),
+        Action.SUBSCRIPTION_ACTIVATED,
+        subscription,
+        label=f"{workspace.name_en} - {plan.name_en}",
+        school=workspace,
+        details={
+            "plan": plan.code,
+            "trial": True,
+            "ends_on": subscription.ends_on.isoformat(),
+            "privacy_accepted_at": timezone.now().isoformat(),
+        },
+    )
+    pending.delete()
+    return user
+
+
+TEACHER_PLANS = {
+    "teacher": TEACHER_PLAN_DEFAULTS,
+    "teacher_pro": {
+        "name_en": "Teacher Pro",
+        "name_ar": "المعلم المحترف",
+        "monthly_price": Decimal("99.00"),
+        "yearly_price": Decimal("1188.00"),
+        "max_students": None,
+    },
+}
+REMINDER_TWO_DAYS, REMINDER_LAST_DAY, REMINDER_ENDED = 1, 2, 3
+# A trial that ended long ago, before reminders existed, gets no email.
+TRIAL_ENDED_EMAIL_DAYS = 3
+
+
+@transaction.atomic
+def extend_teacher_trial(*, actor, school, days):
+    """Adds days to a running trial, or reopens an ended one from today."""
+    School.objects.select_for_update().get(pk=school.pk)
+    today = timezone.localdate()
+    if Subscription.objects.filter(
+        school=school, status=Subscription.Status.ACTIVE, is_trial=False
+    ).exists():
+        raise ValidationError({"days": "This teacher already has a paid plan."})
+
+    trial = (
+        Subscription.objects.select_related("plan")
+        .filter(school=school, is_trial=True)
+        .order_by("-ends_on", "-id")
+        .first()
+    )
+    if trial is None:
+        raise ValidationError({"days": "This teacher has no trial."})
+
+    trial.ends_on = max(trial.ends_on, today) + timedelta(days=days)
+    trial.status = Subscription.Status.ACTIVE
+    trial.expired_at = None
+    trial.trial_reminder_stage = 0
+    trial.save(
+        update_fields=["ends_on", "status", "expired_at", "trial_reminder_stage", "updated_at"]
+    )
+    record_event(
+        actor,
+        Action.SUBSCRIPTION_ACTIVATED,
+        trial,
+        label=f"{school.name_en} - {trial.plan.name_en}",
+        school=school,
+        details={"trial_extended_days": days, "ends_on": trial.ends_on.isoformat()},
+    )
+    return trial
+
+
+@transaction.atomic
+def activate_teacher_plan(*, actor, school, plan_code):
+    """Ends the trial or current plan and starts a paid month of the chosen plan."""
+    School.objects.select_for_update().get(pk=school.pk)
+    current = (
+        Subscription.objects.select_for_update(of=("self",))
+        .select_related("school", "plan")
+        .filter(school=school, status=Subscription.Status.ACTIVE)
+    )
+    for subscription in current:
+        _expire(subscription, actor, "plan_changed")
+
+    plan, _ = Plan.objects.get_or_create(code=plan_code, defaults=TEACHER_PLANS[plan_code])
+    subscription = Subscription.objects.create(
+        school=school,
+        plan=plan,
+        billing_cycle=BillingCycle.MONTHLY,
+        price=plan.monthly_price,
+        starts_on=timezone.localdate(),
+        ends_on=subscription_end(timezone.localdate(), BillingCycle.MONTHLY),
+        created_by=actor.user,
+    )
+    record_event(
+        actor,
+        Action.SUBSCRIPTION_ACTIVATED,
+        subscription,
+        label=f"{school.name_en} - {plan.name_en}",
+        school=school,
+        details={"plan": plan.code, "ends_on": subscription.ends_on.isoformat()},
+    )
+    complete_upgrade_requests(school)
+    return subscription
+
+
+def _trial_email_rows(subscriptions):
+    teacher_email = Membership.objects.filter(
+        school=OuterRef("school"), role=Membership.Role.TEACHER
+    ).order_by("id")
+    return subscriptions.select_related("school").annotate(
+        teacher_email=Subquery(teacher_email.values("user__email")[:1])
+    )
+
+
+@transaction.atomic
+def send_trial_reminders(today=None):
+    """Two days before the end, on the last day, and once the trial has ended."""
+    today = today or timezone.localdate()
+    sent = 0
+
+    running = _trial_email_rows(
+        Subscription.objects.select_for_update(skip_locked=True, of=("self",)).filter(
+            is_trial=True,
+            status=Subscription.Status.ACTIVE,
+            ends_on__gt=today,
+            ends_on__lte=today + timedelta(days=2),
+            trial_reminder_stage__lt=REMINDER_LAST_DAY,
+        )
+    )
+    for trial in running:
+        days_left = (trial.ends_on - today).days
+        stage = REMINDER_LAST_DAY if days_left <= 1 else REMINDER_TWO_DAYS
+        if stage <= trial.trial_reminder_stage or not trial.teacher_email:
+            continue
+        trial.trial_reminder_stage = stage
+        trial.save(update_fields=["trial_reminder_stage", "updated_at"])
+        email, name = trial.teacher_email, trial.school.name_en
+        transaction.on_commit(
+            partial(send_trial_reminder_email_task.delay, email, name, days_left), robust=True
+        )
+        sent += 1
+
+    ended = _trial_email_rows(
+        Subscription.objects.select_for_update(skip_locked=True, of=("self",))
+        .filter(
+            is_trial=True,
+            status=Subscription.Status.EXPIRED,
+            ends_on__gte=today - timedelta(days=TRIAL_ENDED_EMAIL_DAYS),
+            ends_on__lte=today,
+            trial_reminder_stage__lt=REMINDER_ENDED,
+        )
+        .exclude(
+            school__in=Subscription.objects.filter(status=Subscription.Status.ACTIVE).values(
+                "school"
+            )
+        )
+    )
+    for trial in ended:
+        trial.trial_reminder_stage = REMINDER_ENDED
+        trial.save(update_fields=["trial_reminder_stage", "updated_at"])
+        if trial.teacher_email:
+            transaction.on_commit(
+                partial(
+                    send_trial_ended_email_task.delay, trial.teacher_email, trial.school.name_en
+                ),
+                robust=True,
+            )
+            sent += 1
+    return sent
 
 
 # --- Quotations

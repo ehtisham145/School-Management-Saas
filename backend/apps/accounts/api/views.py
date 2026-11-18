@@ -1,5 +1,5 @@
 from django.contrib.auth import authenticate, login, logout
-from rest_framework.permissions import AllowAny
+from django.utils import timezone
 from rest_framework.response import Response
 from rest_framework.throttling import ScopedRateThrottle
 from rest_framework.views import APIView
@@ -10,9 +10,15 @@ from apps.accounts.api.serializers import (
     PasswordResetRequestSerializer,
     SetPasswordSerializer,
     SwitchSchoolSerializer,
+    TeacherSignupRequestSerializer,
+    TeacherSignupVerifySerializer,
 )
 from apps.accounts.models import User
 from apps.accounts.services import request_email_otp, set_password, verify_email_otp
+from apps.audit.services import client_ip
+from apps.core.permissions import TrustedOrigin
+from apps.platform.selectors import get_active_trial
+from apps.platform.services import complete_teacher_signup, request_teacher_signup_code
 from apps.tenancy.selectors import (
     get_switchable_membership,
     is_locked_out_by_inactive_school,
@@ -30,6 +36,7 @@ def _serialize_memberships(memberships):
                 "code": m.school.code,
                 "name_en": m.school.name_en,
                 "name_ar": m.school.name_ar,
+                "kind": m.school.kind,
             },
         }
         for m in memberships
@@ -44,12 +51,21 @@ def _active_memberships(request):
     return memberships
 
 
+def _trial_payload(user):
+    trial = get_active_trial(user)
+    if trial is None:
+        return None
+    days_left = max((trial.ends_on - timezone.localdate()).days, 0)
+    return {"ends_on": trial.ends_on.isoformat(), "days_left": days_left}
+
+
 def _session_payload(request):
     return {
         "username": request.user.username,
         "is_platform_admin": request.user.is_platform_admin,
         "school_inactive": is_locked_out_by_inactive_school(request.user),
         "memberships": _serialize_memberships(_active_memberships(request)),
+        "trial": _trial_payload(request.user),
     }
 
 
@@ -92,7 +108,7 @@ class SwitchSchoolView(APIView):
 
 class LoginView(APIView):
     authentication_classes = []
-    permission_classes = [AllowAny]
+    permission_classes = [TrustedOrigin]
     throttle_classes = [ScopedRateThrottle]
     throttle_scope = "login"
 
@@ -120,12 +136,60 @@ class LoginView(APIView):
         return _login_response(request)
 
 
+class TeacherSignupRequestView(APIView):
+    """Step one of a free trial: checks the details and emails a code. Answers the same for
+    an email that already has an account, so the response can't be used to find accounts."""
+
+    authentication_classes = []
+    permission_classes = [TrustedOrigin]
+    throttle_classes = [ScopedRateThrottle]
+    throttle_scope = "teacher_signup"
+
+    def post(self, request):
+        serializer = TeacherSignupRequestSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        if not serializer.validated_data.get("website"):
+            request_teacher_signup_code(serializer.validated_data["email"])
+        return Response(status=204)
+
+
+class TeacherSignupVerifyView(APIView):
+    """Step two: a correct code creates the account and starts the trial."""
+
+    authentication_classes = []
+    permission_classes = [TrustedOrigin]
+    throttle_classes = [ScopedRateThrottle]
+    throttle_scope = "email_code"
+
+    def post(self, request):
+        serializer = TeacherSignupVerifySerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        data = serializer.validated_data
+
+        user = complete_teacher_signup(
+            full_name=data["full_name"],
+            email=data["email"],
+            password=data["password"],
+            code=data["code"],
+            ip_address=client_ip(request),
+        )
+        if user is None:
+            return Response(
+                {"error": {"code": "invalid_code", "message": "Invalid or expired code."}},
+                status=401,
+            )
+
+        login(request, user, backend="django.contrib.auth.backends.ModelBackend")
+        return Response(_session_payload(request), status=201)
+
+
 class PasswordResetRequestView(APIView):
     """Anyone can ask for a code: a brand-new staff account with no password yet, or someone who
     forgot theirs. Silent for an unknown email, so the response can't be used to find accounts."""
 
     authentication_classes = []
-    permission_classes = [AllowAny]
+    permission_classes = [TrustedOrigin]
     throttle_classes = [ScopedRateThrottle]
     throttle_scope = "email_code"
 
@@ -133,7 +197,7 @@ class PasswordResetRequestView(APIView):
         serializer = PasswordResetRequestSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
-        user = User.objects.filter(email=serializer.validated_data["email"]).first()
+        user = User.objects.filter(email__iexact=serializer.validated_data["email"]).first()
         if user is not None:
             request_email_otp(user, "password_reset")
 
@@ -145,7 +209,7 @@ class PasswordResetConfirmView(APIView):
     none of) before. Signs the user in straight away, same as a normal login."""
 
     authentication_classes = []
-    permission_classes = [AllowAny]
+    permission_classes = [TrustedOrigin]
     throttle_classes = [ScopedRateThrottle]
     throttle_scope = "email_code"
 
@@ -154,7 +218,7 @@ class PasswordResetConfirmView(APIView):
         serializer.is_valid(raise_exception=True)
         data = serializer.validated_data
 
-        user = User.objects.filter(email=data["email"]).first()
+        user = User.objects.filter(email__iexact=data["email"]).first()
         if user is None or not verify_email_otp(user, "password_reset", data["code"]):
             return Response(
                 {"error": {"code": "invalid_credentials", "message": "Invalid email or code."}},

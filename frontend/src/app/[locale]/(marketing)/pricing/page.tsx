@@ -1,18 +1,20 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { cn } from "cn";
 import { HERO_IMAGES } from "@/features/marketing/hero-images";
+import { buttonVariants } from "@/components/ui/button";
 import { DemoButton } from "@/features/leads/components/demo-dialog";
 import type { Plan } from "@/features/leads/api";
 import { CtaBox, PageHero, Section, SectionHeading } from "@/features/marketing/components/blocks";
 import { PricingTabs } from "@/features/marketing/components/pricing-tabs";
 import { Reveal } from "@/features/marketing/components/reveal";
+import { Link } from "@/i18n/navigation";
 import { pageMetadata } from "@/i18n/metadata";
 
 type CardSpec = {
   plan: Plan;
   featured?: boolean;
   period?: "perYear" | "perMonth";
-  cta: "bookDemo" | "talkToUs" | "requestAccess";
+  cta: "bookDemo" | "talkToUs" | "requestAccess" | "startTrial";
 };
 
 // Schools pay yearly, teachers monthly. The Custom plan has no list price.
@@ -22,7 +24,7 @@ const SCHOOL_PLANS: CardSpec[] = [
   { plan: "custom", cta: "talkToUs" },
 ];
 const TEACHER_PLANS: CardSpec[] = [
-  { plan: "teacher", period: "perMonth", cta: "requestAccess" },
+  { plan: "teacher", period: "perMonth", cta: "startTrial" },
   { plan: "teacher_pro", period: "perMonth", cta: "requestAccess", featured: true },
 ];
 
@@ -79,9 +81,18 @@ async function PlanCard({ spec, index }: { spec: CardSpec; index: number }) {
           {t(`tiers.${plan}.billing`)}
         </p>
 
-        <DemoButton plan={plan} variant={featured ? "orange" : "outline"} className="mt-7 w-full">
-          {t(cta)}
-        </DemoButton>
+        {cta === "startTrial" ? (
+          <Link
+            href="/start-trial"
+            className={buttonVariants({ variant: "orange", className: "mt-7 w-full" })}
+          >
+            {t(cta)}
+          </Link>
+        ) : (
+          <DemoButton plan={plan} variant={featured ? "orange" : "outline"} className="mt-7 w-full">
+            {t(cta)}
+          </DemoButton>
+        )}
 
         <p
           className={cn(

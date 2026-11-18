@@ -5,6 +5,7 @@ import type {
   MeResponse,
   SwitchSchoolRequest,
   SwitchSchoolResponse,
+  TeacherSignupDetails,
 } from "./schemas";
 
 export function login(body: LoginRequest) {
@@ -21,6 +22,17 @@ export function switchSchool(body: SwitchSchoolRequest) {
 
 export function logout() {
   return apiFetch<void>("/auth/logout/", { method: "POST" });
+}
+
+export function requestTeacherSignup(body: TeacherSignupDetails & { website?: string }) {
+  return apiFetch<void>("/auth/teacher-signup/request/", { method: "POST", body });
+}
+
+export function verifyTeacherSignup(body: TeacherSignupDetails & { code: string }) {
+  return apiFetch<AuthenticatedResponse>("/auth/teacher-signup/verify/", {
+    method: "POST",
+    body,
+  });
 }
 
 export function requestPasswordReset(email: string) {

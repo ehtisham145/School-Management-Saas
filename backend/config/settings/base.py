@@ -36,6 +36,7 @@ LOCAL_APPS: list[str] = [
     "apps.platform",
     "apps.tenancy",
     "apps.chatbot",
+    "apps.classroom",
 ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
@@ -126,6 +127,9 @@ AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
 ]
 
+# Signed-in sessions end 12 hours after sign-in.
+SESSION_COOKIE_AGE = 60 * 60 * 12
+
 # ---------------------------------------------------------------- Login lockout (django-axes)
 AUTHENTICATION_BACKENDS = [
     "axes.backends.AxesStandaloneBackend",  # must be first
@@ -159,6 +163,8 @@ REST_FRAMEWORK = {
     "DEFAULT_THROTTLE_RATES": {
         "login": "20/min",
         "email_code": "50/min",
+        "teacher_signup": "10/hour",
+        "lesson_ai": "20/hour",
         "leads": "10/hour",
         "chatbot": "30/hour",
     },
@@ -198,5 +204,10 @@ CELERY_BEAT_SCHEDULE = {
     "expire-overdue-subscriptions": {
         "task": "apps.platform.tasks.expire_overdue_subscriptions_task",
         "schedule": crontab(hour=0, minute=15),
+    },
+    # Morning in Saudi Arabia, after the night's expiries have run.
+    "send-trial-reminders": {
+        "task": "apps.platform.tasks.send_trial_reminders_task",
+        "schedule": crontab(hour=9, minute=0),
     },
 }

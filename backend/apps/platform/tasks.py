@@ -4,7 +4,38 @@ from apps.integrations.email.adapter import (
     send_lead_notification_email,
     send_quotation_email,
     send_school_admin_welcome_email,
+    send_teacher_account_exists_email,
+    send_teacher_signup_code_email,
+    send_trial_ended_email,
+    send_trial_reminder_email,
 )
+
+
+@shared_task(queue="emails")
+def send_trial_reminder_email_task(to_email, name, days_left):
+    send_trial_reminder_email(to_email, name, days_left)
+
+
+@shared_task(queue="emails")
+def send_trial_ended_email_task(to_email, name):
+    send_trial_ended_email(to_email, name)
+
+
+@shared_task
+def send_trial_reminders_task():
+    from apps.platform.services import send_trial_reminders
+
+    return send_trial_reminders()
+
+
+@shared_task(queue="emails")
+def send_teacher_signup_code_email_task(to_email, code):
+    send_teacher_signup_code_email(to_email, code)
+
+
+@shared_task(queue="emails")
+def send_teacher_account_exists_email_task(to_email):
+    send_teacher_account_exists_email(to_email)
 
 
 @shared_task(queue="emails")

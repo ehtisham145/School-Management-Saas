@@ -5,6 +5,7 @@ export type School = {
   code: string;
   name_en: string;
   name_ar: string;
+  kind?: "school" | "individual";
 };
 
 export type Membership = {
@@ -24,6 +25,15 @@ export type AuthenticatedResponse = {
   /** The user belongs to schools, but all of them are deactivated. */
   school_inactive: boolean;
   memberships: Membership[];
+  /** Only for an individual teacher whose free trial is running. */
+  trial: { ends_on: string; days_left: number } | null;
+};
+
+export type TeacherSignupDetails = {
+  full_name: string;
+  email: string;
+  password: string;
+  accept_privacy: true;
 };
 
 export type SwitchSchoolRequest = {

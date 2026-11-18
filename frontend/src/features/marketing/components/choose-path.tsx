@@ -20,7 +20,7 @@ import { Section, SectionHeading } from "./blocks";
 import { Reveal } from "./reveal";
 
 type Icon = ComponentType<{ className?: string; "aria-hidden"?: boolean }>;
-type Item = { title: string; desc: string };
+type Item = { title: string; desc: string; pro?: boolean };
 
 const SCHOOL_ITEM_ICONS: Icon[] = [
   LayoutDashboard,
@@ -49,6 +49,7 @@ function PathCard({
   listLabel,
   items,
   itemIcons,
+  proLabel,
   cta,
   href,
   note,
@@ -62,6 +63,7 @@ function PathCard({
   listLabel: string;
   items: Item[];
   itemIcons: Icon[];
+  proLabel?: string;
   cta: string;
   href: string;
   note?: string;
@@ -116,7 +118,14 @@ function PathCard({
                 <ItemIcon aria-hidden className="size-4" />
               </span>
               <div>
-                <p className="text-[14.5px] font-semibold text-ink">{item.title}</p>
+                <p className="flex flex-wrap items-center gap-2 text-[14.5px] font-semibold text-ink">
+                  {item.title}
+                  {item.pro && proLabel && (
+                    <span className="rounded-full bg-orange-soft px-2 py-0.5 text-[11px] font-bold text-orange-text">
+                      {proLabel}
+                    </span>
+                  )}
+                </p>
                 <p className="text-[13px] text-ink-soft">{item.desc}</p>
               </div>
             </li>
@@ -171,8 +180,9 @@ export async function ChoosePathSection(): Promise<ReactNode> {
             listLabel={t("teacher.listLabel")}
             items={teacherItems}
             itemIcons={TEACHER_ITEM_ICONS}
+            proLabel={t("teacher.proLabel")}
             cta={t("teacher.cta")}
-            href="/pricing#teachers"
+            href="/start-trial"
             note={t("teacher.note")}
           />
         </Reveal>

@@ -270,6 +270,13 @@ jobs:
         run: |
           curl --silent --output /dev/null --write-out '%{http_code} %{redirect_url}\n' \
             -H 'Host: staging.lessonlab.me' http://127.0.0.1/ | grep '^308 https://staging.lessonlab.me/'
+      - name: Sends the security headers on website pages
+        run: |
+          headers="$(curl --fail --silent --show-error --insecure --head \
+            --resolve staging.lessonlab.me:443:127.0.0.1 https://staging.lessonlab.me/en)"
+          echo "$headers" | grep -i "^content-security-policy: default-src 'self'"
+          echo "$headers" | grep -i "^x-frame-options: DENY"
+          echo "$headers" | grep -i "^x-content-type-options: nosniff"
       - name: Only Caddy publishes ports
         run: |
           test -z "$(docker compose ps --format '{{.Service}} {{.Ports}}' | grep -e '->' | grep -v '^lessonlab-proxy ' || true)"
