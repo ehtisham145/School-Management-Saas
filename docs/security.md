@@ -17,6 +17,7 @@ This system stores **children's personal data** for multiple organisations. A cr
 - [x] The teacher's classroom API is limited to the teacher of an individual workspace. Every read is scoped to that workspace, another teacher's records answer 404, and plan limits and read-only mode are enforced on the backend ([ADR-0022](decisions/0022-teacher-classroom-app.md)).
 - [x] AI lesson plans send only the topic, subject, grade and language to the provider, never student data.
 - [x] Caddy sends a Content-Security-Policy, `X-Frame-Options: DENY`, `nosniff`, a referrer policy and a permissions policy on every response. Scripts still allow `'unsafe-inline'` because Next.js needs it without nonces.
+- [ ] CI fails on high or critical npm advisories in production packages. One exception runs until 2026-12-18: the picomatch ReDoS (GHSA-fc5q-39xc-vjpf), which has no fixed version yet and needs an attacker-supplied glob pattern (`.github/scripts/audit-npm.mjs`). Remove it when a fix is published.
 - [ ] Before individual teachers go live: production in Saudi Arabia, a reviewed privacy policy and Terms of Service. Staging holds test data only.
 - [x] `django-axes`: lock after 15 failed attempts (per user + IP), with a 1-hour cool-off.
 - [x] Emails: anything a user typed, including names, goes through `user_text()` before it is placed in email markup. Codes and links are never logged, and a code is never in a subject or preheader.
