@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import { routing } from "./routing";
 
-type PageKey = "home" | "about" | "lms" | "pricing" | "contact" | "login" | "privacy";
+type PageKey =
+  "home" | "about" | "lms" | "pricing" | "contact" | "login" | "privacy" | "startTrial";
 
 export async function pageMetadata(locale: string, key: PageKey, path: string): Promise<Metadata> {
   const t = await getTranslations({ locale, namespace: "Marketing.meta" });

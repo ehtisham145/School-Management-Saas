@@ -1,9 +1,12 @@
 from datetime import timedelta
 
-from django.db.models import Count, OuterRef, Q, Subquery
+from django.db.models import Count, IntegerField, OuterRef, Q, Subquery, Value
+from django.db.models.functions import Coalesce
+from django.shortcuts import get_object_or_404
 from django.utils import timezone
 
 from apps.accounts.models import User
+from apps.classroom.models import Classroom, Student, UpgradeRequest
 from apps.platform.models import DemoRequest, Plan, Quotation, Subscription
 from apps.tenancy.models import Membership, School
 
@@ -21,11 +24,16 @@ def is_email_registered(email):
     )
 
 
+def _schools():
+    """Real schools. Individual teachers' private workspaces are not listed as schools."""
+    return School.objects.filter(kind=School.Kind.SCHOOL)
+
+
 def list_schools(*, status=None, search=""):
     first_admin = Membership.objects.filter(
         school=OuterRef("pk"), role=Membership.Role.SCHOOL_ADMIN
     ).order_by("id")
-    schools = School.objects.annotate(
+    schools = _schools().annotate(
         member_count=Count("membership"),
         school_admin_email=Subquery(first_admin.values("user__email")[:1]),
     )
@@ -43,7 +51,7 @@ def list_schools(*, status=None, search=""):
 
 
 def get_school_counts():
-    return School.objects.aggregate(
+    return _schools().aggregate(
         total=Count("id"),
         active=Count("id", filter=Q(is_active=True)),
         inactive=Count("id", filter=Q(is_active=False)),
@@ -82,6 +90,83 @@ def get_dashboard_overview():
 
 
 # --- Plans and subscriptions
+
+
+def get_current_subscription(school, today=None):
+    """The subscription that covers today, even before the nightly job has expired an old one."""
+    today = today or timezone.localdate()
+    return (
+        Subscription.objects.filter(
+            school=school, status=Subscription.Status.ACTIVE, ends_on__gt=today
+        )
+        .select_related("plan")
+        .order_by("-ends_on")
+        .first()
+    )
+
+
+def _count_for_workspace(queryset):
+    counted = (
+        queryset.filter(school=OuterRef("pk"))
+        .order_by()
+        .values("school")
+        .annotate(total=Count("pk"))
+        .values("total")
+    )
+    return Coalesce(Subquery(counted, output_field=IntegerField()), Value(0))
+
+
+def _individual_teachers():
+    today = timezone.localdate()
+    teacher = Membership.objects.filter(school=OuterRef("pk"), role=Role.TEACHER).order_by("id")
+    current = Subscription.objects.filter(
+        school=OuterRef("pk"), status=Subscription.Status.ACTIVE, ends_on__gt=today
+    ).order_by("-ends_on")
+    pending = UpgradeRequest.objects.filter(
+        school=OuterRef("pk"), status=UpgradeRequest.Status.PENDING
+    )
+    return School.objects.filter(kind=School.Kind.INDIVIDUAL).annotate(
+        teacher_email=Subquery(teacher.values("user__email")[:1]),
+        class_count=_count_for_workspace(Classroom.objects.all()),
+        student_count=_count_for_workspace(Student.objects.all()),
+        plan_code=Subquery(current.values("plan__code")[:1]),
+        is_trial=Subquery(current.values("is_trial")[:1]),
+        ends_on=Subquery(current.values("ends_on")[:1]),
+        requested_plan=Subquery(pending.values("plan")[:1]),
+    )
+
+
+def list_individual_teachers(*, search="", status=None):
+    teachers = _individual_teachers()
+    if status == "trial":
+        teachers = teachers.filter(is_trial=True)
+    elif status == "paid":
+        teachers = teachers.filter(is_trial=False)
+    elif status == "ended":
+        teachers = teachers.filter(plan_code__isnull=True)
+    if search:
+        teachers = teachers.filter(
+            Q(name_en__icontains=search) | Q(teacher_email__icontains=search)
+        )
+    return teachers.order_by("-created_at", "-id")
+
+
+def get_individual_teacher(workspace_id):
+    return get_object_or_404(_individual_teachers(), pk=workspace_id)
+
+
+def get_active_trial(user):
+    """The running free trial of this user's own workspace, if there is one."""
+    return (
+        Subscription.objects.filter(
+            school__kind=School.Kind.INDIVIDUAL,
+            school__membership__user=user,
+            status=Subscription.Status.ACTIVE,
+            is_trial=True,
+        )
+        .order_by("-ends_on")
+        .first()
+    )
 
 
 def list_plans(*, active=None):
@@ -168,7 +253,7 @@ def list_school_usage(*, search="", status=None):
         school=OuterRef("pk"), status=Subscription.Status.ACTIVE
     ).select_related("plan")
 
-    schools = School.objects.annotate(
+    schools = _schools().annotate(
         students=_role_count(Role.STUDENT),
         teachers=_role_count(Role.TEACHER),
         parents=_role_count(Role.PARENT),
@@ -198,7 +283,9 @@ def list_school_usage(*, search="", status=None):
 def get_usage_totals():
     since = timezone.now() - timedelta(days=ACTIVE_USER_DAYS)
     active = Q(status=Membership.Status.ACTIVE)
-    members = Membership.objects.filter(active, school__is_active=True).aggregate(
+    members = Membership.objects.filter(
+        active, school__is_active=True, school__kind=School.Kind.SCHOOL
+    ).aggregate(
         students=Count("id", filter=Q(role=Role.STUDENT)),
         teachers=Count("id", filter=Q(role=Role.TEACHER)),
         parents=Count("id", filter=Q(role=Role.PARENT)),
@@ -206,7 +293,7 @@ def get_usage_totals():
         active_users=Count("user", filter=Q(user__last_login__gte=since), distinct=True),
     )
     return {
-        "active_schools": School.objects.filter(is_active=True).count(),
+        "active_schools": _schools().filter(is_active=True).count(),
         "active_subscriptions": Subscription.objects.filter(
             status=Subscription.Status.ACTIVE
         ).count(),

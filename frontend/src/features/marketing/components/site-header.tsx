@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Menu } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { cn } from "cn";
+import { buttonVariants } from "@/components/ui/button";
 import { Link, usePathname } from "@/i18n/navigation";
 import { DemoButton } from "@/features/leads/components/demo-dialog";
 import { LanguageMenu } from "./language-menu";
@@ -28,16 +29,16 @@ export function SiteHeader() {
     <header className="sticky top-0 z-30 border-b border-line bg-bg">
       <div className="page-wrap relative flex h-16 items-center justify-between gap-2 sm:h-[76px] sm:gap-4">
         <Link href="/" onClick={closeMenu} className="block shrink-0">
-          <Logo priority />
+          <Logo priority className="lg:h-9 xl:h-14" />
         </Link>
 
         <nav
           id="site-nav"
           aria-label={t("main")}
           className={cn(
-            "gap-7 text-[14.5px] font-semibold text-ink-soft lg:flex",
+            "gap-7 text-[14.5px] font-semibold whitespace-nowrap text-ink-soft lg:flex lg:gap-4 xl:gap-7",
             menuOpen
-              ? "absolute inset-x-0 top-full flex flex-col gap-0.5 border-b border-line bg-bg px-4 py-3 shadow-soft sm:px-6 lg:static lg:flex-row lg:gap-7 lg:border-0 lg:p-0 lg:shadow-none"
+              ? "absolute inset-x-0 top-full flex flex-col gap-0.5 border-b border-line bg-bg px-4 py-3 shadow-soft sm:px-6 lg:static lg:flex-row lg:gap-4 lg:border-0 lg:p-0 lg:shadow-none xl:gap-7"
               : "hidden",
           )}
         >
@@ -66,17 +67,36 @@ export function SiteHeader() {
           >
             {t("signIn")}
           </Link>
+          <Link
+            href="/start-trial"
+            onClick={closeMenu}
+            className="py-2.5 font-bold text-orange-text transition-colors lg:hidden"
+          >
+            {t("freeTrial")}
+          </Link>
         </nav>
 
         <div className="flex items-center gap-2">
           <LanguageMenu />
           <Link
             href="/login"
-            className="hidden rounded-control px-3 py-[9px] text-[14.5px] font-semibold text-navy hover:bg-navy-soft lg:block"
+            className="hidden rounded-control px-3 py-[9px] text-[14.5px] font-semibold whitespace-nowrap text-navy hover:bg-navy-soft lg:block"
           >
             {t("signIn")}
           </Link>
-          <DemoButton size="sm" className="hidden sm:inline-flex">
+          <Link
+            href="/start-trial"
+            className={buttonVariants({
+              variant: "outline",
+              size: "sm",
+              className: "hidden whitespace-nowrap lg:inline-flex",
+            })}
+          >
+            {/* The full label doesn't fit beside the links on a small laptop. */}
+            <span className="xl:hidden">{t("freeTrialShort")}</span>
+            <span className="hidden xl:inline">{t("freeTrial")}</span>
+          </Link>
+          <DemoButton size="sm" className="hidden whitespace-nowrap sm:inline-flex">
             {t("cta")}
           </DemoButton>
           <button

@@ -9,6 +9,7 @@ from apps.platform.api.billing_views import (
     SubscriptionViewSet,
     UsageViewSet,
 )
+from apps.platform.api.teacher_views import IndividualTeacherViewSet
 from apps.platform.api.views import (
     ContactMessageView,
     DashboardView,
@@ -25,6 +26,7 @@ router.register("subscriptions", SubscriptionViewSet, basename="platform-subscri
 router.register("quotations", QuotationViewSet, basename="platform-quotation")
 router.register("usage", UsageViewSet, basename="platform-usage")
 router.register("audit-log", AuditEventViewSet, basename="platform-audit-log")
+router.register("teachers", IndividualTeacherViewSet, basename="platform-teacher")
 
 urlpatterns = [
     path("demo-requests/", DemoRequestView.as_view(), name="demo-request"),

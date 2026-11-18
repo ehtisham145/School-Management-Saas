@@ -6,6 +6,11 @@ from apps.core.models import TenantModel
 
 
 class School(models.Model):
+    class Kind(models.TextChoices):
+        SCHOOL = "school", "School"
+        # A private workspace for one teacher who signed up without a school.
+        INDIVIDUAL = "individual", "Individual teacher"
+
     class Type(models.TextChoices):
         BOYS = "boys", "Boys"
         GIRLS = "girls", "Girls"
@@ -36,6 +41,7 @@ class School(models.Model):
     name_ar = models.CharField(max_length=200, blank=True)
     code = models.SlugField(max_length=30, unique=True)
     is_active = models.BooleanField(default=True)
+    kind = models.CharField(max_length=20, choices=Kind.choices, default=Kind.SCHOOL, db_index=True)
 
     # Onboarding details. Blank is allowed only for schools created before these
     # fields existed; the platform API requires them for every new school.

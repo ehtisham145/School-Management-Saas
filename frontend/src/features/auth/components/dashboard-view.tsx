@@ -1,6 +1,8 @@
 "use client";
 
+import { useEffect } from "react";
 import { useLocale, useTranslations } from "next-intl";
+import { useRouter } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useSession } from "../session-store";
@@ -12,8 +14,14 @@ export function DashboardView() {
   const locale = useLocale();
   const { session } = useSession();
   const { handleLogout, isLoggingOut } = useLogout();
+  const router = useRouter();
+  const isIndividualTeacher = session?.school.kind === "individual";
 
-  if (!session) {
+  useEffect(() => {
+    if (isIndividualTeacher) router.replace("/teacher");
+  }, [isIndividualTeacher, router]);
+
+  if (!session || isIndividualTeacher) {
     return null;
   }
 

@@ -13,13 +13,20 @@ This system stores **children's personal data** for multiple organisations. A cr
 ## 2. Authentication
 - [x] Argon2 password hashing; Django password validators on.
 - [x] Staff created without a password (a new School Admin) sign in once with an email code and must set a password before using the app. The set-password endpoint works only while the account has no password, runs the password validators, and keeps the current session.
+- [x] Teacher sign-up: no account exists until the email is proven with a hashed 6-digit code (10-minute expiry, 5 attempts, one email every 30 seconds, `teacher_signup` throttle of 10 an hour per IP, honeypot). The password is never stored before that, and a registered email gets the same response ([ADR-0021](decisions/0021-individual-teacher-workspace-and-trial.md)).
+- [x] The teacher's classroom API is limited to the teacher of an individual workspace. Every read is scoped to that workspace, another teacher's records answer 404, and plan limits and read-only mode are enforced on the backend ([ADR-0022](decisions/0022-teacher-classroom-app.md)).
+- [x] AI lesson plans send only the topic, subject, grade and language to the provider, never student data.
+- [x] Caddy sends a Content-Security-Policy, `X-Frame-Options: DENY`, `nosniff`, a referrer policy and a permissions policy on every response. Scripts still allow `'unsafe-inline'` because Next.js needs it without nonces.
+- [ ] CI fails on high or critical npm advisories in production packages. One exception runs until 2026-12-18: the picomatch ReDoS (GHSA-fc5q-39xc-vjpf), which has no fixed version yet and needs an attacker-supplied glob pattern (`.github/scripts/audit-npm.mjs`). Remove it when a fix is published.
+- [ ] Before individual teachers go live: production in Saudi Arabia, a reviewed privacy policy and Terms of Service. Staging holds test data only.
 - [x] `django-axes`: lock after 15 failed attempts (per user + IP), with a 1-hour cool-off.
 - [x] Emails: anything a user typed, including names, goes through `user_text()` before it is placed in email markup. Codes and links are never logged, and a code is never in a subject or preheader.
 - [ ] Email OTP: random 6 digits, stored **hashed**, 10-min expiry, single use, 5 attempts max, resend throttled (e.g. 1/min, 5/hour).
 - [ ] No two-factor authentication: it was removed at the owner's request ([ADR-0018](decisions/0018-remove-two-factor-authentication.md)). A password or an email code alone signs in every role, including Super Admin. Revisit before real school data goes live.
-- [ ] Session cookies `HttpOnly; Secure; SameSite=Lax`; session rotated on login and on privilege change; logout invalidates server-side.
+- [x] Session cookies are `HttpOnly; SameSite=Lax`, and `Secure` on servers. A session ends 12 hours after sign-in.
+- [ ] Session rotated on privilege change; logout invalidates server-side.
 - [x] Login and OTP endpoints return identical responses for "user not found" and "wrong password".
-- [x] Public sign-in and lead form endpoints use no session, so an old session can't block them. Their protection is throttling; endpoints for signed-in users still require CSRF.
+- [x] Public sign-in and lead form endpoints use no session, so an old session can't block them. Their protection is throttling, and sign-in, teacher sign-up and password reset also refuse a browser request from another website (`TrustedOrigin`). Endpoints for signed-in users still require CSRF.
 - [ ] Tighter email code resend limit: today it is only the shared `email_code` throttle (50/min), not the 1/min and 5/hour above.
 
 ## 3. Authorization

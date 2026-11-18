@@ -30,7 +30,8 @@ export type ErrorKey =
   | "passwordShort"
   | "passwordNumeric"
   | "passwordMismatch"
-  | "sameEmail";
+  | "sameEmail"
+  | "acceptPrivacy";
 
 /** Gets the field value, and every value of the form for checks that compare fields. */
 type Validator = (value: string, all: Record<string, string>) => ErrorKey | null;

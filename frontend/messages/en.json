@@ -2,8 +2,8 @@
   "Auth": {
     "login": {
       "title": "Sign in",
-      "usernameLabel": "Username",
-      "usernamePlaceholder": "Enter your username",
+      "usernameLabel": "Username or email",
+      "usernamePlaceholder": "Enter your username or email",
       "passwordLabel": "Password",
       "passwordPlaceholder": "Enter your password",
       "showPassword": "Show password",
@@ -55,7 +55,40 @@
     },
     "schoolInactive": "Your school's account is currently inactive. Please contact Lesson Lab support.",
     "backToLogin": "Back to sign in",
-    "passwordResetSuccess": "Your password has been reset. Sign in with your new password."
+    "passwordResetSuccess": "Your password has been reset. Sign in with your new password.",
+    "teacherSignup": {
+      "headline": "Start your free trial",
+      "sub": "Your own private workspace for planning lessons and running your classes.",
+      "points": ["No credit card required", "Your data stays private to you", "Arabic and English"],
+      "title": "Start your free trial",
+      "subtitle": "Create your teacher account.",
+      "fullNameLabel": "Full name",
+      "emailLabel": "Email address",
+      "passwordLabel": "Password",
+      "passwordHint": "At least 10 characters. Avoid common passwords and your name.",
+      "confirmLabel": "Confirm password",
+      "accept": "I agree to the <link>Privacy Policy</link>.",
+      "submit": "Continue",
+      "submitting": "Sending code...",
+      "codeTitle": "Check your email",
+      "codeSent": "If <email></email> can be used for a trial, a 6-digit code is on its way.",
+      "codeLabel": "6-digit code",
+      "verify": "Start free trial",
+      "verifying": "Starting your trial...",
+      "resend": "Send a new code",
+      "resendIn": "Send a new code in {seconds}s",
+      "codeResent": "If this email can be used, a new code is on its way.",
+      "changeDetails": "Change my details",
+      "haveAccount": "Already have an account?",
+      "signIn": "Sign in",
+      "backHome": "Back to website",
+      "errors": {
+        "invalidCode": "That code is incorrect or has expired.",
+        "rateLimited": "Too many attempts. Please try again later.",
+        "weak": "Choose a stronger password: not a common one and not like your name or email.",
+        "generic": "Something went wrong. Please try again."
+      }
+    }
   },
   "Chatbot": {
     "open": "Open chat assistant",
@@ -120,6 +153,10 @@
       "privacy": {
         "title": "Privacy Policy",
         "description": "How Lesson Lab collects, uses and protects personal data, including student data."
+      },
+      "startTrial": {
+        "title": "Start your 7-day free trial | Lesson Lab",
+        "description": "Individual teachers can try Lesson Lab free for 7 days. No credit card required."
       }
     },
     "nav": {
@@ -132,7 +169,9 @@
       "signIn": "Sign in",
       "cta": "Book a demo",
       "menu": "Open menu",
-      "closeMenu": "Close menu"
+      "closeMenu": "Close menu",
+      "freeTrial": "Free trial for teachers",
+      "freeTrialShort": "Free trial"
     },
     "lang": {
       "label": "Choose language",
@@ -256,7 +295,10 @@
       },
       "strip": {
         "row1": [
-          { "title": "Bilingual by design", "desc": "Arabic and English, both native" },
+          {
+            "title": "Bilingual by design",
+            "desc": "Arabic and English, both native"
+          },
           {
             "title": "Five roles, one system",
             "desc": "Admin, teacher, student, parent, principal"
@@ -265,16 +307,28 @@
             "title": "Built for the Saudi week",
             "desc": "Sunday to Thursday, no workaround needed"
           },
-          { "title": "Hijri and Gregorian together", "desc": "Both dates, every time" }
+          {
+            "title": "Hijri and Gregorian together",
+            "desc": "Both dates, every time"
+          }
         ],
         "row2": [
-          { "title": "Every school, walled off", "desc": "No data ever crosses between schools" },
-          { "title": "One record, not five exports", "desc": "Update once, everyone sees it" },
+          {
+            "title": "Every school, walled off",
+            "desc": "No data ever crosses between schools"
+          },
+          {
+            "title": "One record, not five exports",
+            "desc": "Update once, everyone sees it"
+          },
           {
             "title": "Fees without spreadsheets",
             "desc": "Dues, receipts, overdue, all in one place"
           },
-          { "title": "Reports in both languages", "desc": "Print-ready, Arabic or English" }
+          {
+            "title": "Reports in both languages",
+            "desc": "Print-ready, Arabic or English"
+          }
         ]
       },
       "choosePath": {
@@ -322,11 +376,13 @@
             },
             {
               "title": "AI-powered lesson planning",
-              "desc": "Generate lesson plans aligned with your curriculum."
+              "desc": "Generate lesson plans aligned with your curriculum.",
+              "pro": true
             },
             {
               "title": "Automated grading",
-              "desc": "Simplify checking, marking and evaluating student work."
+              "desc": "Simplify checking, marking and evaluating student work.",
+              "pro": true
             },
             {
               "title": "Smart file uploads",
@@ -338,11 +394,13 @@
             },
             {
               "title": "Automated reports",
-              "desc": "Generate student performance reports and academic summaries."
+              "desc": "Generate student performance reports and academic summaries.",
+              "pro": true
             }
           ],
-          "cta": "Get started as an educator",
-          "note": "Affordable individual subscription, independent access."
+          "cta": "Start your 7-day free trial",
+          "note": "No credit card required.",
+          "proLabel": "Pro"
         },
         "footnote": "One platform. Two flexible ways to work."
       },
@@ -555,7 +613,7 @@
       "talkToUs": "Talk to us",
       "requestAccess": "Request access",
       "schoolsNote": "Prices are per school, per year, before VAT. Your final quote depends on your student count and the modules you need.",
-      "teachersNote": "Prices are per teacher, per month, before VAT. Our team activates your account, usually within one working day. If your school joins Lesson Lab later, your classes and lesson plans move with you.",
+      "teachersNote": "Prices are per teacher, per month, before VAT. Try the Teacher plan free for 7 days, with no credit card. If your school joins Lesson Lab later, your classes and lesson plans move with you.",
       "tiers": {
         "basic": {
           "name": "Basic",
@@ -611,12 +669,9 @@
           "features": [
             "Lesson plans you can save and reuse",
             "Presentations, downloadable as PowerPoint",
-            "Smart file uploads, organised automatically",
             "Up to 5 classes and 100 students",
             "Attendance for your classes",
-            "Marks and results",
-            "Homework you set and check",
-            "Switch to your school's workspace too, if you join one",
+            "Marks and a gradebook",
             "Arabic and English"
           ]
         },
@@ -627,12 +682,10 @@
           "tagline": "For teachers who want to save hours every week.",
           "features": [
             "Everything in Teacher",
-            "AI lesson plans and slides, 50 a month",
-            "Automated grading for student work",
-            "Automated performance reports, including PDF report cards",
+            "AI lesson plans, 50 a month",
             "Unlimited classes and students",
-            "Messages and announcements to parents",
-            "Online quizzes"
+            "Report cards as PDF",
+            "Email messages to parents"
           ]
         }
       },
@@ -653,7 +706,7 @@
         },
         {
           "q": "How does a teacher account start?",
-          "a": "Send a request and our team activates your account, usually within one working day."
+          "a": "Sign up with your email, confirm the code we send you, and your 7-day free trial starts straight away."
         },
         {
           "q": "What happens to our data if we leave?",
@@ -668,7 +721,8 @@
         "title": "Get a price for your school, not a price list.",
         "description": "Tell us your student count and the modules you need, and we'll quote it on the call.",
         "button": "Book a demo"
-      }
+      },
+      "startTrial": "Start 7-day free trial"
     },
     "contact": {
       "hero": {
@@ -789,7 +843,8 @@
       "quotations": "Quotations",
       "plans": "Plans",
       "usage": "Usage",
-      "auditLog": "Audit log"
+      "auditLog": "Audit log",
+      "teachers": "Teachers"
     },
     "profileMenu": {
       "label": "Account menu",
@@ -1240,6 +1295,29 @@
           "ended": "Reached its end date"
         }
       }
+    },
+    "teachers": {
+      "title": "Individual teachers",
+      "subtitle": "Teachers who signed up on their own, with their trials and plans.",
+      "filter": "Filter teachers",
+      "search": "Search by name or email",
+      "status": {
+        "all": "All",
+        "trial": "On trial",
+        "paid": "Paid",
+        "ended": "Ended"
+      },
+      "planTeacher": "Teacher",
+      "planPro": "Teacher Pro",
+      "usage": "{classes, plural, one {# class} other {# classes}}, {students, plural, one {# student} other {# students}}",
+      "endsOn": "Ends {date}",
+      "requested": "Requested {plan}",
+      "extend": "Add {days} days",
+      "activate": "Activate {plan}",
+      "actionRejected": "This change isn't possible for this teacher.",
+      "failed": "Something went wrong. Please try again.",
+      "emptyTitle": "No teachers found",
+      "emptyHint": "Teachers appear here when they start a free trial."
     }
   },
   "SignIn": {
@@ -1300,7 +1378,8 @@
       "passwordShort": "Use at least 10 characters.",
       "passwordNumeric": "Use letters as well as numbers.",
       "passwordMismatch": "The passwords don't match.",
-      "sameEmail": "Use a different email from the school email."
+      "sameEmail": "Use a different email from the school email.",
+      "acceptPrivacy": "Please accept the privacy policy to continue."
     },
     "demo": {
       "title": "Book a demo",
@@ -1326,5 +1405,221 @@
     "welcomeBack": "Welcome back",
     "withName": "{greeting}, {name}",
     "skip": "Skip"
+  },
+  "Teacher": {
+    "nav": {
+      "label": "Teacher menu",
+      "open": "Open menu",
+      "close": "Close menu",
+      "overview": "Overview",
+      "classes": "Classes",
+      "lessons": "Lesson plans",
+      "messages": "Parent messages",
+      "plan": "My plan",
+      "logout": "Sign out"
+    },
+    "banner": {
+      "trial": "Free trial: {days, plural, =0 {ends today} one {# day left} other {# days left}}",
+      "readOnly": "Your plan has ended. You can still view your work. Choose a plan to make changes."
+    },
+    "common": {
+      "loading": "Loading...",
+      "loadFailed": "Couldn't load your workspace.",
+      "retry": "Try again",
+      "save": "Save",
+      "saving": "Saving...",
+      "cancel": "Cancel",
+      "delete": "Delete",
+      "edit": "Edit",
+      "close": "Close",
+      "pro": "Pro",
+      "upgrade": "Choose a plan",
+      "deleteFailed": "Couldn't delete this. Please try again.",
+      "saveFailed": "Couldn't save. Please check your entries and try again."
+    },
+    "errors": {
+      "plan_limit_reached": "You have reached the limit of your plan. Choose a bigger plan to add more.",
+      "pro_required": "This feature is part of Teacher Pro.",
+      "workspace_read_only": "Your plan has ended. Choose a plan to make changes.",
+      "ai_quota_reached": "You have used all your AI lesson plans for this month.",
+      "service_unavailable": "This service isn't available right now. Please try again later.",
+      "rateLimited": "Too many attempts. Please try again later.",
+      "generic": "Something went wrong. Please try again."
+    },
+    "overview": {
+      "title": "Welcome, {name}",
+      "subtitle": "Your teaching workspace.",
+      "setupTitle": "Tell us what you teach",
+      "setupHint": "This takes a few seconds and helps fill in your lessons.",
+      "subject": "Main subject",
+      "subjectExample": "Science",
+      "grades": "Grades you teach",
+      "gradesExample": "Grades 4 to 6",
+      "setupSubmit": "Save and continue",
+      "usedOf": "{used} / {limit}",
+      "classes": "Classes",
+      "students": "Students",
+      "lessons": "Lesson plans",
+      "checklist": "Getting started",
+      "steps": {
+        "setup": "Tell us what you teach",
+        "class": "Create your first class",
+        "students": "Add your students",
+        "lesson": "Write a lesson plan",
+        "attendance": "Take attendance",
+        "presentation": "Download a presentation"
+      }
+    },
+    "classes": {
+      "title": "Classes",
+      "subtitle": "Your classes, students, attendance and marks.",
+      "new": "New class",
+      "newTitle": "New class",
+      "editTitle": "Edit class",
+      "name": "Class name",
+      "nameExample": "Grade 5A Science",
+      "nameTaken": "You already have a class with this name.",
+      "subject": "Subject",
+      "grade": "Grade",
+      "emptyTitle": "No classes yet",
+      "emptyHint": "Create your first class to add students.",
+      "studentCount": "{count, plural, =0 {No students} one {# student} other {# students}}",
+      "deleteTitle": "Delete {name}?",
+      "deleteBody": "Its students, attendance and marks will be deleted too. This can't be undone.",
+      "back": "All classes",
+      "tabsLabel": "Class sections",
+      "tabs": {
+        "students": "Students",
+        "attendance": "Attendance",
+        "marks": "Marks"
+      },
+      "open": "Students and attendance"
+    },
+    "students": {
+      "title": "Students",
+      "add": "Add students",
+      "addTitle": "Add students",
+      "names": "Student names",
+      "namesHint": "Write one name on each line.",
+      "namesInvalid": "Check the names. Each one can have up to 150 characters.",
+      "editTitle": "Edit student",
+      "fullName": "Full name",
+      "parentEmail": "Parent's email",
+      "reportCard": "Report card",
+      "emptyTitle": "No students yet",
+      "emptyHint": "Add the students of this class.",
+      "deleteTitle": "Delete {name}?",
+      "deleteBody": "Their attendance and marks will be deleted too. This can't be undone."
+    },
+    "attendance": {
+      "title": "Attendance",
+      "date": "Date",
+      "allPresent": "Mark everyone present",
+      "present": "Present",
+      "absent": "Absent",
+      "late": "Late",
+      "excused": "Excused",
+      "save": "Save attendance",
+      "saved": "Attendance saved.",
+      "unmarked": "{count, plural, one {# student not marked} other {# students not marked}}",
+      "emptyTitle": "No students yet",
+      "emptyHint": "Add students to take attendance."
+    },
+    "marks": {
+      "title": "Marks",
+      "new": "New assessment",
+      "newTitle": "New assessment",
+      "name": "Assessment name",
+      "nameExample": "Unit 1 test",
+      "maxMarks": "Maximum marks",
+      "date": "Date",
+      "choose": "Assessment",
+      "save": "Save marks",
+      "saved": "Marks saved.",
+      "invalidMark": "Each mark must be a number from 0 to {max}.",
+      "gradebook": "Gradebook",
+      "student": "Student",
+      "emptyTitle": "No assessments yet",
+      "emptyHint": "Create a test or quiz to enter marks.",
+      "noStudents": "No students yet",
+      "noStudentsHint": "Add students to enter marks.",
+      "deleteTitle": "Delete {name}?",
+      "deleteBody": "All marks for this assessment will be deleted. This can't be undone."
+    },
+    "lessons": {
+      "title": "Lesson plans",
+      "subtitle": "Plan your lessons and download them as PowerPoint.",
+      "new": "New lesson plan",
+      "newTitle": "New lesson plan",
+      "editTitle": "Edit lesson plan",
+      "ai": "Write with AI",
+      "aiBadge": "AI",
+      "aiTitle": "Write a lesson plan with AI",
+      "aiHint": "Used this month: {used} of {limit}. Check the lesson before you teach it.",
+      "topic": "Lesson topic",
+      "topicExample": "The water cycle",
+      "language": "Language",
+      "generate": "Write lesson plan",
+      "generating": "Writing your lesson...",
+      "lessonTitle": "Lesson title",
+      "classroom": "Class",
+      "noClass": "No class",
+      "date": "Lesson date",
+      "subject": "Subject",
+      "grade": "Grade",
+      "sectionHint": "Write one point on each line. Each line becomes a point on the slide.",
+      "sections": {
+        "objectives": "Objectives",
+        "materials": "Materials",
+        "activities": "Activities",
+        "assessment": "Assessment",
+        "homework": "Homework"
+      },
+      "search": "Search lesson plans",
+      "download": "Download PowerPoint",
+      "emptyTitle": "No lesson plans yet",
+      "emptyHint": "Write your first lesson plan.",
+      "deleteTitle": "Delete {name}?",
+      "deleteBody": "This lesson plan will be deleted. This can't be undone."
+    },
+    "messages": {
+      "title": "Parent messages",
+      "subtitle": "Email the parents of a class.",
+      "proOnly": "Sending messages to parents is part of Teacher Pro.",
+      "new": "New message",
+      "classroom": "Class",
+      "chooseClass": "Choose a class",
+      "subject": "Subject",
+      "body": "Message",
+      "send": "Send message",
+      "sending": "Sending...",
+      "noParents": "No student in this class has a parent email yet.",
+      "sent": "Sent messages",
+      "recipients": "{count, plural, one {# parent} other {# parents}}",
+      "emptyTitle": "No messages yet",
+      "emptyHint": "Messages you send will appear here."
+    },
+    "plan": {
+      "title": "My plan",
+      "subtitle": "Your current plan and what you have used.",
+      "tiers": {
+        "trial": "7-day free trial",
+        "teacher": "Teacher",
+        "teacher_pro": "Teacher Pro",
+        "expired": "Your plan has ended"
+      },
+      "endsOn": "Active until {date}",
+      "usage": {
+        "classes": "Classes",
+        "students": "Students",
+        "lessons": "Lesson plans",
+        "presentations": "PowerPoint downloads"
+      },
+      "choose": "Choose this plan",
+      "current": "Your current plan",
+      "requested": "Requested",
+      "pending": "We received your request for {plan}. Our team will contact you to complete payment.",
+      "payment": "After you choose a plan, our team contacts you to complete payment and activate it."
+    }
   }
 }

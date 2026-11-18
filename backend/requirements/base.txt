@@ -19,6 +19,7 @@ django-axes>=7.0,<8.0  # lockout after repeated failed logins
 # Documents
 weasyprint>=70.0,<71.0  # quotation PDFs (needs Pango, see Dockerfile)
 hijridate>=2.6,<3.0  # Umm al-Qura dates on PDFs
+python-pptx>=1.0,<2.0  # lesson plan presentations
 
 # AI Chatbot
 openai>=1.0,<2.0

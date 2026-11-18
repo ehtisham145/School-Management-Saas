@@ -88,7 +88,11 @@ If week 3 slips, move **homework** to month 2 first, then **messaging** (announc
 - [x] SMTP email settings through `.env`; `sendtestemail` ran without an error against the real provider. Inbox delivery and SPF/DKIM/DMARC still to be confirmed
 - [x] Pricing page: For schools (yearly: Basic, Premium, Custom) and For teachers (monthly: Teacher, Teacher Pro) tabs, each plan with its own features; plan requests go to Demo requests
 - [ ] Replace sample prices and plan contents with confirmed ones
-- [ ] Individual teacher accounts: decide the features with the client, then build them (likely a one-teacher workspace on the existing tenancy)
+- [x] Individual teacher sign-up at `/start-trial`: email code, private workspace and a 7-day trial, with links from the navbar, home and pricing pages ([ADR-0021](decisions/0021-individual-teacher-workspace-and-trial.md))
+- [x] Individual teachers: setup, classes and students, lesson plans and PowerPoint, attendance, marks and gradebook ([ADR-0022](decisions/0022-teacher-classroom-app.md))
+- [x] Individual teachers: trial limits, read-only after the trial, reminder emails, upgrade requests and a Super Admin list
+- [x] Teacher Pro: AI lesson plans, PDF report cards and email messages to parents
+- [ ] Individual teachers: online payment, and deleting data after a trial ends (waiting on the client)
 - [ ] Plans in the Super Admin panel: mark a plan as for schools or for teachers, and allow a plan with no list price (Custom)
 - [ ] Translate backend validation and email text into Arabic
 - [x] SEO: page metadata and Arabic/English `hreflang`, server-rendered text
