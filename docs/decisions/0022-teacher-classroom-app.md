@@ -2,6 +2,7 @@
 
 - **Status:** Accepted
 - **Date:** 2026-11-18
+- **Amended by:** [ADR-0024](0024-ai-lesson-plans-on-every-teacher-plan.md) (AI on every plan, new trial limits)
 
 ## Context
 [ADR-0021](0021-individual-teacher-workspace-and-trial.md) lets a teacher sign up and start a trial. The teacher now needs a working product: classes, students, lesson plans, presentations, attendance, marks, plan limits and a way to upgrade. Client decisions on trial limits, payment and data retention are still open, so the suggested values are used and kept in one place.

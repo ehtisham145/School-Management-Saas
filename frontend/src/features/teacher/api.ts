@@ -7,13 +7,17 @@ import type {
   Classroom,
   ClassroomInput,
   Gradebook,
+  LessonDraft,
   LessonGenerateInput,
   LessonPlan,
   LessonPlanInput,
   MarkSheet,
   Paginated,
   ParentMessage,
+  ProfilePeriod,
   Student,
+  StudentInput,
+  StudentProfile,
   TeacherPlanCode,
   Workspace,
 } from "./schemas";
@@ -42,17 +46,19 @@ export const deleteClass = (id: number) =>
 
 export const listStudents = (classId: number, signal?: AbortSignal) =>
   apiFetch<Student[]>(`${BASE}/classes/${classId}/students/`, { signal });
-export const addStudents = (classId: number, students: { full_name: string }[]) =>
+export const addStudents = (classId: number, students: StudentInput[]) =>
   apiFetch<Student[]>(`${BASE}/classes/${classId}/students/`, {
     method: "POST",
     body: { students },
   });
-export const updateStudent = (id: number, body: { full_name: string; parent_email: string }) =>
+export const updateStudent = (id: number, body: StudentInput) =>
   apiFetch<Student>(`${BASE}/students/${id}/`, { method: "PATCH", body });
+export const getStudentProfile = (id: number, period: ProfilePeriod, signal?: AbortSignal) =>
+  apiFetch<StudentProfile>(`${BASE}/students/${id}/profile/?period=${period}`, { signal });
 export const deleteStudent = (id: number) =>
   apiFetch<void>(`${BASE}/students/${id}/`, { method: "DELETE" });
 
-export async function downloadReportCard(student: Student, language: string) {
+export async function downloadReportCard(student: Pick<Student, "id">, language: string) {
   const { blob, filename } = await apiDownload(
     `${BASE}/students/${student.id}/report-card/?language=${language}`,
   );
@@ -83,11 +89,16 @@ export const updateLessonPlan = (id: number, body: LessonPlanInput) =>
 export const deleteLessonPlan = (id: number) =>
   apiFetch<void>(`${BASE}/lesson-plans/${id}/`, { method: "DELETE" });
 export const generateLessonPlan = (body: LessonGenerateInput) =>
-  apiFetch<LessonPlan>(`${BASE}/lesson-plans/generate/`, { method: "POST", body });
+  apiFetch<LessonDraft>(`${BASE}/lesson-plans/generate/`, { method: "POST", body });
 
 export async function downloadPresentation(plan: LessonPlan) {
   const { blob, filename } = await apiDownload(`${BASE}/lesson-plans/${plan.id}/presentation/`);
   saveFile(blob, filename ?? "lesson.pptx");
+}
+
+export async function downloadWordDocument(plan: LessonPlan) {
+  const { blob, filename } = await apiDownload(`${BASE}/lesson-plans/${plan.id}/document/`);
+  saveFile(blob, filename ?? "lesson.docx");
 }
 
 export const listAssessments = (classId: number, signal?: AbortSignal) =>

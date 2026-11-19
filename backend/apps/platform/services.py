@@ -9,9 +9,10 @@ from django.contrib.auth.hashers import check_password, make_password
 from django.db import IntegrityError, transaction
 from django.db.models import OuterRef, Subquery
 from django.utils import timezone
-from rest_framework.exceptions import ValidationError
+from rest_framework.exceptions import APIException, ValidationError
 
 from apps.accounts.models import User
+from apps.audit.selectors import count_trials_started_from
 from apps.audit.services import SYSTEM, Action, Actor, record_event
 from apps.classroom.services import complete_upgrade_requests
 from apps.platform.models import (
@@ -391,6 +392,16 @@ def request_teacher_signup_code(email):
     )
 
 
+# Stops one person from starting trial after trial with new email addresses.
+MAX_TRIALS_PER_IP_PER_DAY = 3
+
+
+class TrialSignupLimit(APIException):
+    status_code = 429
+    default_code = "trial_signup_limit"
+    default_detail = "Too many free trials were started from this network today. Try tomorrow."
+
+
 @transaction.atomic
 def complete_teacher_signup(*, full_name, email, password, code, ip_address=None):
     """Creates the teacher, a private workspace and a free trial. None if the code is wrong."""
@@ -409,6 +420,8 @@ def complete_teacher_signup(*, full_name, email, password, code, ip_address=None
     if is_email_registered(email):
         pending.delete()
         return None
+    if count_trials_started_from(ip_address) >= MAX_TRIALS_PER_IP_PER_DAY:
+        raise TrialSignupLimit()
 
     first_name, _, last_name = full_name.partition(" ")
     user = User.objects.create_user(

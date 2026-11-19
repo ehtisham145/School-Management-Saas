@@ -85,7 +85,7 @@ Traffic: peaks during school hours (07:00–14:00 KSA), spikes at morning attend
 
 ## 6. Open questions for the client (TBC)
 - Pricing: the site shows **sample** prices. Confirm the real ones for every plan, and each plan's student and class limits and features
-- Individual teachers: confirm the trial limits now in use (2 classes, 30 students, 10 lesson plans, 3 PowerPoint downloads), whether AI lesson plans may use OpenAI, how a teacher pays after the trial, who can register (suggested: Saudi Arabia only), and how long data is kept after a trial ends (suggested: deleted after 37 days)
+- Individual teachers: confirm the trial limits now in use (2 classes, 30 students, 20 lesson plans, 10 PowerPoint downloads, 10 AI lesson plans; Teacher 30 and Teacher Pro 100 AI lesson plans a month), whether AI lesson plans may use OpenAI, how a teacher pays after the trial, who can register (suggested: Saudi Arabia only), and how long data is kept after a trial ends (suggested: deleted after 37 days)
 - Do any parents lack email? (fallback: school-issued username/password for parents)
 - Fee structure specifics: installments, discounts, sibling discounts, VAT on receipts?
 - Report card format — does the client have a template (Ministry of Education format)?

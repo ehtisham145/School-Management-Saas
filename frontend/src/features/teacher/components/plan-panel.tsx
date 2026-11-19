@@ -39,6 +39,7 @@ export function PlanPanel() {
     { key: "students", used: usage.students, limit: limits.students },
     { key: "lessons", used: usage.lesson_plans, limit: limits.lesson_plans },
     { key: "presentations", used: usage.presentation_exports, limit: limits.presentation_exports },
+    { key: "ai", used: usage.ai_used, limit: limits.ai_lessons },
   ] as const;
 
   return (

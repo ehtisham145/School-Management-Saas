@@ -18,16 +18,19 @@ class Limits:
     students: int | None
     lesson_plans: int | None
     presentation_exports: int | None
-    ai_per_month: int
+    ai_lessons: int
+    # "trial": counted over the whole trial. "month": counted again each calendar month.
+    ai_period: str
     pro_features: bool
 
 
 TRIAL_LIMITS = Limits(
     classes=2,
     students=30,
-    lesson_plans=10,
-    presentation_exports=3,
-    ai_per_month=0,
+    lesson_plans=20,
+    presentation_exports=10,
+    ai_lessons=10,
+    ai_period="trial",
     pro_features=False,
 )
 TEACHER_LIMITS = Limits(
@@ -35,7 +38,8 @@ TEACHER_LIMITS = Limits(
     students=100,
     lesson_plans=None,
     presentation_exports=None,
-    ai_per_month=0,
+    ai_lessons=30,
+    ai_period="month",
     pro_features=False,
 )
 TEACHER_PRO_LIMITS = Limits(
@@ -43,7 +47,8 @@ TEACHER_PRO_LIMITS = Limits(
     students=None,
     lesson_plans=None,
     presentation_exports=None,
-    ai_per_month=50,
+    ai_lessons=100,
+    ai_period="month",
     pro_features=True,
 )
 
@@ -59,6 +64,13 @@ class WorkspaceAccess:
     @property
     def is_trial(self):
         return self.tier == "trial"
+
+    @property
+    def ai_since(self):
+        """From when AI lesson plans are counted. None counts every one ever made."""
+        if self.limits.ai_period == "month":
+            return timezone.localdate().replace(day=1)
+        return None
 
 
 def get_workspace_access(school):

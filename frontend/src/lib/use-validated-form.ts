@@ -26,6 +26,9 @@ export type ErrorKey =
   | "quantity"
   | "date"
   | "pastDate"
+  | "futureDate"
+  | "dayDate"
+  | "repeatedId"
   | "choose"
   | "passwordShort"
   | "passwordNumeric"
@@ -148,6 +151,55 @@ export const dateFromToday = requiredAnd((value) => {
   if (!DATE_PATTERN.test(value)) return "date";
   return value < todayInRiyadh() ? "pastDate" : null;
 });
+/** Shapes typed digits as DD/MM/YYYY. "5/" becomes "05/", and Arabic digits work too. */
+export function maskDayDate(typed: string) {
+  const cleaned = toLatinDigits(typed)
+    .replace(/[.\-\s]/g, "/")
+    .replace(/[^0-9/]/g, "");
+  const parts = cleaned.split("/");
+  const digits = parts
+    .map((part, index) =>
+      index < 2 && index < parts.length - 1 && part.length === 1 ? `0${part}` : part,
+    )
+    .join("")
+    .slice(0, 8);
+  let shaped = digits.slice(0, 2);
+  if (digits.length > 2) shaped += `/${digits.slice(2, 4)}`;
+  if (digits.length > 4) shaped += `/${digits.slice(4)}`;
+  if (cleaned.endsWith("/") && (digits.length === 2 || digits.length === 4)) shaped += "/";
+  return shaped;
+}
+
+/** "05/11/2026" to "2026-11-05", or null when it is not a real date. */
+export function dayDateToIso(value: string) {
+  const match = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(value.trim());
+  if (!match) return null;
+  const [, day, month, year] = match;
+  const date = new Date(Date.UTC(Number(year), Number(month) - 1, Number(day)));
+  const real =
+    date.getUTCFullYear() === Number(year) &&
+    date.getUTCMonth() === Number(month) - 1 &&
+    date.getUTCDate() === Number(day);
+  return real && Number(year) >= 1900 ? `${year}-${month}-${day}` : null;
+}
+
+/** "2026-11-05" to "05/11/2026". */
+export function isoToDayDate(value: string | null | undefined) {
+  if (!value || !DATE_PATTERN.test(value)) return "";
+  const [year, month, day] = value.split("-");
+  return `${day}/${month}/${year}`;
+}
+
+/** A DD/MM/YYYY date. Optional unless required; notFuture stops dates after today. */
+export const dayDate =
+  ({ required: isRequired = false, notFuture = false } = {}): Validator =>
+  (value) => {
+    if (!value.trim()) return isRequired ? "required" : null;
+    const iso = dayDateToIso(value);
+    if (!iso) return "dayDate";
+    return notFuture && iso > todayInRiyadh() ? "futureDate" : null;
+  };
+
 export const email = (value: string) => {
   if (!value.trim()) return "required";
   return EMAIL_PATTERN.test(value.trim()) ? null : "email";

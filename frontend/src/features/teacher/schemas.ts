@@ -9,7 +9,8 @@ export type Workspace = {
     students: number | null;
     lesson_plans: number | null;
     presentation_exports: number | null;
-    ai_per_month: number;
+    ai_lessons: number;
+    ai_period: "trial" | "month";
     pro_features: boolean;
   };
   usage: {
@@ -19,7 +20,7 @@ export type Workspace = {
     presentation_exports: number;
     assessments: number;
     attendance_records: number;
-    ai_this_month: number;
+    ai_used: number;
   };
   profile: { subject: string; grade_levels: string } | null;
   pending_upgrade: { plan: TeacherPlanCode } | null;
@@ -31,14 +32,48 @@ export type Classroom = {
   subject: string;
   grade: string;
   student_count: number;
+  assessment_count: number;
+  attendance_taken_today: boolean;
 };
 export type ClassroomInput = Pick<Classroom, "name" | "subject" | "grade">;
 
 export type Student = {
   id: number;
   classroom: number;
+  first_name: string;
+  last_name: string;
+  father_name: string;
+  student_number: string;
   full_name: string;
   parent_email: string;
+};
+export type StudentInput = Pick<
+  Student,
+  "first_name" | "last_name" | "father_name" | "student_number" | "parent_email"
+>;
+
+export const PROFILE_PERIODS = ["month", "90days", "all"] as const;
+export type ProfilePeriod = (typeof PROFILE_PERIODS)[number];
+export type StudentProfile = {
+  student: Student & { classroom_name: string };
+  period: ProfilePeriod;
+  start: string | null;
+  end: string;
+  attendance: Record<AttendanceStatus, number> & {
+    total: number;
+    rate: string | null;
+    days: { date: string; status: AttendanceStatus }[];
+  };
+  marks: {
+    id: number;
+    title: string;
+    date: string;
+    max_marks: string;
+    value: string | null;
+    percent: string | null;
+    class_average_percent: string | null;
+  }[];
+  average_percent: string | null;
 };
 
 export const ATTENDANCE_STATUSES = ["present", "absent", "late", "excused"] as const;
@@ -64,12 +99,30 @@ export type LessonPlan = {
   source: "manual" | "ai";
   updated_at: string;
 };
-export type LessonPlanInput = Omit<LessonPlan, "id" | "classroom_name" | "source" | "updated_at">;
+export type LessonPlanInput = Omit<
+  LessonPlan,
+  "id" | "classroom_name" | "source" | "updated_at"
+> & {
+  source?: LessonPlan["source"];
+};
+export type LessonDraft = Pick<
+  LessonPlan,
+  | "title"
+  | "subject"
+  | "grade"
+  | "objectives"
+  | "materials"
+  | "activities"
+  | "assessment"
+  | "homework"
+  | "classroom"
+>;
 export type LessonGenerateInput = {
   topic: string;
   subject: string;
   grade: string;
   language: "en" | "ar";
+  classroom: number | null;
 };
 
 export type Assessment = {

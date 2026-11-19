@@ -27,6 +27,7 @@ Guiding principles for this project:
 | PDF | **WeasyPrint** (handles Arabic shaping + RTL), behind `apps/integrations/pdf`; Pango and DejaVu fonts in the image. **hijridate** for Umm al-Qura dates | Headless Chromium (Playwright) — if layouts get very complex |
 | File storage | **OCI Object Storage (S3-compatible) via django-storages**, private bucket + presigned URLs | Local disk volume — acceptable for the first days only |
 | Presentations | **python-pptx**, behind `apps/integrations/slides`. See [ADR-0022](decisions/0022-teacher-classroom-app.md) | Hand-written OOXML, which is harder to maintain |
+| Word documents | **python-docx**, behind `apps/integrations/word`. See [ADR-0025](decisions/0025-lesson-plans-as-word-files.md) | Hand-written OOXML, or HTML saved as `.doc`, which Word opens with a warning |
 | Search | **PostgreSQL full-text + pg_trgm** | Meilisearch — at 100K+ users if name search gets slow |
 | Email (sending) | **SMTP through Django**, settings in `.env`, behind `apps/integrations/email` — **OCI Email Delivery** (Always Free, 3,000 emails/month) is enough at launch scale | `django-anymail` + Amazon SES or Brevo, if volume or delivery becomes a problem |
 | Email (mailbox) | **Zoho Mail free** (info@, sales@) | Google Workspace — if the client wants Gmail |

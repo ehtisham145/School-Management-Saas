@@ -92,6 +92,8 @@ If week 3 slips, move **homework** to month 2 first, then **messaging** (announc
 - [x] Individual teachers: setup, classes and students, lesson plans and PowerPoint, attendance, marks and gradebook ([ADR-0022](decisions/0022-teacher-classroom-app.md))
 - [x] Individual teachers: trial limits, read-only after the trial, reminder emails, upgrade requests and a Super Admin list
 - [x] Teacher Pro: AI lesson plans, PDF report cards and email messages to parents
+- [x] Individual teachers: AI lesson plans on every plan with a review step, student details (ID, father's name) added row by row, student profile with attendance and marks, DD/MM/YYYY date fields, new class cards ([ADR-0024](decisions/0024-ai-lesson-plans-on-every-teacher-plan.md))
+- [x] Individual teachers: lesson plans download as Word as well as PowerPoint ([ADR-0025](decisions/0025-lesson-plans-as-word-files.md))
 - [ ] Individual teachers: online payment, and deleting data after a trial ends (waiting on the client)
 - [ ] Plans in the Super Admin panel: mark a plan as for schools or for teachers, and allow a plan with no list price (Custom)
 - [ ] Translate backend validation and email text into Arabic

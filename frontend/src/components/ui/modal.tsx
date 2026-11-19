@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, type ReactNode } from "react";
 import { X } from "lucide-react";
+import { cn } from "cn";
 
 type ModalProps = {
   open: boolean;
@@ -9,6 +10,8 @@ type ModalProps = {
   title: string;
   description?: string;
   closeLabel: string;
+  /** "wide" fits forms with several columns, such as a list of rows. */
+  size?: "default" | "wide";
   children: ReactNode;
 };
 
@@ -16,7 +19,15 @@ type ModalProps = {
  * Built on the native dialog, which traps focus, closes on Escape and returns
  * focus to the button that opened it.
  */
-export function Modal({ open, onClose, title, description, closeLabel, children }: ModalProps) {
+export function Modal({
+  open,
+  onClose,
+  title,
+  description,
+  closeLabel,
+  size = "default",
+  children,
+}: ModalProps) {
   const ref = useRef<HTMLDialogElement>(null);
 
   useEffect(() => {
@@ -47,7 +58,10 @@ export function Modal({ open, onClose, title, description, closeLabel, children 
       onClick={(event) => {
         if (event.target === ref.current) onClose();
       }}
-      className="modal-dialog m-auto w-[calc(100%-32px)] max-w-[600px] rounded-card bg-bg p-0 text-ink shadow-soft"
+      className={cn(
+        "modal-dialog m-auto w-[calc(100%-32px)] rounded-card bg-bg p-0 text-ink shadow-soft",
+        size === "wide" ? "max-w-[860px]" : "max-w-[600px]",
+      )}
     >
       <div className="max-h-[calc(100dvh-48px)] overflow-y-auto p-5 sm:p-6">
         <div className="mb-4 flex items-start justify-between gap-4">

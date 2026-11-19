@@ -2,31 +2,31 @@
 
 import { useState } from "react";
 import { ArrowLeft } from "lucide-react";
-import { useLocale, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
 import { cn } from "cn";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { DateField } from "@/components/ui/date-field";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Field } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Modal } from "@/components/ui/modal";
 import { Select } from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
 import { LoadFeedback, PageHeader } from "@/features/platform/components/panel-ui";
 import { useLoad } from "@/features/platform/use-load";
 import {
-  email,
+  dayDate,
+  dayDateToIso,
+  isoToDayDate,
+  maskDayDate,
   required,
-  requiredDate,
   todayInRiyadh,
   useValidatedForm,
 } from "@/lib/use-validated-form";
 import {
-  addStudents,
   createAssessment,
   deleteAssessment,
   deleteStudent,
-  downloadReportCard,
   getAttendance,
   getClass,
   getGradebook,
@@ -35,7 +35,6 @@ import {
   listStudents,
   saveAttendance,
   saveMarks,
-  updateStudent,
 } from "../api";
 import {
   ATTENDANCE_STATUSES,
@@ -44,133 +43,52 @@ import {
   type MarkSheet,
   type Student,
 } from "../schemas";
+import { AddStudentsDialog, EditStudentDialog } from "./student-forms";
+import { studentHref } from "./student-profile";
 import {
   ConfirmDelete,
   ErrorNote,
   FormButtons,
   Panel,
-  ProBadge,
   SavedNote,
   useFormatDate,
   useTeacherError,
   useWorkspace,
 } from "./teacher-ui";
 
-const TABS = ["students", "attendance", "marks"] as const;
-type Tab = (typeof TABS)[number];
-
-function AddStudentsDialog({
+function StudentLink({
   classId,
-  onClose,
-  onSaved,
+  student,
+  className,
 }: {
   classId: number;
-  onClose: () => void;
-  onSaved: () => void;
+  student: { id: number; full_name: string };
+  className?: string;
 }) {
-  const t = useTranslations("Teacher.students");
-  const tCommon = useTranslations("Teacher.common");
-  const describe = useTeacherError();
-  const form = useValidatedForm({
-    initial: { names: "" },
-    idPrefix: "students-",
-    validators: { names: required(10000) },
-    submit: async (values) => {
-      const students = values.names
-        .split("\n")
-        .map((name) => name.trim())
-        .filter(Boolean)
-        .map((full_name) => ({ full_name }));
-      await addStudents(classId, students);
-    },
-    onSuccess: onSaved,
-    describeError: (error) => describe(error) ?? t("namesInvalid"),
-  });
-
   return (
-    <Modal open onClose={onClose} title={t("addTitle")} closeLabel={tCommon("close")}>
-      <form onSubmit={form.handleSubmit} noValidate className="flex flex-col gap-3">
-        <Field
-          id="students-names"
-          label={t("names")}
-          required
-          hint={t("namesHint")}
-          error={form.errorFor("names")}
-        >
-          <Textarea {...form.bind("names")} rows={7} />
-        </Field>
-        <ErrorNote message={form.formError} />
-        <FormButtons saving={form.saving} onCancel={onClose} />
-      </form>
-    </Modal>
+    <a
+      href={studentHref(classId, student.id)}
+      className={cn(
+        "font-semibold text-ink underline-offset-4 hover:text-navy hover:underline",
+        className,
+      )}
+    >
+      {student.full_name}
+    </a>
   );
 }
 
-function EditStudentDialog({
-  student,
-  onClose,
-  onSaved,
-}: {
-  student: Student;
-  onClose: () => void;
-  onSaved: () => void;
-}) {
-  const t = useTranslations("Teacher.students");
-  const tCommon = useTranslations("Teacher.common");
-  const describe = useTeacherError();
-  const form = useValidatedForm({
-    initial: { full_name: student.full_name, parent_email: student.parent_email },
-    idPrefix: "student-",
-    validators: {
-      full_name: required(150),
-      parent_email: (value) => (value.trim() ? email(value) : null),
-    },
-    submit: async (values) => {
-      await updateStudent(student.id, {
-        full_name: values.full_name.trim(),
-        parent_email: values.parent_email.trim(),
-      });
-    },
-    onSuccess: onSaved,
-    describeError: describe,
-  });
-
-  return (
-    <Modal open onClose={onClose} title={t("editTitle")} closeLabel={tCommon("close")}>
-      <form onSubmit={form.handleSubmit} noValidate className="flex flex-col gap-3">
-        <Field
-          id="student-full_name"
-          label={t("fullName")}
-          required
-          error={form.errorFor("full_name")}
-        >
-          <Input {...form.bind("full_name")} />
-        </Field>
-        <Field
-          id="student-parent_email"
-          label={t("parentEmail")}
-          error={form.errorFor("parent_email")}
-        >
-          <Input {...form.bind("parent_email")} type="email" dir="ltr" className="rtl:text-end" />
-        </Field>
-        <ErrorNote message={form.formError} />
-        <FormButtons saving={form.saving} onCancel={onClose} />
-      </form>
-    </Modal>
-  );
-}
+const TABS = ["students", "attendance", "marks"] as const;
+type Tab = (typeof TABS)[number];
 
 function StudentsTab({ classId, onChanged }: { classId: number; onChanged: () => void }) {
   const t = useTranslations("Teacher.students");
   const tCommon = useTranslations("Teacher.common");
-  const locale = useLocale();
-  const describe = useTeacherError();
   const { workspace } = useWorkspace();
   const { state, reload } = useLoad((signal) => listStudents(classId, signal), `s${classId}`);
   const [adding, setAdding] = useState(false);
   const [editing, setEditing] = useState<Student | null>(null);
   const [removing, setRemoving] = useState<Student | null>(null);
-  const [error, setError] = useState<string | null>(null);
   const readOnly = workspace.access.read_only;
 
   function refresh() {
@@ -178,15 +96,6 @@ function StudentsTab({ classId, onChanged }: { classId: number; onChanged: () =>
     setEditing(null);
     reload();
     onChanged();
-  }
-
-  async function reportCard(student: Student) {
-    setError(null);
-    try {
-      await downloadReportCard(student, locale);
-    } catch (err) {
-      setError(describe(err));
-    }
   }
 
   return (
@@ -201,7 +110,6 @@ function StudentsTab({ classId, onChanged }: { classId: number; onChanged: () =>
       }
     >
       <div className="flex flex-col gap-3">
-        <ErrorNote message={error} />
         <LoadFeedback state={state} onRetry={reload} />
         {state.name === "ready" && state.data.length === 0 && (
           <EmptyState title={t("emptyTitle")} description={t("emptyHint")} />
@@ -211,17 +119,26 @@ function StudentsTab({ classId, onChanged }: { classId: number; onChanged: () =>
             {state.data.map((student) => (
               <li key={student.id} className="flex flex-wrap items-center gap-2 py-2.5">
                 <div className="min-w-0 flex-1">
-                  <p className="text-sm font-semibold text-ink">{student.full_name}</p>
-                  {student.parent_email && (
-                    <p className="truncate text-xs text-ink-soft" dir="ltr">
-                      {student.parent_email}
-                    </p>
-                  )}
+                  <StudentLink classId={classId} student={student} className="text-sm" />
+                  <p className="flex flex-wrap gap-x-3 text-xs text-ink-soft">
+                    {student.student_number && (
+                      <span>
+                        {t("idShort")}: <bdi>{student.student_number}</bdi>
+                      </span>
+                    )}
+                    {student.father_name && (
+                      <span>
+                        {t("fatherShort")}: <bdi>{student.father_name}</bdi>
+                      </span>
+                    )}
+                  </p>
                 </div>
-                <Button variant="ghost" size="sm" onClick={() => reportCard(student)}>
-                  {t("reportCard")}
-                  {!workspace.limits.pro_features && <ProBadge />}
-                </Button>
+                <a
+                  href={studentHref(classId, student.id)}
+                  className="px-2 text-sm font-semibold text-navy underline-offset-4 hover:underline"
+                >
+                  {t("viewProfile")}
+                </a>
                 {!readOnly && (
                   <>
                     <Button variant="outline" size="sm" onClick={() => setEditing(student)}>
@@ -328,7 +245,7 @@ function AttendanceSheet({
       <ul className="divide-y divide-line">
         {roster.students.map((row) => (
           <li key={row.id} className="flex flex-wrap items-center justify-between gap-2 py-2.5">
-            <span className="text-sm font-semibold text-ink">{row.full_name}</span>
+            <StudentLink classId={classId} student={row} className="text-sm" />
             <div role="group" aria-label={row.full_name} className="flex flex-wrap gap-1">
               {ATTENDANCE_STATUSES.map((status) => {
                 const selected = statuses[row.id] === status;
@@ -375,11 +292,23 @@ function AttendanceSheet({
   );
 }
 
+const checkAttendanceDate = dayDate({ required: true, notFuture: true });
+
 function AttendanceTab({ classId }: { classId: number }) {
   const t = useTranslations("Teacher.attendance");
+  const tErrors = useTranslations("Leads.errors");
   const { reload: reloadWorkspace } = useWorkspace();
   const today = todayInRiyadh();
   const [date, setDate] = useState(today);
+  const [typed, setTyped] = useState(() => isoToDayDate(today));
+  // Only a finished date gets an error, not one still being typed.
+  const dateError = typed.length >= 10 ? checkAttendanceDate(typed, {}) : null;
+
+  function changeDate(value: string) {
+    setTyped(value);
+    const iso = dayDateToIso(value);
+    if (iso && !checkAttendanceDate(value, {})) setDate(iso);
+  }
   const { state, reload } = useLoad(
     (signal) => getAttendance(classId, date, signal),
     `a${classId}:${date}`,
@@ -389,16 +318,25 @@ function AttendanceTab({ classId }: { classId: number }) {
     <Panel
       title={t("title")}
       action={
-        <Field id="attendance-date" label={t("date")}>
-          <Input
+        <div className="w-52">
+          <Field
             id="attendance-date"
-            type="date"
-            value={date}
-            max={today}
-            onChange={(event) => event.target.value && setDate(event.target.value)}
-            className="h-10"
-          />
-        </Field>
+            label={t("date")}
+            error={dateError ? tErrors(dateError) : undefined}
+          >
+            <DateField
+              id="attendance-date"
+              value={typed}
+              max={today}
+              calendarLabel={t("openCalendar")}
+              aria-invalid={Boolean(dateError)}
+              aria-describedby={dateError ? "attendance-date-error" : undefined}
+              onChange={(event) => changeDate(maskDayDate(event.target.value))}
+              onPick={changeDate}
+              className="h-10"
+            />
+          </Field>
+        </div>
       }
     >
       <LoadFeedback state={state} onRetry={reload} />
@@ -430,15 +368,20 @@ function AssessmentDialog({
   const tCommon = useTranslations("Teacher.common");
   const describe = useTeacherError();
   const form = useValidatedForm({
-    initial: { title: "", max_marks: "", date: todayInRiyadh() },
+    initial: { title: "", max_marks: "", date: isoToDayDate(todayInRiyadh()) },
     idPrefix: "assessment-",
     validators: {
       title: required(150),
       max_marks: (value) => (Number(value) > 0 && Number(value) < 10000 ? null : "invalid"),
-      date: requiredDate,
+      date: dayDate({ required: true }),
     },
+    sanitizers: { date: maskDayDate },
     submit: async (values) => {
-      await createAssessment({ ...values, classroom: classId });
+      await createAssessment({
+        ...values,
+        date: dayDateToIso(values.date) ?? "",
+        classroom: classId,
+      });
     },
     onSuccess: onSaved,
     describeError: describe,
@@ -460,7 +403,11 @@ function AssessmentDialog({
             <Input {...form.bind("max_marks")} inputMode="decimal" dir="ltr" />
           </Field>
           <Field id="assessment-date" label={t("date")} required error={form.errorFor("date")}>
-            <Input {...form.bind("date")} type="date" />
+            <DateField
+              {...form.bind("date")}
+              onPick={(value) => form.setValue("date", value)}
+              calendarLabel={t("openCalendar")}
+            />
           </Field>
         </div>
         <ErrorNote message={form.formError} />
@@ -582,8 +529,8 @@ function GradebookTable({ classId, version }: { classId: number; version: number
           <tbody>
             {students.map((student) => (
               <tr key={student.id} className="border-t border-line">
-                <th scope="row" className="p-2.5 text-start font-semibold text-ink">
-                  {student.full_name}
+                <th scope="row" className="p-2.5 text-start">
+                  <StudentLink classId={classId} student={student} />
                 </th>
                 {assessments.map((assessment) => {
                   const mark = student.marks[assessment.id];

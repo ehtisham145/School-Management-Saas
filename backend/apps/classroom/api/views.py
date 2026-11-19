@@ -26,9 +26,11 @@ from apps.classroom.api.serializers import (
     MarkSheetRowSerializer,
     MarksSaveSerializer,
     ParentMessageSerializer,
+    ProfileQuerySerializer,
     ReportCardQuerySerializer,
     RosterRowSerializer,
     SetupSerializer,
+    StudentProfileSerializer,
     StudentsAddSerializer,
     StudentSerializer,
     UpgradeRequestSerializer,
@@ -41,6 +43,17 @@ from apps.integrations.pdf.renderer import PdfUnavailable
 from apps.tenancy.models import School
 
 PPTX_TYPE = "application/vnd.openxmlformats-officedocument.presentationml.presentation"
+DOCX_TYPE = "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+PLAN_SECTIONS = (
+    "title",
+    "subject",
+    "grade",
+    "objectives",
+    "materials",
+    "activities",
+    "assessment",
+    "homework",
+)
 
 
 class LessonAiThrottle(UserRateThrottle):
@@ -108,7 +121,7 @@ class WorkspaceView(WorkspaceMixin, APIView):
                     "days_left": access.days_left,
                 },
                 "limits": asdict(access.limits),
-                "usage": selectors.get_workspace_usage(self.school),
+                "usage": selectors.get_workspace_usage(self.school, ai_since=access.ai_since),
                 "profile": profile
                 and {"subject": profile.subject, "grade_levels": profile.grade_levels},
                 "pending_upgrade": pending and {"plan": pending.plan},
@@ -233,6 +246,21 @@ class StudentViewSet(WorkspaceMixin, viewsets.GenericViewSet):
         services.delete_record(self._student(pk))
         return Response(status=204)
 
+    @action(detail=True, methods=["get"])
+    def profile(self, request, pk=None):
+        query = self.valid(ProfileQuerySerializer, request.query_params)
+        student = self._student(pk)
+        profile = selectors.get_student_profile(self.school, student, period=query["period"])
+        return Response(
+            {
+                "student": {
+                    **self.get_serializer(student).data,
+                    "classroom_name": student.classroom.name,
+                },
+                **StudentProfileSerializer(profile).data,
+            }
+        )
+
     @action(detail=True, methods=["get"], url_path="report-card")
     def report_card(self, request, pk=None):
         if not self.access.limits.pro_features:
@@ -291,9 +319,9 @@ class LessonPlanViewSet(WorkspaceMixin, viewsets.GenericViewSet):
 
     @action(detail=False, methods=["post"], throttle_classes=[LessonAiThrottle])
     def generate(self, request):
+        """A draft only. The teacher edits it and saves it with a normal create."""
         data = self.valid(LessonGenerateSerializer, request.data)
-        plan = services.generate_lesson_plan(self.school, self.access, **data)
-        return Response(self.get_serializer(plan).data, status=201)
+        return Response(services.generate_lesson_draft(self.school, self.access, **data))
 
     @action(detail=True, methods=["get"])
     def presentation(self, request, pk=None):
@@ -303,24 +331,33 @@ class LessonPlanViewSet(WorkspaceMixin, viewsets.GenericViewSet):
         plan = self._plan(pk)
         services.record_presentation_export(self.school, self.access, plan)
         deck = build_lesson_deck(
+            {field: getattr(plan, field) for field in PLAN_SECTIONS},
+            watermark=self.access.tier in ("trial", "expired"),
+        )
+        return self._file(plan, deck, PPTX_TYPE, "pptx")
+
+    @action(detail=True, methods=["get"])
+    def document(self, request, pk=None):
+        """The lesson plan as a Word file. Not counted against any limit."""
+        # Imported here so the rest of the API still runs if python-docx is missing.
+        from apps.integrations.word.lesson_document import build_lesson_document
+
+        plan = self._plan(pk)
+        document = build_lesson_document(
             {
-                field: getattr(plan, field)
-                for field in (
-                    "title",
-                    "subject",
-                    "grade",
-                    "objectives",
-                    "materials",
-                    "activities",
-                    "assessment",
-                    "homework",
-                )
+                **{field: getattr(plan, field) for field in PLAN_SECTIONS},
+                "classroom": plan.classroom.name if plan.classroom else "",
+                "date": plan.lesson_date.strftime("%d/%m/%Y") if plan.lesson_date else "",
             },
             watermark=self.access.tier in ("trial", "expired"),
         )
+        return self._file(plan, document, DOCX_TYPE, "docx")
+
+    @staticmethod
+    def _file(plan, content, content_type, extension):
         name = slugify(plan.title) or f"lesson-{plan.id}"
-        response = HttpResponse(deck, content_type=PPTX_TYPE)
-        response["Content-Disposition"] = f'attachment; filename="{name}.pptx"'
+        response = HttpResponse(content, content_type=content_type)
+        response["Content-Disposition"] = f'attachment; filename="{name}.{extension}"'
         return response
 
 
