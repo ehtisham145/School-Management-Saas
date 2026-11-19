@@ -99,7 +99,7 @@ SUPPORT_EMAIL = env("SUPPORT_EMAIL", default="support@lessonlab.me")
 BRAND_HEADER_LABEL = env("BRAND_HEADER_LABEL", default="School Management")
 # Blank attaches the logo to each email. A value must be an absolute, public URL.
 BRAND_LOGO_URL = env("BRAND_LOGO_URL", default="")
-BRAND_LOGO_WIDTH = 155
+BRAND_LOGO_WIDTH = 160
 BRAND_LOGO_HEIGHT = 36
 # Shown on quotation PDFs. Blank hides it.
 COMPANY_VAT_NUMBER = env("COMPANY_VAT_NUMBER", default="")

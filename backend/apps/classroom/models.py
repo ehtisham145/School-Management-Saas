@@ -29,8 +29,12 @@ class Classroom(TenantModel):
     class Meta:
         ordering = ["name", "id"]
         constraints = [
+            # The same class name can be used once for each subject.
             models.UniqueConstraint(
-                "school", Lower("name"), name="unique_classroom_name_per_workspace"
+                "school",
+                Lower("name"),
+                Lower("subject"),
+                name="unique_classroom_name_subject",
             ),
         ]
 
@@ -40,14 +44,32 @@ class Classroom(TenantModel):
 
 class Student(TenantModel):
     classroom = models.ForeignKey(Classroom, on_delete=models.CASCADE, related_name="students")
-    full_name = models.CharField(max_length=150)
+    first_name = models.CharField(max_length=100)
+    last_name = models.CharField(max_length=100, blank=True)
+    father_name = models.CharField(max_length=100, blank=True)
+    # The school's own ID for the student. Optional, but used once per class.
+    student_number = models.CharField(max_length=30, blank=True)
     parent_email = models.EmailField(blank=True)
 
     class Meta:
-        ordering = ["full_name", "id"]
-        indexes = [
-            models.Index(fields=["school", "classroom", "full_name"], name="student_roster_idx"),
+        ordering = ["first_name", "last_name", "id"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["classroom", "student_number"],
+                condition=~Q(student_number=""),
+                name="unique_student_number_per_class",
+            ),
         ]
+        indexes = [
+            models.Index(
+                fields=["school", "classroom", "first_name", "last_name"],
+                name="student_roster_idx",
+            ),
+        ]
+
+    @property
+    def full_name(self):
+        return f"{self.first_name} {self.last_name}".strip()
 
     def __str__(self):
         return self.full_name

@@ -1,8 +1,19 @@
 """Every read takes the workspace first, so one teacher can never reach another's data."""
 
-from datetime import date
+from datetime import date, timedelta
+from decimal import ROUND_HALF_UP, Decimal
 
-from django.db.models import Count, IntegerField, OuterRef, Q, Subquery, Value
+from django.db.models import (
+    Avg,
+    Count,
+    DecimalField,
+    Exists,
+    IntegerField,
+    OuterRef,
+    Q,
+    Subquery,
+    Value,
+)
 from django.db.models.functions import Coalesce
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
@@ -34,9 +45,14 @@ def _count_of(queryset):
     return Coalesce(Subquery(counted, output_field=IntegerField()), Value(0))
 
 
-def get_workspace_usage(school):
-    """All the counts for the overview and the plan limits, in one query."""
-    month_start = timezone.localdate().replace(day=1)
+def get_workspace_usage(school, *, ai_since: date | None = None):
+    """All the counts for the overview and the plan limits, in one query.
+
+    AI lesson plans are counted from ai_since (the start of the month on a paid plan),
+    or all of them during the trial."""
+    ai = AIGeneration.objects.all()
+    if ai_since is not None:
+        ai = ai.filter(created_at__date__gte=ai_since)
     return (
         School.objects.filter(pk=school.pk)
         .annotate(
@@ -46,7 +62,7 @@ def get_workspace_usage(school):
             presentation_exports=_count_of(PresentationExport.objects.all()),
             assessments=_count_of(Assessment.objects.all()),
             attendance_records=_count_of(AttendanceRecord.objects.all()),
-            ai_this_month=_count_of(AIGeneration.objects.filter(created_at__date__gte=month_start)),
+            ai_used=_count_of(ai),
         )
         .values(
             "classes",
@@ -55,7 +71,7 @@ def get_workspace_usage(school):
             "presentation_exports",
             "assessments",
             "attendance_records",
-            "ai_this_month",
+            "ai_used",
         )
         .get()
     )
@@ -71,8 +87,27 @@ def get_pending_upgrade(school):
     ).first()
 
 
+def _count_per_classroom(queryset):
+    counted = (
+        queryset.filter(classroom=OuterRef("pk"))
+        .order_by()
+        .values("classroom")
+        .annotate(total=Count("pk"))
+        .values("total")
+    )
+    return Coalesce(Subquery(counted, output_field=IntegerField()), Value(0))
+
+
 def list_classrooms(school):
-    return Classroom.objects.filter(school=school).annotate(student_count=Count("students"))
+    """Each class with its counts, and whether today's attendance is taken, in one query."""
+    today = timezone.localdate()
+    return Classroom.objects.filter(school=school).annotate(
+        student_count=_count_per_classroom(Student.objects.filter(school=school)),
+        assessment_count=_count_per_classroom(Assessment.objects.filter(school=school)),
+        attendance_taken_today=Exists(
+            AttendanceRecord.objects.filter(school=school, classroom=OuterRef("pk"), date=today)
+        ),
+    )
 
 
 def get_classroom(school, classroom_id):
@@ -180,3 +215,82 @@ def list_parent_emails(school, classroom):
         .values_list("parent_email", flat=True)
         .distinct()
     )
+
+
+PROFILE_PERIODS = {"month": 30, "90days": 90, "all": None}
+HUNDRED = Decimal("100")
+
+
+def _percent(part, whole):
+    if not whole:
+        return None
+    return (Decimal(part) * HUNDRED / Decimal(whole)).quantize(Decimal("0.1"), ROUND_HALF_UP)
+
+
+def get_student_profile(school, student, *, period="month"):
+    """Attendance and marks of one student, in two queries.
+
+    Late and excused days count as attended in the rate; only absent days count against it.
+    """
+    today = timezone.localdate()
+    days = PROFILE_PERIODS[period]
+    start = today - timedelta(days=days - 1) if days else None
+
+    records = AttendanceRecord.objects.filter(school=school, student=student)
+    if start:
+        records = records.filter(date__gte=start)
+    attendance = list(records.order_by("-date").values("date", "status"))
+    counts = {status: 0 for status in AttendanceRecord.Status.values}
+    for record in attendance:
+        counts[record["status"]] += 1
+    attended = len(attendance) - counts[AttendanceRecord.Status.ABSENT]
+
+    mark = Mark.objects.filter(school=school, assessment=OuterRef("pk"), student=student)
+    assessments = (
+        Assessment.objects.filter(school=school, classroom_id=student.classroom_id)
+        .annotate(
+            value=Subquery(
+                mark.values("value")[:1],
+                output_field=DecimalField(max_digits=6, decimal_places=2),
+            ),
+            class_average=Avg("marks__value"),
+        )
+        .order_by("-date", "-id")
+    )
+    if start:
+        assessments = assessments.filter(date__gte=start)
+
+    marks, earned, possible = [], Decimal("0"), Decimal("0")
+    for assessment in assessments:
+        if assessment.value is not None:
+            earned += assessment.value
+            possible += assessment.max_marks
+        marks.append(
+            {
+                "id": assessment.id,
+                "title": assessment.title,
+                "date": assessment.date,
+                "max_marks": assessment.max_marks,
+                "value": assessment.value,
+                "percent": _percent(assessment.value, assessment.max_marks)
+                if assessment.value is not None
+                else None,
+                "class_average_percent": _percent(assessment.class_average, assessment.max_marks)
+                if assessment.class_average is not None
+                else None,
+            }
+        )
+
+    return {
+        "period": period,
+        "start": start,
+        "end": today,
+        "attendance": {
+            **counts,
+            "total": len(attendance),
+            "rate": _percent(attended, len(attendance)),
+            "days": attendance,
+        },
+        "marks": marks,
+        "average_percent": _percent(earned, possible),
+    }

@@ -29,7 +29,8 @@ from apps.classroom.tasks import send_parent_message_task
 from apps.integrations.ai.lesson_provider import LessonAiUnavailable, generate_lesson_content
 from apps.tenancy.models import School
 
-NAME_TAKEN = "You already have a class with this name."
+NAME_TAKEN = "You already have this class for this subject."
+NUMBER_TAKEN = "Another student in this class has this ID."
 
 
 def _lock_workspace(school):
@@ -65,28 +66,32 @@ def complete_setup(school, user, *, subject, grade_levels):
 # --- Classes and students
 
 
+def _class_taken(school, name, subject, exclude=None):
+    classes = Classroom.objects.filter(school=school, name__iexact=name, subject__iexact=subject)
+    if exclude is not None:
+        classes = classes.exclude(pk=exclude.pk)
+    return classes.exists()
+
+
 @transaction.atomic
 def create_classroom(school, access, **fields):
     _lock_workspace(school)
     _check_limit(access.limits.classes, get_workspace_usage(school)["classes"])
-    if Classroom.objects.filter(school=school, name__iexact=fields["name"]).exists():
+    if _class_taken(school, fields["name"], fields.get("subject", "")):
         raise ValidationError({"name": NAME_TAKEN})
     return Classroom.objects.create(school=school, **fields)
 
 
 def update_classroom(school, classroom, **fields):
-    name = fields.get("name")
-    if (
-        name
-        and Classroom.objects.filter(school=school, name__iexact=name)
-        .exclude(pk=classroom.pk)
-        .exists()
-    ):
+    name = fields.get("name", classroom.name)
+    subject = fields.get("subject", classroom.subject)
+    if _class_taken(school, name, subject, exclude=classroom):
         raise ValidationError({"name": NAME_TAKEN})
     for field, value in fields.items():
         setattr(classroom, field, value)
     try:
-        classroom.save(update_fields=[*fields, "updated_at"])
+        with transaction.atomic():
+            classroom.save(update_fields=[*fields, "updated_at"])
     except IntegrityError as error:
         raise ValidationError({"name": NAME_TAKEN}) from error
     return classroom
@@ -96,15 +101,46 @@ def update_classroom(school, classroom, **fields):
 def add_students(school, access, classroom, rows):
     _lock_workspace(school)
     _check_limit(access.limits.students, get_workspace_usage(school)["students"], len(rows))
+    numbers = [row.get("student_number", "") for row in rows]
+    taken = set(
+        Student.objects.filter(
+            school=school, classroom=classroom, student_number__in=[n for n in numbers if n]
+        ).values_list("student_number", flat=True)
+    )
+    if taken:
+        raise ValidationError(
+            {
+                "students": [
+                    {"student_number": [NUMBER_TAKEN]} if number in taken else {}
+                    for number in numbers
+                ]
+            }
+        )
     return Student.objects.bulk_create(
         [Student(school=school, classroom=classroom, **row) for row in rows]
     )
 
 
 def update_student(student, **fields):
+    number = fields.get("student_number")
+    if (
+        number
+        and Student.objects.filter(
+            school_id=student.school_id,
+            classroom_id=student.classroom_id,
+            student_number=number,
+        )
+        .exclude(pk=student.pk)
+        .exists()
+    ):
+        raise ValidationError({"student_number": NUMBER_TAKEN})
     for field, value in fields.items():
         setattr(student, field, value)
-    student.save(update_fields=[*fields, "updated_at"])
+    try:
+        with transaction.atomic():
+            student.save(update_fields=[*fields, "updated_at"])
+    except IntegrityError as error:
+        raise ValidationError({"student_number": NUMBER_TAKEN}) from error
     return student
 
 
@@ -171,12 +207,21 @@ def record_presentation_export(school, access, plan):
     return PresentationExport.objects.create(school=school, lesson_plan=plan)
 
 
-def generate_lesson_plan(school, access, *, topic, subject, grade, language, classroom=None):
-    """Only the topic, subject and grade go to the AI provider, never any student data."""
-    _require_pro(access)
-    _check_plan_classroom(school, classroom)
-    if get_workspace_usage(school)["ai_this_month"] >= access.limits.ai_per_month:
+def _check_ai_allowance(school, access):
+    usage = get_workspace_usage(school, ai_since=access.ai_since)
+    if usage["ai_used"] >= access.limits.ai_lessons:
         raise AiQuotaReached()
+    # No point making a draft that could never be saved.
+    _check_limit(access.limits.lesson_plans, usage["lesson_plans"])
+
+
+def generate_lesson_draft(school, access, *, topic, subject, grade, language, classroom=None):
+    """Returns a draft for the teacher to read and edit. Nothing is saved but the count.
+
+    Only the topic, subject and grade go to the AI provider, never any student data.
+    """
+    _check_plan_classroom(school, classroom)
+    _check_ai_allowance(school, access)
 
     # Outside any transaction: the provider can take many seconds to answer.
     try:
@@ -188,18 +233,14 @@ def generate_lesson_plan(school, access, *, topic, subject, grade, language, cla
 
     with transaction.atomic():
         _lock_workspace(school)
-        if get_workspace_usage(school)["ai_this_month"] >= access.limits.ai_per_month:
-            raise AiQuotaReached()
-        plan = LessonPlan.objects.create(
-            school=school,
-            classroom=classroom,
-            subject=subject,
-            grade=grade,
-            source=LessonPlan.Source.AI,
-            **content,
-        )
-        AIGeneration.objects.create(school=school, lesson_plan=plan)
-    return plan
+        _check_ai_allowance(school, access)
+        AIGeneration.objects.create(school=school)
+    return {
+        **content,
+        "classroom": classroom.pk if classroom else None,
+        "subject": subject,
+        "grade": grade,
+    }
 
 
 # --- Assessments and marks

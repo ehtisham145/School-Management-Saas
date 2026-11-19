@@ -295,3 +295,43 @@ def test_people_without_a_trial_have_none_in_their_session(api_client, two_schoo
     )
 
     assert response.data["trial"] is None
+
+
+def _trials_from(ip_address, count, *, hours_ago=1):
+    events = AuditEvent.objects.bulk_create(
+        AuditEvent(
+            action=AuditEvent.Action.SUBSCRIPTION_ACTIVATED,
+            target_type="subscription",
+            target_id=index,
+            ip_address=ip_address,
+            details={"trial": True},
+        )
+        for index in range(count)
+    )
+    AuditEvent.objects.filter(pk__in=[event.pk for event in events]).update(
+        created_at=timezone.now() - timedelta(hours=hours_ago)
+    )
+
+
+def test_a_fourth_trial_from_one_network_in_a_day_is_refused(
+    api_client, django_capture_on_commit_callbacks
+):
+    _trials_from("127.0.0.1", 3)
+
+    response = _sign_up(api_client, django_capture_on_commit_callbacks)
+
+    assert response.status_code == 429
+    assert response.data["error"]["code"] == "trial_signup_limit"
+    assert not User.objects.filter(email="sara@example.com").exists()
+    assert not School.objects.exists()
+
+
+def test_older_trials_and_other_networks_do_not_count(
+    api_client, django_capture_on_commit_callbacks
+):
+    _trials_from("127.0.0.1", 3, hours_ago=25)
+    _trials_from("10.0.0.9", 5)
+
+    response = _sign_up(api_client, django_capture_on_commit_callbacks)
+
+    assert response.status_code == 201

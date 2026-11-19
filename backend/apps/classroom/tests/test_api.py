@@ -46,8 +46,13 @@ def _class(workspace, name="Grade 5A"):
 
 
 def _student(workspace, classroom, name="Ali", email=""):
+    first, _, last = name.partition(" ")
     return Student.objects.create(
-        school=workspace.school, classroom=classroom, full_name=name, parent_email=email
+        school=workspace.school,
+        classroom=classroom,
+        first_name=first,
+        last_name=last,
+        parent_email=email,
     )
 
 
@@ -119,15 +124,16 @@ def test_other_teachers_records_are_not_found(trial, other):
     assert (
         client.post(
             f"{BASE}/classes/{classroom.id}/students/",
-            {"students": [{"full_name": "X"}]},
+            {"students": [{"first_name": "X"}]},
             format="json",
         ).status_code
         == 404
     )
     assert client.get(f"{BASE}/classes/{classroom.id}/attendance/").status_code == 404
     assert client.get(f"{BASE}/classes/{classroom.id}/gradebook/").status_code == 404
-    assert client.patch(f"{BASE}/students/{student.id}/", {"full_name": "X"}).status_code == 404
+    assert client.patch(f"{BASE}/students/{student.id}/", {"first_name": "X"}).status_code == 404
     assert client.delete(f"{BASE}/students/{student.id}/").status_code == 404
+    assert client.get(f"{BASE}/students/{student.id}/profile/").status_code == 404
     assert client.get(f"{BASE}/lesson-plans/{plan.id}/").status_code == 404
     assert client.patch(f"{BASE}/lesson-plans/{plan.id}/", {"title": "X"}).status_code == 404
     assert client.delete(f"{BASE}/lesson-plans/{plan.id}/").status_code == 404
@@ -276,6 +282,73 @@ def test_a_class_name_can_be_used_once_in_any_letter_case(teacher):
     assert renamed.status_code == 400
 
 
+def test_the_same_class_name_can_be_used_for_another_subject(teacher):
+    teacher.client.post(f"{BASE}/classes/", {"name": "Grade 6", "subject": "Math"})
+
+    science = teacher.client.post(f"{BASE}/classes/", {"name": "Grade 6", "subject": "Science"})
+    repeated = teacher.client.post(
+        f"{BASE}/classes/", {"name": "  grade   6 ", "subject": " MATH "}
+    )
+
+    assert science.status_code == 201
+    assert repeated.status_code == 400
+    assert str(repeated.data["error"]["fields"]["name"]) == (
+        "You already have this class for this subject."
+    )
+
+
+def test_changing_only_the_subject_checks_for_a_repeat(teacher):
+    teacher.client.post(f"{BASE}/classes/", {"name": "Grade 6", "subject": "Math"})
+    science = teacher.client.post(f"{BASE}/classes/", {"name": "Grade 6", "subject": "Science"})
+
+    response = teacher.client.patch(f"{BASE}/classes/{science.data['id']}/", {"subject": "math"})
+
+    assert response.status_code == 400
+
+
+def test_extra_spaces_are_removed_from_a_class(teacher):
+    created = teacher.client.post(
+        f"{BASE}/classes/", {"name": "  Grade   6 ", "subject": " Math ", "grade": " 6 "}
+    )
+
+    assert created.data["name"] == "Grade 6"
+    assert created.data["subject"] == "Math"
+    assert created.data["grade"] == "6"
+
+
+def test_a_blank_class_name_is_rejected(teacher):
+    assert teacher.client.post(f"{BASE}/classes/", {"name": "   "}).status_code == 400
+
+
+def test_class_list_shows_tests_and_todays_attendance(teacher):
+    taken = _class(teacher, "Taken")
+    waiting = _class(teacher, "Waiting")
+    ali, huda = _student(teacher, taken), _student(teacher, waiting, "Huda")
+    _student(teacher, taken, "Omar")
+    _assessment(teacher, taken)
+    _assessment(teacher, taken)
+    today = timezone.localdate()
+    AttendanceRecord.objects.create(
+        school=teacher.school, classroom=taken, student=ali, date=today, status="present"
+    )
+    AttendanceRecord.objects.create(
+        school=teacher.school,
+        classroom=waiting,
+        student=huda,
+        date=today - timedelta(days=1),
+        status="present",
+    )
+
+    rows = {row["name"]: row for row in teacher.client.get(f"{BASE}/classes/").data}
+
+    assert rows["Taken"]["student_count"] == 2
+    assert rows["Taken"]["assessment_count"] == 2
+    assert rows["Taken"]["attendance_taken_today"] is True
+    assert rows["Waiting"]["student_count"] == 1
+    assert rows["Waiting"]["assessment_count"] == 0
+    assert rows["Waiting"]["attendance_taken_today"] is False
+
+
 def test_two_teachers_can_use_the_same_class_name(trial, other):
     _class(other, "Grade 6")
 
@@ -302,26 +375,116 @@ def test_students_can_be_added_listed_updated_and_deleted(teacher):
 
     added = teacher.client.post(
         url,
-        {"students": [{"full_name": "Ali"}, {"full_name": "Huda", "parent_email": "p@x.com"}]},
+        {"students": [{"first_name": "Ali"}, {"first_name": "Huda", "parent_email": "p@x.com"}]},
         format="json",
     )
     assert added.status_code == 201
     assert [row["full_name"] for row in teacher.client.get(url).data] == ["Ali", "Huda"]
 
     student_id = added.data[0]["id"]
-    updated = teacher.client.patch(f"{BASE}/students/{student_id}/", {"full_name": "Aly"})
+    updated = teacher.client.patch(f"{BASE}/students/{student_id}/", {"first_name": "Aly"})
     assert updated.data["full_name"] == "Aly"
     assert teacher.client.delete(f"{BASE}/students/{student_id}/").status_code == 204
     assert Student.objects.count() == 1
+
+
+def test_students_keep_every_detail(teacher):
+    classroom = _class(teacher)
+    row = {
+        "first_name": "  Ali ",
+        "last_name": "Hassan  Khan",
+        "father_name": "Hassan",
+        "student_number": " S-01 ",
+    }
+
+    added = teacher.client.post(
+        f"{BASE}/classes/{classroom.id}/students/", {"students": [row]}, format="json"
+    )
+
+    assert added.status_code == 201
+    saved = added.data[0]
+    assert saved["first_name"] == "Ali"
+    assert saved["last_name"] == "Hassan Khan"
+    assert saved["full_name"] == "Ali Hassan Khan"
+    assert saved["father_name"] == "Hassan"
+    assert saved["student_number"] == "S-01"
+
+
+def _add(workspace, classroom, *rows):
+    return workspace.client.post(
+        f"{BASE}/classes/{classroom.id}/students/", {"students": list(rows)}, format="json"
+    )
+
+
+def test_a_student_id_can_be_used_once_in_a_class(teacher):
+    classroom = _class(teacher)
+    _add(teacher, classroom, {"first_name": "Ali", "student_number": "7"})
+
+    response = _add(
+        teacher,
+        classroom,
+        {"first_name": "Huda", "student_number": "8"},
+        {"first_name": "Omar", "student_number": "7"},
+    )
+
+    assert response.status_code == 400
+    rows = response.data["error"]["fields"]["students"]
+    assert rows[0] == {}
+    assert "student_number" in rows[1]
+    assert Student.objects.count() == 1
+
+
+def test_the_same_student_id_twice_in_one_list_is_rejected(teacher):
+    classroom = _class(teacher)
+
+    response = _add(
+        teacher,
+        classroom,
+        {"first_name": "Ali", "student_number": "7"},
+        {"first_name": "Huda", "student_number": "7"},
+        {"first_name": "Omar"},
+    )
+
+    assert response.status_code == 400
+    assert not Student.objects.exists()
+
+
+def test_students_with_no_id_and_ids_in_other_classes_are_fine(teacher):
+    first, second = _class(teacher, "A"), _class(teacher, "B")
+    _add(teacher, first, {"first_name": "Ali", "student_number": "7"})
+
+    response = _add(
+        teacher,
+        second,
+        {"first_name": "Ali", "student_number": "7"},
+        {"first_name": "Huda"},
+        {"first_name": "Omar"},
+    )
+
+    assert response.status_code == 201
+
+
+def test_editing_a_student_cannot_take_another_students_id(teacher):
+    classroom = _class(teacher)
+    Student.objects.create(
+        school=teacher.school, classroom=classroom, first_name="Ali", student_number="7"
+    )
+    huda = _student(teacher, classroom, "Huda")
+
+    response = teacher.client.patch(f"{BASE}/students/{huda.id}/", {"student_number": "7"})
+
+    assert response.status_code == 400
+    assert "student_number" in response.data["error"]["fields"]
 
 
 @pytest.mark.parametrize(
     "students",
     [
         [],
-        [{"full_name": ""}],
-        [{"full_name": "Ali", "parent_email": "not-an-email"}],
-        [{"full_name": "x" * 151}],
+        [{"first_name": ""}],
+        [{"first_name": "Ali", "parent_email": "not-an-email"}],
+        [{"first_name": "x" * 101}],
+        [{"first_name": "Ali", "student_number": "x" * 31}],
     ],
 )
 def test_invalid_students_are_rejected(teacher, students):
@@ -351,13 +514,13 @@ def test_trial_class_limit(trial):
 def test_trial_student_limit_counts_the_whole_batch(trial):
     classroom = _class(trial)
     Student.objects.bulk_create(
-        Student(school=trial.school, classroom=classroom, full_name=f"S{index}")
+        Student(school=trial.school, classroom=classroom, first_name=f"S{index}")
         for index in range(29)
     )
 
     response = trial.client.post(
         f"{BASE}/classes/{classroom.id}/students/",
-        {"students": [{"full_name": "A"}, {"full_name": "B"}]},
+        {"students": [{"first_name": "A"}, {"first_name": "B"}]},
         format="json",
     )
 
@@ -368,7 +531,7 @@ def test_trial_student_limit_counts_the_whole_batch(trial):
 
 def test_trial_lesson_plan_limit(trial):
     LessonPlan.objects.bulk_create(
-        LessonPlan(school=trial.school, title=f"L{index}") for index in range(10)
+        LessonPlan(school=trial.school, title=f"L{index}") for index in range(20)
     )
 
     response = trial.client.post(f"{BASE}/lesson-plans/", LESSON, format="json")
@@ -471,7 +634,7 @@ def test_attendance_roster_shows_students_with_no_status_yet(teacher):
 def test_attendance_roster_query_count_does_not_grow(teacher, django_assert_max_num_queries):
     classroom = _class(teacher)
     Student.objects.bulk_create(
-        Student(school=teacher.school, classroom=classroom, full_name=f"S{index}")
+        Student(school=teacher.school, classroom=classroom, first_name=f"S{index}")
         for index in range(40)
     )
 
@@ -641,13 +804,96 @@ def test_trial_presentation_has_the_mark_and_a_limit(trial):
     first = trial.client.get(url)
     assert "Made with Lesson Lab" in " ".join(_deck_text(first.content))
 
-    trial.client.get(url)
-    trial.client.get(url)
-    fourth = trial.client.get(url)
+    PresentationExport.objects.bulk_create(
+        PresentationExport(school=trial.school, lesson_plan=plan) for _ in range(9)
+    )
+    eleventh = trial.client.get(url)
 
-    assert fourth.status_code == 403
-    assert fourth.data["error"]["code"] == "plan_limit_reached"
-    assert PresentationExport.objects.count() == 3
+    assert eleventh.status_code == 403
+    assert eleventh.data["error"]["code"] == "plan_limit_reached"
+    assert PresentationExport.objects.count() == 10
+
+
+def _document(content):
+    from docx import Document
+
+    return Document(BytesIO(content))
+
+
+def _document_text(document):
+    footer = [p.text for p in document.sections[0].footer.paragraphs]
+    return " ".join([p.text for p in document.paragraphs] + footer)
+
+
+def test_lesson_plan_downloads_as_word(teacher):
+    pytest.importorskip("docx")
+    classroom = _class(teacher)
+    plan = _plan(
+        teacher,
+        classroom=classroom,
+        subject="Science",
+        lesson_date=timezone.localdate().replace(day=5),
+        objectives="Explain evaporation\nExplain rain",
+        homework="Page 12",
+    )
+
+    response = teacher.client.get(f"{BASE}/lesson-plans/{plan.id}/document/")
+
+    assert response.status_code == 200
+    assert "wordprocessingml" in response["Content-Type"]
+    assert response["Content-Disposition"].endswith('lesson.docx"')
+    text = _document_text(_document(response.content))
+    assert "Lesson" in text
+    assert "Science" in text
+    assert "Grade 5A" in text
+    assert f"05/{timezone.localdate():%m/%Y}" in text
+    assert "Objectives" in text and "Explain rain" in text
+    # A section with nothing in it is left out.
+    assert "Materials" not in text
+    assert "Made with Lesson Lab" not in text
+    # A Word download is not counted against the PowerPoint limit.
+    assert not PresentationExport.objects.exists()
+
+
+def test_trial_word_file_has_the_mark_and_no_limit(trial):
+    pytest.importorskip("docx")
+    plan = _plan(trial, objectives="Explain rain")
+    PresentationExport.objects.bulk_create(
+        PresentationExport(school=trial.school, lesson_plan=plan) for _ in range(10)
+    )
+
+    response = trial.client.get(f"{BASE}/lesson-plans/{plan.id}/document/")
+
+    assert response.status_code == 200
+    assert "Made with Lesson Lab" in _document_text(_document(response.content))
+
+
+def test_an_ended_trial_can_still_download_word(expired):
+    pytest.importorskip("docx")
+    plan = _plan(expired, objectives="Explain rain")
+
+    assert expired.client.get(f"{BASE}/lesson-plans/{plan.id}/document/").status_code == 200
+
+
+def test_another_teachers_lesson_cannot_be_downloaded_as_word(trial, other):
+    plan = _plan(other)
+
+    assert trial.client.get(f"{BASE}/lesson-plans/{plan.id}/document/").status_code == 404
+
+
+def test_arabic_word_file_is_right_to_left(teacher):
+    pytest.importorskip("docx")
+    plan = LessonPlan.objects.create(
+        school=teacher.school, title="دورة الماء", objectives="شرح التبخر"
+    )
+
+    response = teacher.client.get(f"{BASE}/lesson-plans/{plan.id}/document/")
+
+    document = _document(response.content)
+    assert "الأهداف" in _document_text(document)
+    body = document.element.body.xml
+    assert "<w:bidi/>" in body
+    assert "<w:rtl/>" in body
 
 
 def test_arabic_presentation_is_right_to_left(teacher):
@@ -788,7 +1034,7 @@ def test_gradebook_lists_every_student_and_assessment(teacher):
 def test_gradebook_query_count_does_not_grow(teacher, django_assert_max_num_queries):
     classroom = _class(teacher)
     students = Student.objects.bulk_create(
-        Student(school=teacher.school, classroom=classroom, full_name=f"S{index}")
+        Student(school=teacher.school, classroom=classroom, first_name=f"S{index}")
         for index in range(25)
     )
     assessment = _assessment(teacher, classroom)
@@ -803,38 +1049,98 @@ def test_gradebook_query_count_does_not_grow(teacher, django_assert_max_num_quer
     assert len(response.data["students"]) == 25
 
 
-# --- Teacher Pro: AI lesson plans
+# --- AI lesson plans
 
 
-@pytest.mark.parametrize("workspace", ["trial", "teacher"])
-def test_ai_needs_teacher_pro(workspace, request):
+@patch("apps.classroom.services.generate_lesson_content", return_value=AI_LESSON)
+@pytest.mark.parametrize("workspace", ["trial", "teacher", "pro"])
+def test_every_plan_can_make_an_ai_draft(generate, workspace, request):
     client = request.getfixturevalue(workspace).client
 
     response = client.post(f"{BASE}/lesson-plans/generate/", GENERATE, format="json")
 
-    assert response.status_code == 403
-    assert response.data["error"]["code"] == "pro_required"
-
-
-@patch("apps.classroom.services.generate_lesson_content", return_value=AI_LESSON)
-def test_ai_creates_a_lesson_plan_from_only_the_topic(generate, pro):
-    response = pro.client.post(f"{BASE}/lesson-plans/generate/", GENERATE, format="json")
-
-    assert response.status_code == 201
+    assert response.status_code == 200
     assert response.data["title"] == "Fractions"
-    assert response.data["source"] == "ai"
+    assert response.data["subject"] == "Math"
     assert AIGeneration.objects.count() == 1
+    # A draft only: nothing is saved until the teacher saves it.
+    assert not LessonPlan.objects.exists()
     generate.assert_called_once_with(topic="Fractions", subject="Math", grade="5", language="en")
 
 
 @patch("apps.classroom.services.generate_lesson_content", return_value=AI_LESSON)
-def test_ai_stops_at_the_monthly_allowance(generate, pro):
-    AIGeneration.objects.bulk_create(AIGeneration(school=pro.school) for _ in range(50))
+def test_a_saved_ai_draft_is_marked_as_ai(_generate, teacher):
+    draft = teacher.client.post(f"{BASE}/lesson-plans/generate/", GENERATE, format="json").data
 
-    response = pro.client.post(f"{BASE}/lesson-plans/generate/", GENERATE, format="json")
+    saved = teacher.client.post(
+        f"{BASE}/lesson-plans/",
+        {**draft, "title": "Fractions, edited", "source": "ai"},
+        format="json",
+    )
+
+    assert saved.status_code == 201
+    assert saved.data["source"] == "ai"
+    assert LessonPlan.objects.get().title == "Fractions, edited"
+
+
+@patch("apps.classroom.services.generate_lesson_content", return_value=AI_LESSON)
+def test_the_trial_has_ten_ai_drafts_in_all(generate, trial):
+    old = timezone.now() - timedelta(days=40)
+    AIGeneration.objects.bulk_create(AIGeneration(school=trial.school) for _ in range(10))
+    # Counted over the whole trial, not only this month.
+    AIGeneration.objects.update(created_at=old)
+
+    response = trial.client.post(f"{BASE}/lesson-plans/generate/", GENERATE, format="json")
 
     assert response.status_code == 403
     assert response.data["error"]["code"] == "ai_quota_reached"
+    assert trial.client.get(f"{BASE}/workspace/").data["usage"]["ai_used"] == 10
+    generate.assert_not_called()
+
+
+@patch("apps.classroom.services.generate_lesson_content", return_value=AI_LESSON)
+@pytest.mark.parametrize(("workspace", "allowance"), [("teacher", 30), ("pro", 100)])
+def test_paid_plans_have_a_monthly_ai_allowance(generate, workspace, allowance, request):
+    client = request.getfixturevalue(workspace)
+    AIGeneration.objects.bulk_create(AIGeneration(school=client.school) for _ in range(allowance))
+
+    response = client.client.post(f"{BASE}/lesson-plans/generate/", GENERATE, format="json")
+
+    assert response.status_code == 403
+    assert response.data["error"]["code"] == "ai_quota_reached"
+    generate.assert_not_called()
+
+
+@patch("apps.classroom.services.generate_lesson_content", return_value=AI_LESSON)
+def test_last_months_ai_drafts_do_not_count_on_a_paid_plan(_generate, teacher):
+    AIGeneration.objects.bulk_create(AIGeneration(school=teacher.school) for _ in range(30))
+    AIGeneration.objects.update(created_at=timezone.now() - timedelta(days=40))
+
+    response = teacher.client.post(f"{BASE}/lesson-plans/generate/", GENERATE, format="json")
+
+    assert response.status_code == 200
+    assert teacher.client.get(f"{BASE}/workspace/").data["usage"]["ai_used"] == 1
+
+
+@patch("apps.classroom.services.generate_lesson_content", return_value=AI_LESSON)
+def test_no_ai_draft_when_no_lesson_plan_can_be_saved(generate, trial):
+    LessonPlan.objects.bulk_create(
+        LessonPlan(school=trial.school, title=f"L{index}") for index in range(20)
+    )
+
+    response = trial.client.post(f"{BASE}/lesson-plans/generate/", GENERATE, format="json")
+
+    assert response.status_code == 403
+    assert response.data["error"]["code"] == "plan_limit_reached"
+    generate.assert_not_called()
+
+
+@patch("apps.classroom.services.generate_lesson_content", return_value=AI_LESSON)
+def test_an_ended_trial_cannot_make_ai_drafts(generate, expired):
+    response = expired.client.post(f"{BASE}/lesson-plans/generate/", GENERATE, format="json")
+
+    assert response.status_code == 403
+    assert response.data["error"]["code"] == "workspace_read_only"
     generate.assert_not_called()
 
 
@@ -991,3 +1297,100 @@ def test_upgrade_needs_a_teacher_plan(trial, plan):
 
     assert response.status_code == 400
     assert not UpgradeRequest.objects.exists()
+
+
+# --- Student profile
+
+
+def _profile(workspace, student, period=""):
+    query = f"?period={period}" if period else ""
+    return workspace.client.get(f"{BASE}/students/{student.id}/profile/{query}")
+
+
+def _attendance(workspace, student, days_ago, status):
+    AttendanceRecord.objects.create(
+        school=workspace.school,
+        classroom=student.classroom,
+        student=student,
+        date=timezone.localdate() - timedelta(days=days_ago),
+        status=status,
+    )
+
+
+def test_student_profile_shows_attendance_and_marks(teacher):
+    classroom = _class(teacher)
+    ali, huda = _student(teacher, classroom, "Ali Khan"), _student(teacher, classroom, "Huda")
+    for days_ago, status in [(0, "present"), (1, "absent"), (2, "late"), (3, "excused")]:
+        _attendance(teacher, ali, days_ago, status)
+    quiz = _assessment(teacher, classroom, max_marks=20)
+    unmarked = _assessment(teacher, classroom, max_marks=10)
+    Mark.objects.create(school=teacher.school, assessment=quiz, student=ali, value=15)
+    Mark.objects.create(school=teacher.school, assessment=quiz, student=huda, value=5)
+
+    response = _profile(teacher, ali)
+
+    assert response.status_code == 200
+    data = response.data
+    assert data["student"]["full_name"] == "Ali Khan"
+    assert data["student"]["classroom_name"] == "Grade 5A"
+    assert data["period"] == "month"
+    attendance = data["attendance"]
+    assert (attendance["present"], attendance["absent"], attendance["late"]) == (1, 1, 1)
+    assert attendance["excused"] == 1
+    assert attendance["total"] == 4
+    # Late and excused days count as attended; only the absent day counts against.
+    assert attendance["rate"] == "75.0"
+    assert attendance["days"][0] == {
+        "date": timezone.localdate().isoformat(),
+        "status": "present",
+    }
+    marks = {row["id"]: row for row in data["marks"]}
+    assert marks[quiz.id]["value"] == "15.00"
+    assert marks[quiz.id]["percent"] == "75.0"
+    assert marks[quiz.id]["class_average_percent"] == "50.0"
+    assert marks[unmarked.id]["value"] is None
+    assert marks[unmarked.id]["percent"] is None
+    assert data["average_percent"] == "75.0"
+
+
+def test_student_profile_period_limits_what_is_shown(teacher):
+    ali = _student(teacher, _class(teacher))
+    _attendance(teacher, ali, 60, "absent")
+
+    assert _profile(teacher, ali).data["attendance"]["total"] == 0
+    assert _profile(teacher, ali, "90days").data["attendance"]["total"] == 1
+    assert _profile(teacher, ali, "all").data["attendance"]["total"] == 1
+    assert _profile(teacher, ali, "all").data["start"] is None
+
+
+def test_an_empty_student_profile_has_no_rates(teacher):
+    data = _profile(teacher, _student(teacher, _class(teacher))).data
+
+    assert data["attendance"]["rate"] is None
+    assert data["average_percent"] is None
+    assert data["marks"] == []
+
+
+def test_student_profile_rejects_an_unknown_period(teacher):
+    response = _profile(teacher, _student(teacher, _class(teacher)), "year")
+
+    assert response.status_code == 400
+
+
+def test_student_profile_is_open_on_every_plan(trial, expired):
+    assert _profile(trial, _student(trial, _class(trial))).status_code == 200
+    assert _profile(expired, _student(expired, _class(expired))).status_code == 200
+
+
+def test_student_profile_query_count_does_not_grow(teacher, django_assert_max_num_queries):
+    classroom = _class(teacher)
+    ali = _student(teacher, classroom)
+    for index in range(10):
+        assessment = _assessment(teacher, classroom)
+        Mark.objects.create(school=teacher.school, assessment=assessment, student=ali, value=index)
+        _attendance(teacher, ali, index, "present")
+
+    with django_assert_max_num_queries(9):
+        response = _profile(teacher, ali)
+
+    assert len(response.data["marks"]) == 10

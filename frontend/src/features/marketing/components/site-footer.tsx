@@ -15,8 +15,8 @@ export async function SiteFooter() {
       <div className="page-wrap">
         <div className="grid grid-cols-2 gap-[26px] pt-14 pb-9 sm:gap-8 lg:grid-cols-[1.6fr_1fr_1fr_1.4fr]">
           <div className="col-span-2 sm:col-span-1">
-            <Link href="/" className="inline-block rounded-btn bg-bg px-3.5 py-2.5">
-              <Logo className="h-14 sm:h-14" />
+            <Link href="/" className="inline-block rounded-btn">
+              <Logo variant="white" className="h-14 sm:h-14" />
             </Link>
             <p className="mt-3.5 max-w-[34ch]">{t("tag")}</p>
           </div>

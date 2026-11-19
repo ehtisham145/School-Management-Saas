@@ -80,7 +80,7 @@ def test_only_platform_admins_can_use_teachers(db):
 def test_list_shows_teachers_with_their_plan_and_usage(admin_client):
     workspace = _teacher()
     classroom = Classroom.objects.create(school=workspace, name="A")
-    Student.objects.create(school=workspace, classroom=classroom, full_name="Ali")
+    Student.objects.create(school=workspace, classroom=classroom, first_name="Ali")
     UpgradeRequest.objects.create(school=workspace, plan="teacher_pro")
     School.objects.create(name_en="Al Noor", code="alnoor")
 

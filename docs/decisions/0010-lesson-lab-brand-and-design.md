@@ -1,6 +1,6 @@
 # ADR-0010: Lesson Lab brand and one design language
 
-- **Status:** Accepted; the Latin-typeface part (IBM Plex Sans for Latin text) is superseded by [ADR-0020](0020-latin-display-and-body-typefaces.md)
+- **Status:** Accepted; the Latin-typeface part (IBM Plex Sans for Latin text) is superseded by [ADR-0020](0020-latin-display-and-body-typefaces.md), and the logo part by [ADR-0023](0023-new-brand-mark.md)
 - **Date:** 2026-11-03
 
 ## Context
@@ -13,7 +13,7 @@ The product was named Schoolify and the public site had its own colors and fonts
 - The language is in the URL (`/en`, `/ar`) and remembered in the `NEXT_LOCALE` cookie, so `lang` and `dir` are rendered on the server with no flash.
 - Translation keys are type checked, and a key missing from either language fails the build.
 - At the owner's request the site goes beyond the demo: a typewriter on page headings, cards that slide into place on scroll, and a full-width photo behind each page's heading. The sign-in page is a plain tinted page with the brand on one side and the sign-in card on the other, with no image.
-- `public/brand/logo.webp` is rebuilt from `design/assets/logo.png` with a smaller flask, so the name reads larger. Don't replace it with the original.
+- ~~`public/brand/logo.webp` is rebuilt from `design/assets/logo.png` with a smaller flask, so the name reads larger. Don't replace it with the original.~~ Superseded by [ADR-0023](0023-new-brand-mark.md): the logo is now the new mark in `docs/design/assets/logo/`.
 
 ## Consequences
 - Logged-in screens pick up the new colors through the shared tokens, but they still need their own layout work.

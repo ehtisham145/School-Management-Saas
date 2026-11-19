@@ -376,8 +376,7 @@
             },
             {
               "title": "AI-powered lesson planning",
-              "desc": "Generate lesson plans aligned with your curriculum.",
-              "pro": true
+              "desc": "Generate lesson plans aligned with your curriculum."
             },
             {
               "title": "Automated grading",
@@ -668,6 +667,7 @@
           "tagline": "Everything you need to run your own classes.",
           "features": [
             "Lesson plans you can save and reuse",
+            "AI lesson plans, 30 a month",
             "Presentations, downloadable as PowerPoint",
             "Up to 5 classes and 100 students",
             "Attendance for your classes",
@@ -682,7 +682,7 @@
           "tagline": "For teachers who want to save hours every week.",
           "features": [
             "Everything in Teacher",
-            "AI lesson plans, 50 a month",
+            "AI lesson plans, 100 a month",
             "Unlimited classes and students",
             "Report cards as PDF",
             "Email messages to parents"
@@ -706,7 +706,7 @@
         },
         {
           "q": "How does a teacher account start?",
-          "a": "Sign up with your email, confirm the code we send you, and your 7-day free trial starts straight away."
+          "a": "Sign up with your email, confirm the code we send you, and your 7-day free trial starts straight away. It includes 10 AI lesson plans to try."
         },
         {
           "q": "What happens to our data if we leave?",
@@ -1379,7 +1379,10 @@
       "passwordNumeric": "Use letters as well as numbers.",
       "passwordMismatch": "The passwords don't match.",
       "sameEmail": "Use a different email from the school email.",
-      "acceptPrivacy": "Please accept the privacy policy to continue."
+      "acceptPrivacy": "Please accept the privacy policy to continue.",
+      "futureDate": "Choose today or an earlier date.",
+      "dayDate": "Write a real date as DD/MM/YYYY.",
+      "repeatedId": "This ID is already in the list."
     },
     "demo": {
       "title": "Book a demo",
@@ -1441,7 +1444,7 @@
       "plan_limit_reached": "You have reached the limit of your plan. Choose a bigger plan to add more.",
       "pro_required": "This feature is part of Teacher Pro.",
       "workspace_read_only": "Your plan has ended. Choose a plan to make changes.",
-      "ai_quota_reached": "You have used all your AI lesson plans for this month.",
+      "ai_quota_reached": "You have used all your AI lesson plans. Choose a plan to get more.",
       "service_unavailable": "This service isn't available right now. Please try again later.",
       "rateLimited": "Too many attempts. Please try again later.",
       "generic": "Something went wrong. Please try again."
@@ -1478,7 +1481,6 @@
       "editTitle": "Edit class",
       "name": "Class name",
       "nameExample": "Grade 5A Science",
-      "nameTaken": "You already have a class with this name.",
       "subject": "Subject",
       "grade": "Grade",
       "emptyTitle": "No classes yet",
@@ -1493,23 +1495,44 @@
         "attendance": "Attendance",
         "marks": "Marks"
       },
-      "open": "Students and attendance"
+      "nameSubjectTaken": "You already have this class for this subject.",
+      "noDetails": "No subject or grade yet",
+      "menu": "Options for {name}",
+      "students": "Students",
+      "tests": "Tests",
+      "attendanceTaken": "Attendance taken today",
+      "attendanceWaiting": "Attendance not taken today",
+      "openClass": "Open class"
     },
     "students": {
       "title": "Students",
       "add": "Add students",
       "addTitle": "Add students",
-      "names": "Student names",
-      "namesHint": "Write one name on each line.",
-      "namesInvalid": "Check the names. Each one can have up to 150 characters.",
       "editTitle": "Edit student",
-      "fullName": "Full name",
       "parentEmail": "Parent's email",
-      "reportCard": "Report card",
       "emptyTitle": "No students yet",
       "emptyHint": "Add the students of this class.",
       "deleteTitle": "Delete {name}?",
-      "deleteBody": "Their attendance and marks will be deleted too. This can't be undone."
+      "deleteBody": "Their attendance and marks will be deleted too. This can't be undone.",
+      "addHint": "Only the first name is needed. Add more rows for more students.",
+      "rowLabel": "Student {number}",
+      "removeRow": "Remove student {number}",
+      "fields": {
+        "first_name": "First name",
+        "last_name": "Last name",
+        "father_name": "Father's name",
+        "student_number": "Student ID"
+      },
+      "addMore": "Add more",
+      "remaining": "{count, plural, =0 {Your plan has no room for more students.} one {You can add # more student on your plan.} other {You can add # more students on your plan.}}",
+      "saveCount": "{count, plural, one {Save # student} other {Save # students}}",
+      "idTaken": "The ID of student {number} is already used in this class.",
+      "idTakenOne": "Another student in this class has this ID.",
+      "rowsInvalid": "Check the highlighted fields and try again.",
+      "parentEmailHint": "Used for messages to parents.",
+      "idShort": "ID",
+      "fatherShort": "Father",
+      "viewProfile": "View profile"
     },
     "attendance": {
       "title": "Attendance",
@@ -1523,7 +1546,8 @@
       "saved": "Attendance saved.",
       "unmarked": "{count, plural, one {# student not marked} other {# students not marked}}",
       "emptyTitle": "No students yet",
-      "emptyHint": "Add students to take attendance."
+      "emptyHint": "Add students to take attendance.",
+      "openCalendar": "Open calendar"
     },
     "marks": {
       "title": "Marks",
@@ -1544,23 +1568,23 @@
       "noStudents": "No students yet",
       "noStudentsHint": "Add students to enter marks.",
       "deleteTitle": "Delete {name}?",
-      "deleteBody": "All marks for this assessment will be deleted. This can't be undone."
+      "deleteBody": "All marks for this assessment will be deleted. This can't be undone.",
+      "openCalendar": "Open calendar"
     },
     "lessons": {
       "title": "Lesson plans",
-      "subtitle": "Plan your lessons and download them as PowerPoint.",
+      "subtitle": "Plan your lessons and download them as PowerPoint or Word.",
       "new": "New lesson plan",
       "newTitle": "New lesson plan",
       "editTitle": "Edit lesson plan",
       "ai": "Write with AI",
       "aiBadge": "AI",
       "aiTitle": "Write a lesson plan with AI",
-      "aiHint": "Used this month: {used} of {limit}. Check the lesson before you teach it.",
+      "aiHint": "Tell us the topic. You can read and edit the lesson before it is saved.",
       "topic": "Lesson topic",
       "topicExample": "The water cycle",
       "language": "Language",
       "generate": "Write lesson plan",
-      "generating": "Writing your lesson...",
       "lessonTitle": "Lesson title",
       "classroom": "Class",
       "noClass": "No class",
@@ -1580,7 +1604,23 @@
       "emptyTitle": "No lesson plans yet",
       "emptyHint": "Write your first lesson plan.",
       "deleteTitle": "Delete {name}?",
-      "deleteBody": "This lesson plan will be deleted. This can't be undone."
+      "deleteBody": "This lesson plan will be deleted. This can't be undone.",
+      "openCalendar": "Open calendar",
+      "aiLeftTrial": "{left} of {limit} AI lesson plans left in your trial",
+      "aiLeftMonth": "{left} of {limit} AI lesson plans left this month",
+      "aiLeftShort": "{left} left",
+      "aiPrivacy": "Only the topic, subject and grade are sent to the AI. Student names never are.",
+      "aiSteps": {
+        "read": "Reading your topic",
+        "objectives": "Writing the objectives",
+        "activities": "Planning the activities",
+        "assessment": "Adding the assessment and homework"
+      },
+      "reviewTitle": "Check your AI lesson plan",
+      "reviewHint": "Not saved yet. Read it, change anything you like, then save it.",
+      "discard": "Discard",
+      "saveDraft": "Save lesson plan",
+      "downloadWord": "Download Word"
     },
     "messages": {
       "title": "Parent messages",
@@ -1613,13 +1653,52 @@
         "classes": "Classes",
         "students": "Students",
         "lessons": "Lesson plans",
-        "presentations": "PowerPoint downloads"
+        "presentations": "PowerPoint downloads",
+        "ai": "AI lesson plans"
       },
       "choose": "Choose this plan",
       "current": "Your current plan",
       "requested": "Requested",
       "pending": "We received your request for {plan}. Our team will contact you to complete payment.",
       "payment": "After you choose a plan, our team contacts you to complete payment and activate it."
+    },
+    "profile": {
+      "back": "Back to class",
+      "backTo": "Back to {name}",
+      "id": "Student ID",
+      "father": "Father",
+      "reportCard": "Report card (PDF)",
+      "periodLabel": "Time period",
+      "periods": {
+        "month": "Last 30 days",
+        "90days": "Last 90 days",
+        "all": "All time"
+      },
+      "attendanceRate": "Attendance",
+      "daysRecorded": "{count, plural, =0 {No days recorded} one {# day recorded} other {# days recorded}}",
+      "averageMark": "Average mark",
+      "testsTaken": "Tests marked",
+      "attendanceTitle": "Attendance",
+      "noAttendance": "No attendance in this period.",
+      "legend": "Attendance key",
+      "days": "Days, newest first",
+      "daysHint": "Newest first. Late and excused days count as attended.",
+      "short": {
+        "present": "P",
+        "absent": "A",
+        "late": "L",
+        "excused": "E"
+      },
+      "marksTitle": "Tests and marks",
+      "noMarks": "No tests in this period.",
+      "test": "Test",
+      "score": "Marks",
+      "percent": "Score",
+      "classAverage": "Class average",
+      "notMarked": "Not marked",
+      "averageMarker": "The orange line is the class average.",
+      "emptyTitle": "Nothing recorded yet",
+      "emptyHint": "Attendance and marks for this student will show here."
     }
   }
 }

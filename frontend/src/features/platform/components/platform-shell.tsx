@@ -79,9 +79,9 @@ export function PlatformShell({ user, children }: { user: MeResponse; children: 
           <Link
             href="/platform"
             onClick={() => setMenuOpen(false)}
-            className="rounded-control bg-bg px-3 py-2"
+            className="rounded-control py-1"
           >
-            <Logo className="h-7 sm:h-7" />
+            <Logo variant="white" className="h-8 sm:h-8" />
           </Link>
           <button
             type="button"
