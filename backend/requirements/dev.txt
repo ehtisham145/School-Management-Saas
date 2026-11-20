@@ -5,7 +5,7 @@ uvicorn[standard]>=0.54.0
 
 # Quality
 ruff>=0.11  # package used for remove unused import and maintain code format and style
-pre-commit>=4.2 # stop the git to commit erro code
+pre-commit>=4.7.0 # stop the git to commit erro code
 
 # Tests
 pytest>=8.3
