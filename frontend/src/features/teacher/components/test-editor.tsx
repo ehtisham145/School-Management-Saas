@@ -1,9 +1,11 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { ArrowDown, ArrowUp, Plus, RefreshCw, Sparkles, Trash2, X } from "lucide-react";
+import { ArrowDown, ArrowUp, Palette, Plus, RefreshCw, Sparkles, Trash2, X } from "lucide-react";
 import { cn } from "cn";
 import { useLocale, useTranslations } from "next-intl";
+import { Link } from "@/i18n/navigation";
+import { ActionMenu } from "@/components/ui/action-menu";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { DateField } from "@/components/ui/date-field";
@@ -11,6 +13,7 @@ import { Field } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Modal } from "@/components/ui/modal";
 import { Select } from "@/components/ui/select";
+import { Spinner } from "@/components/ui/spinner";
 import { Textarea } from "@/components/ui/textarea";
 import { useLoad } from "@/features/platform/use-load";
 import { ApiError } from "@/lib/api";
@@ -29,7 +32,6 @@ import {
 } from "@/lib/use-validated-form";
 import { createExam, listClasses, regenerateExamQuestion, updateExam } from "../api";
 import {
-  FONT_SIZES,
   QUESTION_KINDS,
   type ExamDetail,
   type ExamDraft,
@@ -38,7 +40,7 @@ import {
   type QuestionKind,
 } from "../schemas";
 import { marksValidator, sanitizeMarks, Stepper } from "./test-maker";
-import { ErrorNote, useTeacherError } from "./teacher-ui";
+import { ErrorNote, useTeacherError, useWorkspace } from "./teacher-ui";
 
 const MIN_OPTIONS = 2;
 const MAX_OPTIONS = 6;
@@ -145,7 +147,42 @@ function QuestionCard({
             <Badge tone="neutral">{t("editor.fromPage", { page: item.sourcePage })}</Badge>
           )}
         </p>
-        <div className="flex flex-wrap items-center gap-1">
+        {/* Phones: one "⋯" button in place of the row below. */}
+        <ActionMenu
+          className="sm:hidden"
+          label={t("editor.more", { number })}
+          items={[
+            ...(canRewrite
+              ? [
+                  {
+                    label: t("editor.rewrite"),
+                    icon: <RefreshCw aria-hidden="true" className="size-4" />,
+                    onSelect: onRewrite,
+                    disabled: rewriting,
+                  },
+                ]
+              : []),
+            {
+              label: t("editor.menuMoveUp"),
+              icon: <ArrowUp aria-hidden="true" className="size-4" />,
+              onSelect: () => onMove(-1),
+              disabled: number === 1,
+            },
+            {
+              label: t("editor.menuMoveDown"),
+              icon: <ArrowDown aria-hidden="true" className="size-4" />,
+              onSelect: () => onMove(1),
+              disabled: number === total,
+            },
+            {
+              label: t("editor.menuDelete"),
+              icon: <Trash2 aria-hidden="true" className="size-4" />,
+              onSelect: onRemove,
+              tone: "danger",
+            },
+          ]}
+        />
+        <div className="hidden flex-wrap items-center gap-1 sm:flex">
           {canRewrite && (
             <Button type="button" variant="ghost" size="sm" loading={rewriting} onClick={onRewrite}>
               <RefreshCw aria-hidden="true" className="size-4" />
@@ -180,6 +217,12 @@ function QuestionCard({
           </button>
         </div>
       </div>
+      {rewriting && (
+        <p role="status" className="mb-3 flex items-center gap-2 text-sm text-ink-soft sm:hidden">
+          <Spinner />
+          {t("editor.rewriting")}
+        </p>
+      )}
 
       <div className="flex flex-col gap-3">
         <Field
@@ -367,7 +410,12 @@ export function TestEditor({
   const t = useTranslations("Teacher.tests");
   const locale = useLocale();
   const describe = useTeacherError();
-  const classes = useLoad(listClasses, "test-editor-classes");
+  // Classes belong to the school plan (ADR-0027), so the field shows only when on.
+  const showClasses = useWorkspace().workspace.features.classes;
+  const classes = useLoad(
+    (signal) => (showClasses ? listClasses(signal) : Promise.resolve([])),
+    `test-editor-classes:${showClasses}`,
+  );
   const maxQuestions = options.limits.max_exam_questions;
 
   const [start] = useState(() => {
@@ -375,7 +423,6 @@ export function TestEditor({
     let slots = 0;
     const questions = exam?.questions ?? draft?.questions ?? [blankQuestion("mcq")];
     const settings = draft?.settings;
-    const theme = exam?.theme;
     const values: Record<string, string> = {
       title: exam?.title ?? settings?.title ?? "",
       subject: exam?.subject ?? settings?.subject ?? "",
@@ -385,10 +432,6 @@ export function TestEditor({
       exam_date: isoToDayDate(exam?.exam_date),
       duration: exam?.duration_minutes ? String(exam.duration_minutes) : "",
       instructions: exam?.instructions ?? "",
-      color: theme?.color ?? options.themes[0]?.key ?? "navy",
-      font_size: theme?.font_size ?? "normal",
-      columns: String(theme?.columns ?? 1),
-      name_line: theme?.name_line === false ? "no" : "yes",
     };
     const items = questions.map((question) => {
       const state = questionState(question, ids++, () => slots++);
@@ -469,12 +512,6 @@ export function TestEditor({
         exam_date: dayDateToIso(values.exam_date),
         duration_minutes: values.duration ? Number(values.duration) : null,
         instructions: values.instructions.trim(),
-        theme: {
-          color: values.color,
-          font_size: values.font_size as ExamDetail["theme"]["font_size"],
-          columns: values.columns === "2" ? (2 as const) : (1 as const),
-          name_line: values.name_line === "yes",
-        },
         questions: items.map((item): ExamQuestion => {
           const isMcq = item.kind === "mcq";
           return {
@@ -646,17 +683,19 @@ export function TestEditor({
             <Field id="test-grade" label={t("details.grade")} error={form.errorFor("grade")}>
               <Input {...form.bind("grade")} />
             </Field>
-            <Field id="test-classroom" label={t("details.classroom")}>
-              <Select {...form.bind("classroom")} className="h-11">
-                <option value="">{t("details.noClass")}</option>
-                {classes.state.name === "ready" &&
-                  classes.state.data.map((classroom) => (
-                    <option key={classroom.id} value={classroom.id}>
-                      {classroom.name}
-                    </option>
-                  ))}
-              </Select>
-            </Field>
+            {showClasses && (
+              <Field id="test-classroom" label={t("details.classroom")}>
+                <Select {...form.bind("classroom")} className="h-11">
+                  <option value="">{t("details.noClass")}</option>
+                  {classes.state.name === "ready" &&
+                    classes.state.data.map((classroom) => (
+                      <option key={classroom.id} value={classroom.id}>
+                        {classroom.name}
+                      </option>
+                    ))}
+                </Select>
+              </Field>
+            )}
             <Field id="test-exam_date" label={t("editor.date")} error={form.errorFor("exam_date")}>
               <DateField
                 {...form.bind("exam_date")}
@@ -758,71 +797,16 @@ export function TestEditor({
           )}
         </section>
 
-        <section className="flex flex-col gap-4 rounded-card border border-line bg-bg p-5">
-          <div>
-            <h2 className="text-lg text-navy-deep">{t("editor.design")}</h2>
-            <p className="mt-1 text-sm text-ink-soft">{t("editor.designHint")}</p>
-          </div>
-          <fieldset className="flex flex-col gap-2">
-            <legend className="mb-1 text-sm font-semibold text-ink">{t("editor.color")}</legend>
-            <div className="flex flex-wrap gap-2">
-              {options.themes.map((theme) => {
-                const chosen = form.values.color === theme.key;
-                return (
-                  <button
-                    key={theme.key}
-                    type="button"
-                    aria-pressed={chosen}
-                    onClick={() => form.setValue("color", theme.key)}
-                    className={cn(
-                      "flex min-h-10 cursor-pointer items-center gap-2 rounded-full border px-3 text-sm font-semibold transition-colors",
-                      chosen
-                        ? "border-navy bg-navy-soft text-navy"
-                        : "border-line text-ink hover:border-navy-line",
-                    )}
-                  >
-                    {/* The paper's own print color, shown as a sample. */}
-                    <span
-                      aria-hidden="true"
-                      className="size-5 rounded-full border border-line"
-                      style={{ backgroundColor: theme.accent }}
-                    />
-                    {t(`editor.colors.${theme.key as "navy"}`)}
-                  </button>
-                );
-              })}
-            </div>
-          </fieldset>
-          <div className="grid gap-3 sm:grid-cols-2">
-            <Field id="test-font_size" label={t("editor.fontSize")}>
-              <Select {...form.bind("font_size")} className="h-11">
-                {FONT_SIZES.map((size) => (
-                  <option key={size} value={size}>
-                    {t(`editor.fontSizes.${size}`)}
-                  </option>
-                ))}
-              </Select>
-            </Field>
-            <Field id="test-columns" label={t("editor.columns")}>
-              <Select {...form.bind("columns")} className="h-11">
-                <option value="1">{t("editor.oneColumn")}</option>
-                <option value="2">{t("editor.twoColumns")}</option>
-              </Select>
-            </Field>
-          </div>
-          <label className="flex cursor-pointer items-center gap-2 text-sm text-ink">
-            <input
-              type="checkbox"
-              checked={form.values.name_line === "yes"}
-              onChange={(event) => form.setValue("name_line", event.target.checked ? "yes" : "no")}
-              className="size-4"
-            />
-            {t("editor.nameLine")}
-          </label>
-        </section>
+        <p className="flex flex-wrap items-center gap-x-2 gap-y-1 rounded-control bg-bg p-3 text-sm text-ink-soft">
+          <Palette aria-hidden="true" className="size-4 text-navy" />
+          {t("editor.designNote")}
+          <Link href="/teacher/paper-design" className="font-semibold text-navy hover:underline">
+            {t("editor.designLink")}
+          </Link>
+        </p>
 
         <ErrorNote message={form.formError} />
-        <div className="sticky bottom-0 flex flex-wrap justify-end gap-2 border-t border-line bg-bg-tint py-3">
+        <div className="sticky bottom-[calc(4rem+env(safe-area-inset-bottom))] flex flex-wrap justify-end gap-2 border-t border-line bg-bg-tint py-3 lg:bottom-0">
           <Button type="button" variant="outline" size="sm" onClick={close}>
             {t("editor.back")}
           </Button>

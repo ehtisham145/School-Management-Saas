@@ -153,7 +153,12 @@ function UploadStep({
   const locale = useLocale();
   const describe = useTeacherError();
   const { workspace } = useWorkspace();
-  const classes = useLoad(listClasses, "test-classes");
+  // Classes belong to the school plan (ADR-0027), so the field shows only when on.
+  const showClasses = useWorkspace().workspace.features.classes;
+  const classes = useLoad(
+    (signal) => (showClasses ? listClasses(signal) : Promise.resolve([])),
+    `test-classes:${showClasses}`,
+  );
   const [source, setSource] = useState<SourceDocument | null>(initial?.source ?? null);
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
@@ -339,17 +344,19 @@ function UploadStep({
             </Select>
           </Field>
         </div>
-        <Field id="test-classroom" label={t("details.classroom")}>
-          <Select {...form.bind("classroom")} className="h-11">
-            <option value="">{t("details.noClass")}</option>
-            {classes.state.name === "ready" &&
-              classes.state.data.map((classroom) => (
-                <option key={classroom.id} value={classroom.id}>
-                  {classroom.name}
-                </option>
-              ))}
-          </Select>
-        </Field>
+        {showClasses && (
+          <Field id="test-classroom" label={t("details.classroom")}>
+            <Select {...form.bind("classroom")} className="h-11">
+              <option value="">{t("details.noClass")}</option>
+              {classes.state.name === "ready" &&
+                classes.state.data.map((classroom) => (
+                  <option key={classroom.id} value={classroom.id}>
+                    {classroom.name}
+                  </option>
+                ))}
+            </Select>
+          </Field>
+        )}
         <div className="grid gap-3 sm:grid-cols-2">
           <Field
             id="test-page_from"
@@ -763,7 +770,7 @@ function PatternStep({
           <p className="text-xs text-ink-soft">{t("upload.privacy")}</p>
         </section>
 
-        <div className="sticky bottom-0 z-10 flex flex-col gap-2 rounded-card border border-line bg-bg p-4 shadow-soft">
+        <div className="sticky bottom-[calc(4rem+env(safe-area-inset-bottom))] z-10 flex flex-col gap-2 rounded-card border border-line bg-bg p-4 shadow-soft lg:bottom-0">
           {tooMany && (
             <p role="alert" className="text-sm text-red-700">
               {t("pattern.tooMany", { max: options.limits.max_ai_questions })}

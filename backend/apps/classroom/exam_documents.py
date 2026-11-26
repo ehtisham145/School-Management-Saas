@@ -120,11 +120,13 @@ def _paper_question(question, number, labels, answers):
     return item
 
 
-def build_paper(exam, *, teacher_name, answers=False, watermark=False):
-    """Every line of the paper, or of its answer key, ready to lay out."""
+def build_paper(exam, *, teacher_name, answers=False, watermark=False, theme=None):
+    """Every line of the paper, or of its answer key, ready to lay out.
+
+    `theme` is the workspace's paper design; without it, the test's own is used."""
     language = exam.language if exam.language in LABELS else "en"
     labels = LABELS[language]
-    theme = {**exams.DEFAULT_THEME, **(exam.theme or {})}
+    theme = {**exams.DEFAULT_THEME, **(theme if theme is not None else exam.theme or {})}
     colors = exams.THEMES.get(theme["color"], exams.THEMES["navy"])
     questions = list(exam.questions.all())
     total = sum((question.marks for question in questions), Decimal("0"))

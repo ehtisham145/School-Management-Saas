@@ -664,14 +664,13 @@
           "name": "Teacher",
           "price": "SAR 49",
           "billing": "Billed monthly. Cancel anytime.",
-          "tagline": "Everything you need to run your own classes.",
+          "tagline": "Lesson plans, slides and tests in minutes.",
           "features": [
             "Lesson plans you can save and reuse",
             "AI lesson plans, 30 a month",
-            "Presentations, downloadable as PowerPoint",
-            "Up to 5 classes and 100 students",
-            "Attendance for your classes",
-            "Marks and a gradebook",
+            "PowerPoint presentations made with AI",
+            "AI tests from your PDFs, 20 a month",
+            "Word and PDF downloads",
             "Arabic and English"
           ]
         },
@@ -683,9 +682,7 @@
           "features": [
             "Everything in Teacher",
             "AI lesson plans, 100 a month",
-            "Unlimited classes and students",
-            "Report cards as PDF",
-            "Email messages to parents"
+            "AI tests, 60 a month"
           ]
         }
       },
@@ -1421,13 +1418,25 @@
       "label": "Teacher menu",
       "open": "Open menu",
       "close": "Close menu",
-      "overview": "Overview",
+      "overview": "Home",
       "classes": "Classes",
       "lessons": "Lesson plans",
       "messages": "Parent messages",
       "plan": "My plan",
       "logout": "Sign out",
-      "tests": "Tests"
+      "tests": "Virtual tests",
+      "presentations": "PowerPoint presentations",
+      "short": {
+        "overview": "Home",
+        "lessons": "Lessons",
+        "presentations": "PowerPoint",
+        "tests": "Tests",
+        "classes": "Classes",
+        "messages": "Messages",
+        "plan": "My plan",
+        "paperDesign": "Design"
+      },
+      "paperDesign": "Paper design"
     },
     "banner": {
       "trial": "Free trial: {days, plural, =0 {ends today} one {# day left} other {# days left}}",
@@ -1457,12 +1466,13 @@
       "rateLimited": "Too many attempts. Please try again later.",
       "generic": "Something went wrong. Please try again.",
       "ai_exam_quota_reached": "You have used all your AI tests. Choose a plan to get more.",
-      "regenerate_limit_reached": "You can't write any more new questions for this draft."
+      "regenerate_limit_reached": "You can't write any more new questions for this draft.",
+      "school_plan_only": "Classes and parent messages are part of the school plan."
     },
     "overview": {
       "title": "Welcome, {name}",
-      "subtitle": "Your teaching workspace.",
-      "setupTitle": "Tell us what you teach",
+      "subtitle": "What would you like to make today?",
+      "setupTitle": "First, tell us what you teach",
       "setupHint": "This takes a few seconds and helps fill in your lessons.",
       "subject": "Main subject",
       "subjectExample": "Science",
@@ -1470,17 +1480,58 @@
       "gradesExample": "Grades 4 to 6",
       "setupSubmit": "Save and continue",
       "usedOf": "{used} / {limit}",
-      "classes": "Classes",
-      "students": "Students",
-      "lessons": "Lesson plans",
+      "unlimited": "No limit",
+      "toolsTitle": "Make with AI",
+      "tools": {
+        "lesson": {
+          "title": "Make a lesson plan with AI",
+          "body": "Objectives, activities, assessment and homework, ready to edit.",
+          "action": "Start a lesson plan"
+        },
+        "presentation": {
+          "title": "Make a PowerPoint with AI",
+          "body": "Branded slides from your topic, downloaded in one go.",
+          "action": "Start a presentation"
+        },
+        "test": {
+          "title": "Make a Digital / Virtual Test with AI",
+          "body": "Questions from your PDF, with an answer key, ready to print.",
+          "action": "Start a test"
+        }
+      },
+      "recentLessons": "Recent lesson plans",
+      "recentTests": "Recent tests",
+      "noLessons": "None yet.",
+      "noTests": "None yet.",
+      "seeAll": "See all",
+      "loading": "Loading...",
+      "allowanceTitle": "Your AI allowance",
+      "aiLessons": "AI lesson plans",
+      "aiTests": "AI tests",
+      "presentations": "PowerPoint downloads",
+      "seePlan": "See my plan",
       "checklist": "Getting started",
       "steps": {
         "setup": "Tell us what you teach",
-        "class": "Create your first class",
-        "students": "Add your students",
-        "lesson": "Write a lesson plan",
-        "attendance": "Take attendance",
-        "presentation": "Download a presentation"
+        "lesson": "Make a lesson plan",
+        "presentation": "Download a PowerPoint",
+        "test": "Make a test"
+      },
+      "welcome": {
+        "title": "Welcome to Lesson Lab",
+        "body": "Make these with AI, in English or Arabic, and download them ready to use:",
+        "lesson": {
+          "title": "Lesson plans",
+          "body": "Objectives, activities and homework in a minute."
+        },
+        "presentation": {
+          "title": "PowerPoint",
+          "body": "Branded slides from your topic."
+        },
+        "test": {
+          "title": "Tests",
+          "body": "Questions from your PDF, with an answer key."
+        }
       }
     },
     "classes": {
@@ -1582,7 +1633,7 @@
       "openCalendar": "Open calendar"
     },
     "lessons": {
-      "title": "Lesson plans",
+      "title": "My lesson plans",
       "subtitle": "Plan your lessons and download them as PowerPoint or Word.",
       "new": "New lesson plan",
       "newTitle": "New lesson plan",
@@ -1630,10 +1681,33 @@
       "reviewHint": "Not saved yet. Read it, change anything you like, then save it.",
       "discard": "Discard",
       "saveDraft": "Save lesson plan",
-      "downloadWord": "Download Word"
+      "downloadWord": "Download Word",
+      "heroTitle": "Make a lesson plan with AI",
+      "heroHint": "Write the topic and the AI drafts the lesson. You check it, then download it as Word or PowerPoint.",
+      "more": "More for {title}",
+      "downloading": "Downloading..."
+    },
+    "presentations": {
+      "heroTitle": "Make a PowerPoint presentation with AI",
+      "heroHint": "Write the topic, check the lesson the AI writes, and your slides download at once.",
+      "startTitle": "New presentation",
+      "startHint": "Branded slides with a title page, your objectives, activities and homework.",
+      "left": "{left} of {limit} AI lessons left",
+      "exportsLeft": "{left} PowerPoint downloads left",
+      "start": "Make slides with AI",
+      "listTitle": "My presentations",
+      "search": "Search presentations",
+      "emptyTitle": "No presentations yet",
+      "emptyHint": "Make your first one with AI. It takes about a minute.",
+      "aiBadge": "AI",
+      "download": "Download PowerPoint",
+      "downloaded": "\"{title}\" is downloading as PowerPoint.",
+      "dialogTitle": "Make a PowerPoint presentation with AI",
+      "dialogHint": "Tell us the topic. You check the content before the slides are made.",
+      "dialogSubmit": "Write the slides"
     },
     "tests": {
-      "title": "Tests",
+      "title": "Make a Digital / Virtual Test with AI",
       "subtitle": "Make tests from a PDF with AI, or write them yourself. Print them with an answer key.",
       "ai": "Make a test with AI",
       "aiLeftShort": "{left} left",
@@ -1653,7 +1727,7 @@
       "copyLabel": "Copy {name}",
       "deleteTitle": "Delete {name}?",
       "deleteBody": "This test and its questions will be deleted. This can't be undone.",
-      "makeTitle": "Make a test with AI",
+      "makeTitle": "Make a Digital / Virtual Test with AI",
       "cancel": "Cancel",
       "next": "Next",
       "back": "Back",
@@ -1830,7 +1904,34 @@
         "discardTitle": "Leave without saving?",
         "discardBody": "Your changes to this test will be lost.",
         "keep": "Keep editing",
-        "discard": "Leave"
+        "discard": "Leave",
+        "more": "More for question {number}",
+        "menuMoveUp": "Move up",
+        "menuMoveDown": "Move down",
+        "menuDelete": "Delete question",
+        "rewriting": "Writing a new question...",
+        "designNote": "Every paper and answer key uses your paper design.",
+        "designLink": "Change the paper design"
+      }
+    },
+    "paperDesign": {
+      "title": "Paper design",
+      "subtitle": "Choose how your test papers and answer keys look. It applies to every download.",
+      "color": "Color",
+      "fontSize": "Text size",
+      "columns": "Layout",
+      "nameLine": "Add lines for the student's name and number",
+      "appliesTo": "Used on every test paper and answer key you download, as PDF or Word, including tests you made before.",
+      "save": "Save design",
+      "saving": "Saving...",
+      "saved": "Your paper design is saved.",
+      "preview": {
+        "label": "Preview",
+        "title": "Science test",
+        "name": "Name",
+        "number": "Number",
+        "section": "Multiple choice",
+        "question": "Which part of the plant makes food?"
       }
     },
     "messages": {
@@ -1872,7 +1973,11 @@
       "current": "Your current plan",
       "requested": "Requested",
       "pending": "We received your request for {plan}. Our team will contact you to complete payment.",
-      "payment": "After you choose a plan, our team contacts you to complete payment and activate it."
+      "payment": "After you choose a plan, our team contacts you to complete payment and activate it.",
+      "unlimited": "{used} · no limit",
+      "schoolTitle": "Need classes, students and parent messages?",
+      "schoolBody": "They come with Lesson Lab for schools, with attendance, marks and report cards.",
+      "schoolCta": "Ask about the school plan"
     },
     "profile": {
       "back": "Back to class",
@@ -1911,6 +2016,12 @@
       "averageMarker": "The orange line is the class average.",
       "emptyTitle": "Nothing recorded yet",
       "emptyHint": "Attendance and marks for this student will show here."
+    },
+    "schoolPlan": {
+      "title": "This is part of the school plan",
+      "body": "Classes, students, attendance, marks, report cards and parent messages come with Lesson Lab for schools. Your teacher plan keeps the AI tools: lesson plans, PowerPoint and tests.",
+      "cta": "Talk to us about the school plan",
+      "back": "Back to home"
     }
   }
 }

@@ -38,7 +38,7 @@ export function SchoolPicker({ memberships, locale, onSelected }: SchoolPickerPr
         school: result.school,
       });
       onSelected?.();
-      router.push("/dashboard");
+      router.push(result.school.kind === "individual" ? "/teacher" : "/dashboard");
     } catch (err) {
       setError(err instanceof ApiError && err.code === "not_found" ? "notFound" : "generic");
       setPendingId(null);

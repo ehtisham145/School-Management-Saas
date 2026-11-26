@@ -32,6 +32,7 @@ from apps.classroom.api.serializers import (
     ExamSectionsSerializer,
     ExamSerializer,
     ExamSourceUploadSerializer,
+    ExamThemeSerializer,
     LessonGenerateSerializer,
     LessonPlanFilterSerializer,
     LessonPlanSerializer,
@@ -51,7 +52,12 @@ from apps.classroom.api.serializers import (
 from apps.classroom.documents import render_report_card_pdf
 from apps.classroom.entitlements import get_workspace_access
 from apps.classroom.exam_documents import build_paper, render_paper_pdf
-from apps.classroom.exceptions import ProRequired, ServiceUnavailable, WorkspaceReadOnly
+from apps.classroom.exceptions import (
+    ProRequired,
+    SchoolPlanOnly,
+    ServiceUnavailable,
+    WorkspaceReadOnly,
+)
 from apps.core.policies import can
 from apps.integrations.pdf.renderer import PdfUnavailable
 from apps.tenancy.models import School
@@ -106,6 +112,16 @@ class IndividualTeacherWorkspace(BasePermission):
         return True
 
 
+class ClassesEnabled(BasePermission):
+    """Classes and what is built on them belong to the school plan (ADR-0027). Runs after
+    IndividualTeacherWorkspace, which sets workspace_access."""
+
+    def has_permission(self, request, view):
+        if not request.workspace_access.classes_enabled:
+            raise SchoolPlanOnly()
+        return True
+
+
 class WorkspaceMixin:
     permission_classes = [IndividualTeacherWorkspace]
     lookup_value_regex = r"\d+"
@@ -147,6 +163,7 @@ class WorkspaceView(WorkspaceMixin, APIView):
                 "profile": profile
                 and {"subject": profile.subject, "grade_levels": profile.grade_levels},
                 "pending_upgrade": pending and {"plan": pending.plan},
+                "features": {"classes": access.classes_enabled},
             }
         )
 
@@ -168,7 +185,11 @@ class UpgradeRequestView(WorkspaceMixin, APIView):
         return Response(UpgradeRequestSerializer(upgrade).data, status=201)
 
 
+CLASS_FEATURES = [IndividualTeacherWorkspace, ClassesEnabled]
+
+
 class ClassroomViewSet(WorkspaceMixin, viewsets.GenericViewSet):
+    permission_classes = CLASS_FEATURES
     serializer_class = ClassroomSerializer
 
     def get_queryset(self):
@@ -254,6 +275,7 @@ class ClassroomViewSet(WorkspaceMixin, viewsets.GenericViewSet):
 
 
 class StudentViewSet(WorkspaceMixin, viewsets.GenericViewSet):
+    permission_classes = CLASS_FEATURES
     serializer_class = StudentSerializer
 
     def _student(self, pk):
@@ -355,6 +377,7 @@ class LessonPlanViewSet(WorkspaceMixin, viewsets.GenericViewSet):
         deck = build_lesson_deck(
             {field: getattr(plan, field) for field in PLAN_SECTIONS},
             watermark=self.access.tier in ("trial", "expired"),
+            teacher_name=request.user.get_full_name(),
         )
         return self._file(plan, deck, PPTX_TYPE, "pptx")
 
@@ -370,6 +393,7 @@ class LessonPlanViewSet(WorkspaceMixin, viewsets.GenericViewSet):
                 **{field: getattr(plan, field) for field in PLAN_SECTIONS},
                 "classroom": plan.classroom.name if plan.classroom else "",
                 "date": plan.lesson_date.strftime("%d/%m/%Y") if plan.lesson_date else "",
+                "teacher": request.user.get_full_name(),
             },
             watermark=self.access.tier in ("trial", "expired"),
         )
@@ -384,6 +408,7 @@ class LessonPlanViewSet(WorkspaceMixin, viewsets.GenericViewSet):
 
 
 class AssessmentViewSet(WorkspaceMixin, viewsets.GenericViewSet):
+    permission_classes = CLASS_FEATURES
     serializer_class = AssessmentSerializer
 
     def _assessment(self, pk):
@@ -434,6 +459,7 @@ class ParentMessagePagination(PageNumberPagination):
 
 
 class ParentMessageViewSet(WorkspaceMixin, viewsets.GenericViewSet):
+    permission_classes = CLASS_FEATURES
     serializer_class = ParentMessageSerializer
     pagination_class = ParentMessagePagination
 
@@ -473,6 +499,18 @@ class ExamOptionsView(WorkspaceMixin, APIView):
                 },
             }
         )
+
+
+class PaperDesignView(WorkspaceMixin, APIView):
+    """The look of every test paper and answer key: color, text size, columns, name line."""
+
+    def get(self, request):
+        return Response(selectors.get_paper_design(self.school))
+
+    def put(self, request):
+        # Partial: a field left out keeps its saved value.
+        data = self.valid(ExamThemeSerializer, request.data, partial=True)
+        return Response(services.save_paper_design(self.school, data))
 
 
 class ExamSourceView(WorkspaceMixin, APIView):
@@ -605,6 +643,8 @@ class ExamViewSet(WorkspaceMixin, viewsets.GenericViewSet):
             teacher_name=request.user.get_full_name(),
             answers=query["answers"],
             watermark=self.access.tier in ("trial", "expired"),
+            # The Paper design page sets the look of every paper.
+            theme=selectors.get_paper_design(self.school),
         )
         if query["type"] == "docx":
             # Imported here so the rest of the API still runs if python-docx is missing.

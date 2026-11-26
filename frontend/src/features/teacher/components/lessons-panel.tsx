@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { Check, Plus, Sparkles } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { Check, FileText, Pencil, Plus, Presentation, Sparkles, Trash2 } from "lucide-react";
 import { cn } from "cn";
 import { useLocale, useTranslations } from "next-intl";
+import { ActionMenu } from "@/components/ui/action-menu";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { DateField } from "@/components/ui/date-field";
@@ -12,6 +13,7 @@ import { Field } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Modal } from "@/components/ui/modal";
 import { Select } from "@/components/ui/select";
+import { Spinner } from "@/components/ui/spinner";
 import { Textarea } from "@/components/ui/textarea";
 import {
   LoadFeedback,
@@ -52,7 +54,18 @@ import {
 const SECTIONS = ["objectives", "materials", "activities", "assessment", "homework"] as const;
 const SECTION_MAX = 5000;
 
-function LessonDialog({
+/** The teacher's classes, or none when classes belong to the school plan (ADR-0027). */
+function useClassChoices(key: string) {
+  const { workspace } = useWorkspace();
+  const enabled = workspace.features.classes;
+  const classes = useLoad(
+    (signal) => (enabled ? listClasses(signal) : Promise.resolve([])),
+    `${key}:${enabled}`,
+  );
+  return { enabled, classes };
+}
+
+export function LessonDialog({
   plan,
   draft,
   onClose,
@@ -62,12 +75,14 @@ function LessonDialog({
   /** An AI draft to review. Nothing is saved until the teacher saves it. */
   draft?: LessonDraft;
   onClose: () => void;
-  onSaved: () => void;
+  /** Gets the saved lesson plan, so the PowerPoint page can download it at once. */
+  onSaved: (plan: LessonPlan) => void;
 }) {
   const t = useTranslations("Teacher.lessons");
   const tCommon = useTranslations("Teacher.common");
   const describe = useTeacherError();
-  const classes = useLoad(listClasses, "lesson-classes");
+  const { enabled: showClasses, classes } = useClassChoices("lesson-classes");
+  const saved = useRef<LessonPlan | null>(null);
   const form = useValidatedForm({
     initial: {
       title: (plan ?? draft)?.title ?? "",
@@ -99,11 +114,14 @@ function LessonDialog({
         classroom: values.classroom ? Number(values.classroom) : null,
         lesson_date: dayDateToIso(values.lesson_date),
       };
-      if (plan) await updateLessonPlan(plan.id, body);
-      else await createLessonPlan({ ...body, source: draft ? "ai" : "manual" });
+      saved.current = plan
+        ? await updateLessonPlan(plan.id, body)
+        : await createLessonPlan({ ...body, source: draft ? "ai" : "manual" });
     },
     sanitizers: { lesson_date: maskDayDate },
-    onSuccess: onSaved,
+    onSuccess: () => {
+      if (saved.current) onSaved(saved.current);
+    },
     describeError: describe,
   });
 
@@ -126,17 +144,19 @@ function LessonDialog({
           <Input {...form.bind("title")} />
         </Field>
         <div className="grid gap-3 sm:grid-cols-2">
-          <Field id="lesson-classroom" label={t("classroom")}>
-            <Select {...form.bind("classroom")} className="h-11">
-              <option value="">{t("noClass")}</option>
-              {classes.state.name === "ready" &&
-                classes.state.data.map((classroom) => (
-                  <option key={classroom.id} value={classroom.id}>
-                    {classroom.name}
-                  </option>
-                ))}
-            </Select>
-          </Field>
+          {showClasses && (
+            <Field id="lesson-classroom" label={t("classroom")}>
+              <Select {...form.bind("classroom")} className="h-11">
+                <option value="">{t("noClass")}</option>
+                {classes.state.name === "ready" &&
+                  classes.state.data.map((classroom) => (
+                    <option key={classroom.id} value={classroom.id}>
+                      {classroom.name}
+                    </option>
+                  ))}
+              </Select>
+            </Field>
+          )}
           <Field id="lesson-lesson_date" label={t("date")} error={form.errorFor("lesson_date")}>
             <DateField
               {...form.bind("lesson_date")}
@@ -239,19 +259,26 @@ function AiProgress() {
   );
 }
 
-function useAiAllowance() {
+export function useAiAllowance() {
   const { workspace } = useWorkspace();
   const limit = workspace.limits.ai_lessons;
   const used = workspace.usage.ai_used;
   return { used, limit, left: Math.max(limit - used, 0), period: workspace.limits.ai_period };
 }
 
-function GenerateDialog({
+export function GenerateDialog({
   onClose,
   onDraft,
+  title,
+  hint,
+  submitLabel,
 }: {
   onClose: () => void;
   onDraft: (draft: LessonDraft) => void;
+  /** The PowerPoint page uses the same form with its own words. */
+  title?: string;
+  hint?: string;
+  submitLabel?: string;
 }) {
   const t = useTranslations("Teacher.lessons");
   const tCommon = useTranslations("Teacher.common");
@@ -259,7 +286,7 @@ function GenerateDialog({
   const describe = useTeacherError();
   const { workspace } = useWorkspace();
   const allowance = useAiAllowance();
-  const classes = useLoad(listClasses, "ai-classes");
+  const { enabled: showClasses, classes } = useClassChoices("ai-classes");
   const form = useValidatedForm({
     initial: {
       classroom: "",
@@ -285,8 +312,8 @@ function GenerateDialog({
     <Modal
       open
       onClose={onClose}
-      title={t("aiTitle")}
-      description={t("aiHint")}
+      title={title ?? t("aiTitle")}
+      description={hint ?? t("aiHint")}
       closeLabel={tCommon("close")}
     >
       {form.saving && <AiProgress />}
@@ -330,17 +357,19 @@ function GenerateDialog({
             </Select>
           </Field>
         </div>
-        <Field id="ai-classroom" label={t("classroom")}>
-          <Select {...form.bind("classroom")} className="h-11">
-            <option value="">{t("noClass")}</option>
-            {classes.state.name === "ready" &&
-              classes.state.data.map((classroom) => (
-                <option key={classroom.id} value={classroom.id}>
-                  {classroom.name}
-                </option>
-              ))}
-          </Select>
-        </Field>
+        {showClasses && (
+          <Field id="ai-classroom" label={t("classroom")}>
+            <Select {...form.bind("classroom")} className="h-11">
+              <option value="">{t("noClass")}</option>
+              {classes.state.name === "ready" &&
+                classes.state.data.map((classroom) => (
+                  <option key={classroom.id} value={classroom.id}>
+                    {classroom.name}
+                  </option>
+                ))}
+            </Select>
+          </Field>
+        )}
         <p className="text-xs text-ink-soft">{t("aiPrivacy")}</p>
         <ErrorNote message={form.formError} />
         <div className="flex justify-end gap-2 pt-1">
@@ -349,7 +378,7 @@ function GenerateDialog({
           </Button>
           <Button type="submit" size="sm" disabled={allowance.left === 0}>
             <Sparkles aria-hidden="true" className="size-4" />
-            {t("generate")}
+            {submitLabel ?? t("generate")}
           </Button>
         </div>
       </form>
@@ -406,8 +435,8 @@ export function LessonsPanel() {
   return (
     <>
       <PageHeader
-        title={t("title")}
-        subtitle={t("subtitle")}
+        title={t("heroTitle")}
+        subtitle={t("heroHint")}
         action={
           !readOnly && (
             <div className="flex flex-wrap gap-2">
@@ -432,6 +461,7 @@ export function LessonsPanel() {
         }
       />
 
+      <h2 className="text-lg text-navy-deep">{t("title")}</h2>
       <SearchBox
         label={t("search")}
         onSearch={(term) => {
@@ -451,8 +481,8 @@ export function LessonsPanel() {
           <ul className="flex flex-col gap-3">
             {state.data.results.map((plan) => (
               <li key={plan.id} className="rounded-card border border-line bg-bg p-4">
-                <div className="flex flex-wrap items-start justify-between gap-3">
-                  <div className="min-w-0">
+                <div className="flex items-start justify-between gap-3 sm:flex-wrap">
+                  <div className="min-w-0 flex-1">
                     <p className="flex flex-wrap items-center gap-2 text-[16px] font-semibold text-navy-deep">
                       {plan.title}
                       {plan.source === "ai" && <Badge tone="info">{t("aiBadge")}</Badge>}
@@ -466,8 +496,51 @@ export function LessonsPanel() {
                         .filter(Boolean)
                         .join(" · ")}
                     </p>
+                    {downloading?.startsWith(`${plan.id}:`) && (
+                      <p
+                        role="status"
+                        className="mt-2 flex items-center gap-2 text-sm text-ink-soft sm:hidden"
+                      >
+                        <Spinner />
+                        {t("downloading")}
+                      </p>
+                    )}
                   </div>
-                  <div className="flex flex-wrap gap-2">
+                  {/* Phones: one "⋯" menu in place of the buttons. */}
+                  <ActionMenu
+                    className="sm:hidden"
+                    label={t("more", { title: plan.title })}
+                    items={[
+                      {
+                        label: t("download"),
+                        icon: <Presentation aria-hidden="true" className="size-4" />,
+                        onSelect: () => download(plan, "pptx"),
+                        disabled: downloading !== null,
+                      },
+                      {
+                        label: t("downloadWord"),
+                        icon: <FileText aria-hidden="true" className="size-4" />,
+                        onSelect: () => download(plan, "docx"),
+                        disabled: downloading !== null,
+                      },
+                      ...(readOnly
+                        ? []
+                        : [
+                            {
+                              label: tCommon("edit"),
+                              icon: <Pencil aria-hidden="true" className="size-4" />,
+                              onSelect: () => setDialog(plan),
+                            },
+                            {
+                              label: tCommon("delete"),
+                              icon: <Trash2 aria-hidden="true" className="size-4" />,
+                              onSelect: () => setRemoving(plan),
+                              tone: "danger" as const,
+                            },
+                          ]),
+                    ]}
+                  />
+                  <div className="hidden flex-wrap gap-2 sm:flex">
                     <Button
                       variant="outline"
                       size="sm"

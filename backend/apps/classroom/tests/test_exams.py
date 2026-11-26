@@ -19,6 +19,7 @@ from apps.classroom.models import (
     ExamDraft,
     ExamPattern,
     ExamQuestion,
+    PaperDesign,
     SourceDocument,
 )
 from apps.classroom.services import clean_up_exam_drafts
@@ -1042,7 +1043,8 @@ def test_the_paper_says_when_pdf_is_unavailable(_to_pdf, teacher):
 
 def test_the_paper_can_be_downloaded_as_word(teacher):
     docx = pytest.importorskip("docx")
-    exam = _exam(teacher, theme={"columns": 2})
+    exam = _exam(teacher)
+    teacher.client.put(f"{BASE}/paper-design/", {"columns": 2}, format="json")
 
     response = teacher.client.get(f"{BASE}/exams/{exam.id}/download/", {"type": "docx"})
 
@@ -1171,3 +1173,79 @@ def test_marks_are_shown_without_trailing_zeros():
     assert exams.format_marks(Decimal("1.50")) == "1.5"
     assert exams.format_marks(Decimal("100.00")) == "100"
     assert exams.format_marks(Decimal("0.25")) == "0.25"
+
+
+# --- Paper design (one per workspace, on its own page)
+
+
+def test_a_new_workspace_starts_with_the_default_paper_design(teacher):
+    response = teacher.client.get(f"{BASE}/paper-design/")
+
+    assert response.status_code == 200
+    assert response.data == exams.DEFAULT_THEME
+
+
+def test_the_paper_design_is_saved_and_kept(teacher):
+    saved = teacher.client.put(
+        f"{BASE}/paper-design/",
+        {"color": "green", "font_size": "large", "columns": 2, "name_line": False},
+        format="json",
+    )
+
+    assert saved.status_code == 200
+    assert teacher.client.get(f"{BASE}/paper-design/").data == {
+        "color": "green",
+        "font_size": "large",
+        "columns": 2,
+        "name_line": False,
+    }
+    assert PaperDesign.objects.count() == 1
+
+
+@pytest.mark.parametrize(
+    "body",
+    [{"color": "pink"}, {"font_size": "huge"}, {"columns": 3}, {"name_line": "maybe"}],
+)
+def test_the_paper_design_is_checked(teacher, body):
+    response = teacher.client.put(f"{BASE}/paper-design/", body, format="json")
+
+    assert response.status_code == 400
+    assert not PaperDesign.objects.exists()
+
+
+def test_each_workspace_has_its_own_paper_design(trial, other):
+    other.client.put(f"{BASE}/paper-design/", {"color": "crimson"}, format="json")
+
+    assert trial.client.get(f"{BASE}/paper-design/").data["color"] == "navy"
+    assert other.client.get(f"{BASE}/paper-design/").data["color"] == "crimson"
+
+
+def test_an_ended_trial_cannot_change_the_paper_design(expired):
+    response = expired.client.put(f"{BASE}/paper-design/", {"color": "green"}, format="json")
+
+    assert response.status_code == 403
+    assert expired.client.get(f"{BASE}/paper-design/").status_code == 200
+
+
+def test_signed_out_visitors_cannot_see_the_paper_design(api_client):
+    assert api_client.get(f"{BASE}/paper-design/").status_code == 403
+
+
+@patch("apps.classroom.exam_documents.html_to_pdf", return_value=b"%PDF-1.7")
+def test_every_paper_uses_the_workspace_design(to_pdf, teacher):
+    exam = _exam(teacher, theme={"color": "navy"})
+    teacher.client.put(f"{BASE}/paper-design/", {"color": "crimson"}, format="json")
+
+    teacher.client.get(f"{BASE}/exams/{exam.id}/download/")
+
+    assert exams.THEMES["crimson"]["accent"] in to_pdf.call_args.args[0]
+
+
+def test_a_test_saved_without_a_design_takes_the_workspace_one(teacher):
+    teacher.client.put(f"{BASE}/paper-design/", {"color": "teal"}, format="json")
+
+    response = teacher.client.post(
+        f"{BASE}/exams/", {"title": "Quiz", "questions": [_question()]}, format="json"
+    )
+
+    assert response.data["theme"]["color"] == "teal"

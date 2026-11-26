@@ -46,7 +46,9 @@ function LoginSteps() {
       } else if (memberships.length === 1) {
         setSession(toActiveSession(memberships[0]));
         markFreshLogin();
-        router.push("/dashboard");
+        // A teacher's own workspace opens straight away. Going through /dashboard first
+        // cut the welcome short when it sent them on.
+        router.push(memberships[0].school.kind === "individual" ? "/teacher" : "/dashboard");
       } else {
         setStep({ name: "choose-school", memberships });
       }

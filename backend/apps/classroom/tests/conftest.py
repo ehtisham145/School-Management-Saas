@@ -46,6 +46,13 @@ class Workspace:
         )
 
 
+@pytest.fixture(autouse=True)
+def classes_on(settings):
+    """Classes are off for teachers (ADR-0027), but the code stays and is tested with them
+    on. test_teacher_app.py checks the switch itself."""
+    settings.TEACHER_CLASSES_ENABLED = True
+
+
 @pytest.fixture
 def trial(db):
     workspace = Workspace("Sara")
