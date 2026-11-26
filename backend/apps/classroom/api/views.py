@@ -8,18 +8,30 @@ from django.utils.text import slugify
 from rest_framework import viewsets
 from rest_framework.decorators import action
 from rest_framework.pagination import PageNumberPagination
+from rest_framework.parsers import FormParser, MultiPartParser
 from rest_framework.permissions import SAFE_METHODS, BasePermission
 from rest_framework.response import Response
 from rest_framework.throttling import UserRateThrottle
 from rest_framework.views import APIView
 
-from apps.classroom import selectors, services
+from apps.classroom import exams, selectors, services
 from apps.classroom.api.serializers import (
     AssessmentFilterSerializer,
     AssessmentSerializer,
     AttendanceQuerySerializer,
     AttendanceSaveSerializer,
     ClassroomSerializer,
+    ExamDetailSerializer,
+    ExamDraftCreateSerializer,
+    ExamDraftSerializer,
+    ExamFileQuerySerializer,
+    ExamFilterSerializer,
+    ExamPatternSerializer,
+    ExamQuestionsSerializer,
+    ExamRegenerateSerializer,
+    ExamSectionsSerializer,
+    ExamSerializer,
+    ExamSourceUploadSerializer,
     LessonGenerateSerializer,
     LessonPlanFilterSerializer,
     LessonPlanSerializer,
@@ -30,6 +42,7 @@ from apps.classroom.api.serializers import (
     ReportCardQuerySerializer,
     RosterRowSerializer,
     SetupSerializer,
+    SourceDocumentSerializer,
     StudentProfileSerializer,
     StudentsAddSerializer,
     StudentSerializer,
@@ -37,6 +50,7 @@ from apps.classroom.api.serializers import (
 )
 from apps.classroom.documents import render_report_card_pdf
 from apps.classroom.entitlements import get_workspace_access
+from apps.classroom.exam_documents import build_paper, render_paper_pdf
 from apps.classroom.exceptions import ProRequired, ServiceUnavailable, WorkspaceReadOnly
 from apps.core.policies import can
 from apps.integrations.pdf.renderer import PdfUnavailable
@@ -58,6 +72,14 @@ PLAN_SECTIONS = (
 
 class LessonAiThrottle(UserRateThrottle):
     scope = "lesson_ai"
+
+
+class ExamAiThrottle(UserRateThrottle):
+    scope = "exam_ai"
+
+
+class ExamUploadThrottle(UserRateThrottle):
+    scope = "exam_upload"
 
 
 class IndividualTeacherWorkspace(BasePermission):
@@ -426,3 +448,179 @@ class ParentMessageViewSet(WorkspaceMixin, viewsets.GenericViewSet):
         classroom = data.pop("classroom")
         message = services.send_parent_message(self.school, self.access, classroom, **data)
         return Response(self.get_serializer(message).data, status=201)
+
+
+# --- Tests made from a PDF
+
+
+class ExamOptionsView(WorkspaceMixin, APIView):
+    """What the test maker offers: ready patterns, paper colors and its limits."""
+
+    def get(self, request):
+        return Response(
+            {
+                "presets": exams.PRESETS,
+                "themes": [{"key": key, **colors} for key, colors in exams.THEMES.items()],
+                "font_sizes": list(exams.FONT_SIZES),
+                "limits": {
+                    "max_pdf_mb": exams.MAX_PDF_BYTES // (1024 * 1024),
+                    "max_pdf_pages": exams.MAX_PDF_PAGES,
+                    "max_sections": exams.MAX_SECTIONS,
+                    "max_section_questions": exams.MAX_SECTION_QUESTIONS,
+                    "max_ai_questions": exams.MAX_AI_QUESTIONS,
+                    "max_exam_questions": exams.MAX_EXAM_QUESTIONS,
+                    "max_regenerations": exams.MAX_REGENERATIONS,
+                },
+            }
+        )
+
+
+class ExamSourceView(WorkspaceMixin, APIView):
+    """Takes a PDF and keeps only its text. Says which pages have text to choose from."""
+
+    parser_classes = [MultiPartParser, FormParser]
+    throttle_classes = [ExamUploadThrottle]
+
+    def post(self, request):
+        data = self.valid(ExamSourceUploadSerializer, request.data)
+        document = services.save_exam_source(self.school, upload=data["file"])
+        return Response(SourceDocumentSerializer(document).data, status=201)
+
+
+def _without(data, *keys):
+    return {key: value for key, value in data.items() if key not in keys}
+
+
+class ExamPatternViewSet(WorkspaceMixin, viewsets.GenericViewSet):
+    serializer_class = ExamPatternSerializer
+
+    def _pattern(self, pk):
+        return selectors.get_exam_pattern(self.school, pk)
+
+    def list(self, request):
+        patterns = selectors.list_exam_patterns(self.school)
+        return Response(self.get_serializer(patterns, many=True).data)
+
+    def create(self, request):
+        data = self.valid(ExamPatternSerializer, request.data)
+        pattern = services.create_exam_pattern(self.school, **data)
+        return Response(self.get_serializer(pattern).data, status=201)
+
+    def partial_update(self, request, pk=None):
+        pattern = self._pattern(pk)
+        data = self.valid(ExamPatternSerializer, _without(request.data, "sections"), partial=True)
+        if "sections" in request.data:
+            data.update(self.valid(ExamSectionsSerializer, {"sections": request.data["sections"]}))
+        pattern = services.update_exam_pattern(self.school, pattern, **data)
+        return Response(self.get_serializer(pattern).data)
+
+    def destroy(self, request, pk=None):
+        services.delete_record(self._pattern(pk))
+        return Response(status=204)
+
+
+class ExamDraftViewSet(WorkspaceMixin, viewsets.GenericViewSet):
+    """AI drafts. One is written in the background; the app asks for it until it's ready."""
+
+    serializer_class = ExamDraftSerializer
+
+    def get_throttles(self):
+        if self.action == "create":
+            return [ExamAiThrottle()]
+        return super().get_throttles()
+
+    def create(self, request):
+        data = self.valid(ExamDraftCreateSerializer, request.data)
+        draft = services.start_exam_draft(
+            self.school, self.access, document=data.pop("source"), **data
+        )
+        # Without a task queue (a laptop), the draft is already written by now.
+        draft.refresh_from_db()
+        return Response(self.get_serializer(draft).data, status=202)
+
+    def retrieve(self, request, pk=None):
+        return Response(self.get_serializer(selectors.get_exam_draft(self.school, pk)).data)
+
+    @action(detail=True, methods=["post"], throttle_classes=[ExamAiThrottle])
+    def regenerate(self, request, pk=None):
+        draft = selectors.get_exam_draft(self.school, pk)
+        data = self.valid(ExamRegenerateSerializer, request.data)
+        return Response(services.regenerate_exam_question(self.school, draft, **data))
+
+
+class ExamPagination(PageNumberPagination):
+    page_size = 20
+
+
+class ExamViewSet(WorkspaceMixin, viewsets.GenericViewSet):
+    serializer_class = ExamSerializer
+    pagination_class = ExamPagination
+
+    def _exam(self, pk):
+        return selectors.get_exam(self.school, pk)
+
+    def _detail(self, pk):
+        return ExamDetailSerializer(self._exam(pk), context=self.get_serializer_context()).data
+
+    def list(self, request):
+        filters = self.valid(ExamFilterSerializer, request.query_params)
+        page = self.paginate_queryset(selectors.list_exams(self.school, **filters))
+        return self.get_paginated_response(self.get_serializer(page, many=True).data)
+
+    def create(self, request):
+        data = self.valid(ExamDetailSerializer, request.data)
+        exam = services.create_exam(self.school, **data)
+        return Response(self._detail(exam.pk), status=201)
+
+    def retrieve(self, request, pk=None):
+        return Response(self._detail(pk))
+
+    def partial_update(self, request, pk=None):
+        exam = self._exam(pk)
+        fields = _without(request.data, "questions", "draft")
+        data = self.valid(ExamSerializer, fields, partial=True)
+        if "questions" in request.data:
+            data.update(
+                self.valid(ExamQuestionsSerializer, {"questions": request.data["questions"]})
+            )
+        services.update_exam(self.school, exam, **data)
+        return Response(self._detail(exam.pk))
+
+    def destroy(self, request, pk=None):
+        services.delete_record(self._exam(pk))
+        return Response(status=204)
+
+    @action(detail=True, methods=["post"])
+    def duplicate(self, request, pk=None):
+        copy = services.duplicate_exam(self.school, self._exam(pk))
+        return Response(self._detail(copy.pk), status=201)
+
+    @action(detail=True, methods=["get"])
+    def download(self, request, pk=None):
+        """The paper, or its answer key, as PDF or Word. Not counted against any limit."""
+        query = self.valid(ExamFileQuerySerializer, request.query_params)
+        exam = self._exam(pk)
+        paper = build_paper(
+            exam,
+            teacher_name=request.user.get_full_name(),
+            answers=query["answers"],
+            watermark=self.access.tier in ("trial", "expired"),
+        )
+        if query["type"] == "docx":
+            # Imported here so the rest of the API still runs if python-docx is missing.
+            from apps.integrations.word.exam_document import build_exam_document
+
+            content, content_type = build_exam_document(paper), DOCX_TYPE
+        else:
+            try:
+                content = render_paper_pdf(paper)
+            except PdfUnavailable as error:
+                raise ServiceUnavailable() from error
+            content_type = "application/pdf"
+
+        name = slugify(exam.title) or f"test-{exam.id}"
+        if query["answers"]:
+            name += "-answers"
+        response = HttpResponse(content, content_type=content_type)
+        response["Content-Disposition"] = f'attachment; filename="{name}.{query["type"]}"'
+        return response

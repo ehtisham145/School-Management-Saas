@@ -129,10 +129,11 @@ services:
     cpus: 1.0
     pids_limit: 100
 
-  # Reads the "emails" queue, so it also needs the internet to reach the SMTP server.
+  # Reads the "emails" and "ai" queues, so it also needs the internet to reach the SMTP
+  # server and the AI provider.
   lessonlab-worker:
     <<: *backend
-    command: ["celery", "-A", "config", "worker", "-Q", "emails,celery", "--loglevel", "INFO", "--concurrency", "2"]
+    command: ["celery", "-A", "config", "worker", "-Q", "emails,ai,celery", "--loglevel", "INFO", "--concurrency", "2"]
     networks: [egress, data]
     healthcheck:
       test: ["CMD-SHELL", "celery -A config inspect ping --destination celery@$$HOSTNAME --timeout 10"]

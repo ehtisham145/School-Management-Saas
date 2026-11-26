@@ -19,7 +19,9 @@ class Limits:
     lesson_plans: int | None
     presentation_exports: int | None
     ai_lessons: int
+    ai_exams: int
     # "trial": counted over the whole trial. "month": counted again each calendar month.
+    # Both AI lesson plans and AI tests follow it.
     ai_period: str
     pro_features: bool
 
@@ -30,6 +32,7 @@ TRIAL_LIMITS = Limits(
     lesson_plans=20,
     presentation_exports=10,
     ai_lessons=10,
+    ai_exams=5,
     ai_period="trial",
     pro_features=False,
 )
@@ -39,6 +42,7 @@ TEACHER_LIMITS = Limits(
     lesson_plans=None,
     presentation_exports=None,
     ai_lessons=30,
+    ai_exams=20,
     ai_period="month",
     pro_features=False,
 )
@@ -48,6 +52,7 @@ TEACHER_PRO_LIMITS = Limits(
     lesson_plans=None,
     presentation_exports=None,
     ai_lessons=100,
+    ai_exams=60,
     ai_period="month",
     pro_features=True,
 )
@@ -67,7 +72,7 @@ class WorkspaceAccess:
 
     @property
     def ai_since(self):
-        """From when AI lesson plans are counted. None counts every one ever made."""
+        """From when AI lesson plans and tests are counted. None counts every one ever made."""
         if self.limits.ai_period == "month":
             return timezone.localdate().replace(day=1)
         return None

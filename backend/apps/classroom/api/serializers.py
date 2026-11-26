@@ -3,12 +3,17 @@ from decimal import Decimal
 from django.utils import timezone
 from rest_framework import serializers
 
+from apps.classroom import exams
 from apps.classroom.models import (
     Assessment,
     AttendanceRecord,
     Classroom,
+    Exam,
+    ExamDraft,
+    ExamPattern,
     LessonPlan,
     ParentMessage,
+    SourceDocument,
     Student,
     UpgradeRequest,
 )
@@ -333,3 +338,279 @@ class UpgradeRequestSerializer(serializers.ModelSerializer):
 
 class ReportCardQuerySerializer(serializers.Serializer):
     language = serializers.ChoiceField(choices=["en", "ar"], required=False, default="en")
+
+
+# --- Tests made from a PDF
+
+
+class WorkspaceSourceField(serializers.PrimaryKeyRelatedField):
+    """Only PDFs the teacher uploaded."""
+
+    def get_queryset(self):
+        return SourceDocument.objects.filter(school=self.context["school"])
+
+
+class WorkspaceDraftField(serializers.PrimaryKeyRelatedField):
+    """Only the teacher's own drafts that are ready and under a day old."""
+
+    def get_queryset(self):
+        return ExamDraft.objects.filter(
+            school=self.context["school"],
+            status=ExamDraft.Status.READY,
+            created_at__gte=timezone.now() - exams.DRAFT_LIFETIME,
+        )
+
+
+def _marks_field(**kwargs):
+    return serializers.DecimalField(
+        max_digits=5,
+        decimal_places=2,
+        min_value=exams.MIN_MARKS,
+        max_value=exams.MAX_MARKS,
+        **kwargs,
+    )
+
+
+class ExamSourceUploadSerializer(serializers.Serializer):
+    file = serializers.FileField(allow_empty_file=False)
+
+
+class SourceDocumentSerializer(serializers.ModelSerializer):
+    text_pages = serializers.SerializerMethodField()
+    preview = serializers.SerializerMethodField()
+
+    class Meta:
+        model = SourceDocument
+        fields = ["id", "filename", "page_count", "text_pages", "preview"]
+
+    def get_text_pages(self, document) -> list[int]:
+        return [number for number, text in enumerate(document.pages, start=1) if text.strip()]
+
+    def get_preview(self, document) -> str:
+        return next((text for text in document.pages if text.strip()), "")[:400]
+
+
+class ExamSectionSerializer(serializers.Serializer):
+    kind = serializers.ChoiceField(choices=exams.KINDS)
+    count = serializers.IntegerField(min_value=1, max_value=exams.MAX_SECTION_QUESTIONS)
+    marks = _marks_field()
+    difficulty = serializers.ChoiceField(choices=exams.DIFFICULTIES, default="medium")
+
+
+def _sections_field():
+    return ExamSectionSerializer(many=True, min_length=1, max_length=exams.MAX_SECTIONS)
+
+
+def _check_sections(sections):
+    if exams.total_questions(sections) > exams.MAX_AI_QUESTIONS:
+        raise serializers.ValidationError(
+            f"An AI test can have up to {exams.MAX_AI_QUESTIONS} questions."
+        )
+    return sections
+
+
+class ExamPatternSerializer(serializers.ModelSerializer):
+    sections = _sections_field()
+
+    class Meta:
+        model = ExamPattern
+        fields = ["id", "name", "sections", "updated_at"]
+        read_only_fields = ["updated_at"]
+        # The service gives the friendly message for a name that is already used.
+        validators = []
+
+    def validate_name(self, value):
+        value = _tidy(value)
+        if not value:
+            raise serializers.ValidationError("This field may not be blank.")
+        return value
+
+    def validate_sections(self, value):
+        return _check_sections(value)
+
+
+class ExamDraftCreateSerializer(serializers.Serializer):
+    source = WorkspaceSourceField()
+    page_from = serializers.IntegerField(min_value=1, max_value=exams.MAX_PDF_PAGES)
+    page_to = serializers.IntegerField(min_value=1, max_value=exams.MAX_PDF_PAGES)
+    title = serializers.CharField(max_length=200)
+    subject = serializers.CharField(max_length=100, allow_blank=True, default="")
+    grade = serializers.CharField(max_length=50, allow_blank=True, default="")
+    language = serializers.ChoiceField(choices=Exam.Language.choices)
+    classroom = WorkspaceClassroomField(required=False, allow_null=True)
+    sections = _sections_field()
+
+    def validate_sections(self, value):
+        return _check_sections(value)
+
+    def validate(self, attrs):
+        if attrs["page_from"] > attrs["page_to"]:
+            raise serializers.ValidationError(
+                {"page_to": "The last page can't come before the first."}
+            )
+        return attrs
+
+
+class ExamDraftSerializer(serializers.ModelSerializer):
+    regenerations_left = serializers.SerializerMethodField()
+
+    class Meta:
+        model = ExamDraft
+        fields = [
+            "id",
+            "status",
+            "error",
+            "requested",
+            "questions",
+            "settings",
+            "regenerations_left",
+            "created_at",
+        ]
+
+    def get_regenerations_left(self, draft) -> int:
+        return max(exams.MAX_REGENERATIONS - draft.regenerations, 0)
+
+
+class ExamRegenerateSerializer(serializers.Serializer):
+    kind = serializers.ChoiceField(choices=exams.KINDS)
+    difficulty = serializers.ChoiceField(choices=exams.DIFFICULTIES, default="medium")
+    source_page = serializers.IntegerField(min_value=1, required=False, allow_null=True)
+    # The questions already in the test, so the new one is different.
+    avoid = serializers.ListField(
+        child=serializers.CharField(max_length=1000),
+        max_length=exams.MAX_EXAM_QUESTIONS,
+        default=list,
+    )
+
+
+class ExamQuestionSerializer(serializers.Serializer):
+    kind = serializers.ChoiceField(choices=exams.KINDS)
+    text = serializers.CharField(max_length=1000)
+    options = serializers.ListField(
+        child=serializers.CharField(max_length=300), max_length=6, default=list
+    )
+    correct_option = serializers.IntegerField(
+        min_value=0, max_value=5, allow_null=True, default=None
+    )
+    answer = serializers.CharField(max_length=1000, allow_blank=True, default="")
+    explanation = serializers.CharField(max_length=1000, allow_blank=True, default="")
+    marks = _marks_field()
+    difficulty = serializers.ChoiceField(choices=exams.DIFFICULTIES, default="medium")
+    source_page = serializers.IntegerField(
+        min_value=1, max_value=32767, allow_null=True, default=None
+    )
+
+    def validate(self, attrs):
+        kind = attrs["kind"]
+        if kind == exams.MCQ:
+            options = attrs["options"]
+            if not 2 <= len(options) <= 6:
+                raise serializers.ValidationError({"options": "Give 2 to 6 choices."})
+            if len({exams.normalize(option) for option in options}) != len(options):
+                raise serializers.ValidationError({"options": "Each choice must be different."})
+            correct = attrs["correct_option"]
+            if correct is None or correct >= len(options):
+                raise serializers.ValidationError({"correct_option": "Choose the right answer."})
+            attrs["answer"] = ""
+            return attrs
+
+        # Only a multiple-choice question has choices.
+        attrs["options"] = []
+        attrs["correct_option"] = None
+        if kind == exams.TRUE_FALSE and attrs["answer"] not in ("true", "false"):
+            raise serializers.ValidationError({"answer": 'Choose "true" or "false".'})
+        if kind == exams.FILL_BLANK:
+            text = exams.UNDERSCORES.sub(exams.BLANK, attrs["text"])
+            if text.count(exams.BLANK) != 1:
+                raise serializers.ValidationError(
+                    {"text": "Mark the missing part once, with _____."}
+                )
+            if not attrs["answer"].strip():
+                raise serializers.ValidationError({"answer": "Write the missing word."})
+            attrs["text"] = text
+        return attrs
+
+
+class ExamThemeSerializer(serializers.Serializer):
+    color = serializers.ChoiceField(choices=list(exams.THEMES), default="navy")
+    font_size = serializers.ChoiceField(choices=list(exams.FONT_SIZES), default="normal")
+    columns = serializers.ChoiceField(choices=[1, 2], default=1)
+    name_line = serializers.BooleanField(default=True)
+
+
+class ExamSerializer(serializers.ModelSerializer):
+    classroom = WorkspaceClassroomField(required=False, allow_null=True)
+    classroom_name = serializers.CharField(source="classroom.name", read_only=True, default=None)
+    duration_minutes = serializers.IntegerField(
+        min_value=1, max_value=600, required=False, allow_null=True
+    )
+    theme = ExamThemeSerializer(required=False)
+    question_count = serializers.IntegerField(read_only=True)
+    total_marks = serializers.DecimalField(max_digits=8, decimal_places=2, read_only=True)
+
+    class Meta:
+        model = Exam
+        fields = [
+            "id",
+            "classroom",
+            "classroom_name",
+            "title",
+            "subject",
+            "grade",
+            "language",
+            "exam_date",
+            "duration_minutes",
+            "instructions",
+            "theme",
+            "source",
+            "question_count",
+            "total_marks",
+            "updated_at",
+        ]
+        read_only_fields = ["source", "updated_at"]
+        extra_kwargs = {"instructions": {"max_length": 1000}}
+
+    def validate_title(self, value):
+        value = _tidy(value)
+        if not value:
+            raise serializers.ValidationError("This field may not be blank.")
+        return value
+
+
+def _questions_field():
+    return ExamQuestionSerializer(many=True, min_length=1, max_length=exams.MAX_EXAM_QUESTIONS)
+
+
+class ExamQuestionsSerializer(serializers.Serializer):
+    """The full list of questions, checked whole even in a partial update."""
+
+    questions = _questions_field()
+
+
+class ExamSectionsSerializer(serializers.Serializer):
+    """The full list of sections, checked whole even in a partial update."""
+
+    sections = _sections_field()
+
+    def validate_sections(self, value):
+        return _check_sections(value)
+
+
+class ExamDetailSerializer(ExamSerializer):
+    questions = _questions_field()
+    # The AI draft this test was made from, if any. It is removed once the test is saved.
+    draft = WorkspaceDraftField(required=False, allow_null=True, write_only=True)
+
+    class Meta(ExamSerializer.Meta):
+        fields = [*ExamSerializer.Meta.fields, "questions", "draft"]
+
+
+class ExamFilterSerializer(serializers.Serializer):
+    search = serializers.CharField(required=False, max_length=100)
+    classroom = serializers.IntegerField(required=False)
+
+
+class ExamFileQuerySerializer(serializers.Serializer):
+    # Not "format": DRF reads that one to choose how to reply.
+    type = serializers.ChoiceField(choices=["pdf", "docx"], default="pdf")
+    answers = serializers.BooleanField(default=False)

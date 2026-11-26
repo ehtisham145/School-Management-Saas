@@ -21,6 +21,7 @@ weasyprint>=70.0,<71.0  # quotation PDFs (needs Pango, see Dockerfile)
 hijridate>=2.6,<3.0  # Umm al-Qura dates on PDFs
 python-pptx>=1.0,<2.0  # lesson plan presentations
 python-docx>=1.1,<2.0  # lesson plans as Word files
+pypdf>=5.4,<7.0  # reads the text of PDFs teachers upload for AI tests
 
 # AI Chatbot
 openai>=1.0,<2.0

@@ -10,6 +10,7 @@ export type Workspace = {
     lesson_plans: number | null;
     presentation_exports: number | null;
     ai_lessons: number;
+    ai_exams: number;
     ai_period: "trial" | "month";
     pro_features: boolean;
   };
@@ -20,7 +21,9 @@ export type Workspace = {
     presentation_exports: number;
     assessments: number;
     attendance_records: number;
+    exams: number;
     ai_used: number;
+    ai_exams_used: number;
   };
   profile: { subject: string; grade_levels: string } | null;
   pending_upgrade: { plan: TeacherPlanCode } | null;
@@ -154,3 +157,111 @@ export type ParentMessage = {
 };
 
 export type Paginated<T> = { count: number; results: T[] };
+
+// --- Tests made from a PDF
+
+export const QUESTION_KINDS = ["mcq", "true_false", "fill_blank", "short_answer"] as const;
+export type QuestionKind = (typeof QUESTION_KINDS)[number];
+export const DIFFICULTIES = ["easy", "medium", "hard"] as const;
+export type Difficulty = (typeof DIFFICULTIES)[number];
+export type TestLanguage = "en" | "ar";
+
+export type ExamSection = {
+  kind: QuestionKind;
+  count: number;
+  marks: string;
+  difficulty: Difficulty;
+};
+export type ExamPattern = { id: number; name: string; sections: ExamSection[]; updated_at: string };
+export type ExamPreset = { key: "quick_quiz" | "mixed" | "exam"; sections: ExamSection[] };
+
+export const FONT_SIZES = ["small", "normal", "large"] as const;
+export type ExamTheme = {
+  color: string;
+  font_size: (typeof FONT_SIZES)[number];
+  columns: 1 | 2;
+  name_line: boolean;
+};
+export type ExamOptions = {
+  presets: ExamPreset[];
+  themes: { key: string; accent: string; soft: string }[];
+  limits: {
+    max_pdf_mb: number;
+    max_pdf_pages: number;
+    max_sections: number;
+    max_section_questions: number;
+    max_ai_questions: number;
+    max_exam_questions: number;
+    max_regenerations: number;
+  };
+};
+
+export type SourceDocument = {
+  id: number;
+  filename: string;
+  page_count: number;
+  /** Page numbers that have text. A page with none can't make questions. */
+  text_pages: number[];
+  preview: string;
+};
+
+export type ExamQuestion = {
+  kind: QuestionKind;
+  text: string;
+  options: string[];
+  correct_option: number | null;
+  answer: string;
+  explanation: string;
+  marks: string;
+  difficulty: Difficulty;
+  source_page: number | null;
+};
+
+export type ExamDraftInput = {
+  source: number;
+  page_from: number;
+  page_to: number;
+  title: string;
+  subject: string;
+  grade: string;
+  language: TestLanguage;
+  classroom: number | null;
+  sections: ExamSection[];
+};
+export type ExamDraft = {
+  id: number;
+  status: "pending" | "ready" | "failed";
+  error: string;
+  requested: number;
+  questions: ExamQuestion[];
+  settings: Omit<ExamDraftInput, "source">;
+  regenerations_left: number;
+  created_at: string;
+};
+export type RegeneratedQuestion = {
+  question: Omit<ExamQuestion, "marks">;
+  regenerations_left: number;
+};
+
+export type Exam = {
+  id: number;
+  classroom: number | null;
+  classroom_name: string | null;
+  title: string;
+  subject: string;
+  grade: string;
+  language: TestLanguage;
+  exam_date: string | null;
+  duration_minutes: number | null;
+  instructions: string;
+  theme: ExamTheme;
+  source: "manual" | "ai";
+  question_count: number;
+  total_marks: string;
+  updated_at: string;
+};
+export type ExamDetail = Exam & { questions: ExamQuestion[] };
+export type ExamInput = Omit<
+  Exam,
+  "id" | "classroom_name" | "source" | "question_count" | "total_marks" | "updated_at"
+> & { questions: ExamQuestion[]; draft?: number | null };

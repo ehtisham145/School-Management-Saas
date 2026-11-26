@@ -94,6 +94,9 @@ If week 3 slips, move **homework** to month 2 first, then **messaging** (announc
 - [x] Teacher Pro: AI lesson plans, PDF report cards and email messages to parents
 - [x] Individual teachers: AI lesson plans on every plan with a review step, student details (ID, father's name) added row by row, student profile with attendance and marks, DD/MM/YYYY date fields, new class cards ([ADR-0024](decisions/0024-ai-lesson-plans-on-every-teacher-plan.md))
 - [x] Individual teachers: lesson plans download as Word as well as PowerPoint ([ADR-0025](decisions/0025-lesson-plans-as-word-files.md))
+- [x] Individual teachers: AI tests from a PDF, phase 1. Upload, ready and saved patterns, AI draft checked against the PDF, review and edit, paper design, test and answer key as PDF or Word ([ADR-0026](decisions/0026-ai-tests-from-pdf.md))
+- [ ] AI tests, phase 2: online tests students take with a link and code, auto-marked into the gradebook
+- [ ] AI tests, phase 3: OCR for scanned PDFs, question bank, A/B versions of a test
 - [ ] Individual teachers: online payment, and deleting data after a trial ends (waiting on the client)
 - [ ] Plans in the Super Admin panel: mark a plan as for schools or for teachers, and allow a plan with no list price (Custom)
 - [ ] Translate backend validation and email text into Arabic

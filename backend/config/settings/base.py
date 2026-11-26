@@ -165,6 +165,8 @@ REST_FRAMEWORK = {
         "email_code": "50/min",
         "teacher_signup": "10/hour",
         "lesson_ai": "20/hour",
+        "exam_ai": "20/hour",
+        "exam_upload": "30/hour",
         "leads": "10/hour",
         "chatbot": "30/hour",
     },
@@ -209,5 +211,10 @@ CELERY_BEAT_SCHEDULE = {
     "send-trial-reminders": {
         "task": "apps.platform.tasks.send_trial_reminders_task",
         "schedule": crontab(hour=9, minute=0),
+    },
+    # AI test drafts and the PDF text behind them last a day.
+    "clean-up-exam-drafts": {
+        "task": "apps.classroom.tasks.clean_up_exam_drafts_task",
+        "schedule": crontab(minute=30),
     },
 }

@@ -10,23 +10,31 @@ from django.db.models import (
     Exists,
     IntegerField,
     OuterRef,
+    Prefetch,
     Q,
     Subquery,
+    Sum,
     Value,
 )
 from django.db.models.functions import Coalesce
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 
+from apps.classroom.exams import DRAFT_LIFETIME, PENDING_TIMEOUT
 from apps.classroom.models import (
     AIGeneration,
     Assessment,
     AttendanceRecord,
     Classroom,
+    Exam,
+    ExamDraft,
+    ExamPattern,
+    ExamQuestion,
     LessonPlan,
     Mark,
     ParentMessage,
     PresentationExport,
+    SourceDocument,
     Student,
     TeacherProfile,
     UpgradeRequest,
@@ -48,8 +56,8 @@ def _count_of(queryset):
 def get_workspace_usage(school, *, ai_since: date | None = None):
     """All the counts for the overview and the plan limits, in one query.
 
-    AI lesson plans are counted from ai_since (the start of the month on a paid plan),
-    or all of them during the trial."""
+    AI lesson plans and AI tests are counted from ai_since (the start of the month on a
+    paid plan), or all of them during the trial."""
     ai = AIGeneration.objects.all()
     if ai_since is not None:
         ai = ai.filter(created_at__date__gte=ai_since)
@@ -62,7 +70,9 @@ def get_workspace_usage(school, *, ai_since: date | None = None):
             presentation_exports=_count_of(PresentationExport.objects.all()),
             assessments=_count_of(Assessment.objects.all()),
             attendance_records=_count_of(AttendanceRecord.objects.all()),
-            ai_used=_count_of(ai),
+            exams=_count_of(Exam.objects.all()),
+            ai_used=_count_of(ai.filter(kind=AIGeneration.Kind.LESSON)),
+            ai_exams_used=_count_of(ai.filter(kind=AIGeneration.Kind.EXAM)),
         )
         .values(
             "classes",
@@ -71,7 +81,9 @@ def get_workspace_usage(school, *, ai_since: date | None = None):
             "presentation_exports",
             "assessments",
             "attendance_records",
+            "exams",
             "ai_used",
+            "ai_exams_used",
         )
         .get()
     )
@@ -294,3 +306,71 @@ def get_student_profile(school, student, *, period="month"):
         "marks": marks,
         "average_percent": _percent(earned, possible),
     }
+
+
+# --- Tests made from a PDF
+
+
+def get_source_document(school, document_id):
+    return get_object_or_404(SourceDocument.objects.filter(school=school), pk=document_id)
+
+
+def find_source_document(school, sha256):
+    return SourceDocument.objects.filter(school=school, sha256=sha256).first()
+
+
+def list_exam_patterns(school):
+    return ExamPattern.objects.filter(school=school)
+
+
+def get_exam_pattern(school, pattern_id):
+    return get_object_or_404(list_exam_patterns(school), pk=pattern_id)
+
+
+def count_exams_in_progress(school):
+    """AI tests still being written. They hold a place in the allowance until they finish."""
+    return ExamDraft.objects.filter(
+        school=school,
+        status=ExamDraft.Status.PENDING,
+        created_at__gte=timezone.now() - PENDING_TIMEOUT,
+    ).count()
+
+
+def get_exam_draft(school, draft_id):
+    """A draft from the last day. Older ones are gone, even before the clean-up runs."""
+    drafts = ExamDraft.objects.filter(
+        school=school, created_at__gte=timezone.now() - DRAFT_LIFETIME
+    ).select_related("document")
+    return get_object_or_404(drafts, pk=draft_id)
+
+
+def _exam_totals(exams):
+    return exams.annotate(
+        question_count=Count("questions"),
+        total_marks=Coalesce(
+            Sum("questions__marks"),
+            Value(0),
+            output_field=DecimalField(max_digits=8, decimal_places=2),
+        ),
+    )
+
+
+def list_exams(school, *, search="", classroom=None):
+    # Ordered here: a query with totals doesn't use the model's default order.
+    exams = _exam_totals(Exam.objects.filter(school=school).select_related("classroom")).order_by(
+        "-updated_at", "-id"
+    )
+    if classroom:
+        exams = exams.filter(classroom_id=classroom)
+    if search:
+        exams = exams.filter(Q(title__icontains=search) | Q(subject__icontains=search))
+    return exams
+
+
+def get_exam(school, exam_id):
+    """The test with its questions in order, in two queries."""
+    questions = ExamQuestion.objects.filter(school=school).order_by("position", "id")
+    return get_object_or_404(
+        list_exams(school).prefetch_related(Prefetch("questions", queryset=questions)),
+        pk=exam_id,
+    )

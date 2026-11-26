@@ -32,6 +32,8 @@ const KNOWN_ERRORS = [
   "pro_required",
   "workspace_read_only",
   "ai_quota_reached",
+  "ai_exam_quota_reached",
+  "regenerate_limit_reached",
   "service_unavailable",
 ] as const;
 
