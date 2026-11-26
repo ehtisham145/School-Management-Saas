@@ -48,6 +48,7 @@ WORKDIR /app
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
        zlib1g=1:1.3.dfsg+really1.3.1-1+deb13u1 \
+       libzstd1=1.5.7+dfsg-1+deb13u1 \
        libpango-1.0-0 libpangoft2-1.0-0 libharfbuzz-subset0 fonts-dejavu-core \
     && rm -rf /var/lib/apt/lists/*
 

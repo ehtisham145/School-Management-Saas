@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
 import {
   BookOpenText,
+  ClipboardCheck,
   CreditCard,
   LayoutDashboard,
   LogOut,
@@ -27,6 +28,7 @@ const NAV_ITEMS = [
   { href: "/teacher", labelKey: "overview", icon: LayoutDashboard },
   { href: "/teacher/classes", labelKey: "classes", icon: UsersRound },
   { href: "/teacher/lessons", labelKey: "lessons", icon: BookOpenText },
+  { href: "/teacher/tests", labelKey: "tests", icon: ClipboardCheck },
   { href: "/teacher/messages", labelKey: "messages", icon: Mail },
   { href: "/teacher/plan", labelKey: "plan", icon: CreditCard },
 ] as const;

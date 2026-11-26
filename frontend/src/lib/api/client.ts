@@ -74,6 +74,29 @@ export async function apiFetch<T>(path: string, options: ApiFetchOptions = {}): 
     signal: options.signal,
   });
 
+  return readJson<T>(response);
+}
+
+/** Sends a file, such as a PDF, as a form. The browser sets the multipart boundary. */
+export async function apiUpload<T>(path: string, body: FormData): Promise<T> {
+  const headers = new Headers({ Accept: "application/json" });
+  if (typeof document !== "undefined" && document.documentElement.lang) {
+    headers.set("Accept-Language", document.documentElement.lang);
+  }
+  const csrfToken = readCookie("csrftoken");
+  if (csrfToken) headers.set("X-CSRFToken", csrfToken);
+
+  const response = await fetch(`/api${path}`, {
+    method: "POST",
+    headers,
+    credentials: "same-origin",
+    body,
+  });
+
+  return readJson<T>(response);
+}
+
+async function readJson<T>(response: Response): Promise<T> {
   if (response.status === 204) {
     return undefined as T;
   }

@@ -83,7 +83,7 @@ class TenantModel(models.Model):
 - `/api/platform/` needs a signed-in user with `is_platform_admin`.
 - A new School Admin gets no password: the Super Admin enters their email, and the welcome email gives their username (`<school code>.admin`). The first sign-in is by email code. Staff without a usable password (School Admin, Principal, Teacher, or a platform admin) get `needs_password: true` from login and `/api/auth/me/`, and the website sends them to `/set-password` before anything else. `POST /api/auth/password/set/` sets it once, checked by Django's password validators (10+ characters, not common, not all digits, not like the username), and keeps the session. Parents and students are never asked.
 - An individual teacher signs up through `POST /api/auth/teacher-signup/request/` (emails a 6-digit code, same answer for a registered email, `teacher_signup` throttle, honeypot) and `POST /api/auth/teacher-signup/verify/`. A correct code creates the user, a private workspace (`School.kind = individual`), a `TEACHER` membership and a 7-day trial subscription in one transaction, then signs them in. Login and `/api/auth/me/` return `trial` with `ends_on` and `days_left` while it runs.
-- The individual teacher's app is `/teacher` on the website and `/api/classroom/` on the backend. Only the `TEACHER` of an individual workspace can use it. Plan rules live in `apps/classroom/entitlements.py`, and a workspace with no subscription covering today is read-only ([ADR-0022](decisions/0022-teacher-classroom-app.md)), [ADR-0024](decisions/0024-ai-lesson-plans-on-every-teacher-plan.md)). AI lesson plans come back as a draft the teacher edits before saving. `GET /api/classroom/students/{id}/profile/?period=month|90days|all` gives one student's attendance and marks. The Super Admin manages teachers through `/api/platform/teachers/`.
+- The individual teacher's app is `/teacher` on the website and `/api/classroom/` on the backend. Only the `TEACHER` of an individual workspace can use it. Plan rules live in `apps/classroom/entitlements.py`, and a workspace with no subscription covering today is read-only ([ADR-0022](decisions/0022-teacher-classroom-app.md)), [ADR-0024](decisions/0024-ai-lesson-plans-on-every-teacher-plan.md)). AI lesson plans come back as a draft the teacher edits before saving. `GET /api/classroom/students/{id}/profile/?period=month|90days|all` gives one student's attendance and marks. AI tests are made from a PDF through `/api/classroom/exam-sources/`, `/exam-patterns/`, `/exam-drafts/` and `/exams/`; the draft is written by a Celery task on the `ai` queue and every question is checked against the PDF's text before the teacher reviews it ([ADR-0026](decisions/0026-ai-tests-from-pdf.md)). The Super Admin manages teachers through `/api/platform/teachers/`.
 - A new school's email and its admin's email must both be unused. Neither can match any user account, including a Super Admin's, or any school's email, in any letter case, and the two can't be the same. A database constraint backs up school emails, and `accounts_user` email is already unique.
 - Demo request phone numbers must be Saudi mobiles and are saved as `+9665XXXXXXXX`. The frontend blocks other characters, and the backend checks again.
 - Every email goes through `apps/integrations/email/branded.py` (one shared header, footer and block helpers, tables and inline styles only) and is composed in `adapter.py`. Celery tasks on the `emails` queue send them, so sending never blocks a web request.
@@ -139,9 +139,14 @@ platform:       DemoRequest(status, admin_notes, converted_school), ContactMessa
                 Quotation(number, school | demo_request, recipient, language, vat_rate, totals, status), QuotationItem
                 (no school FK scoping — platform-owned)
 classroom:      TeacherProfile, Classroom unique(name, subject), Student(first/last/father name,
-                student_number unique per class, parent_email), LessonPlan, PresentationExport, AIGeneration,
-                AttendanceRecord unique(student, date), Assessment, Mark unique(assessment, student),
-                ParentMessage, UpgradeRequest one pending per workspace ([ADR-0022](decisions/0022-teacher-classroom-app.md))
+                student_number unique per class, parent_email), LessonPlan, PresentationExport,
+                AIGeneration(kind lesson | exam), AttendanceRecord unique(student, date), Assessment,
+                Mark unique(assessment, student), ParentMessage, UpgradeRequest one pending per workspace
+                ([ADR-0022](decisions/0022-teacher-classroom-app.md)),
+                SourceDocument(sha256 unique per workspace, page text only, kept 1 day), ExamPattern(name, sections),
+                ExamDraft(document, status, settings, questions, kept 1 day), Exam(classroom?, title, language,
+                theme, source) → ExamQuestion(position, kind, text, options, answer, marks, source_page)
+                ([ADR-0026](decisions/0026-ai-tests-from-pdf.md))
 audit:          AuditEvent(actor, action, target, school, ip_address, details) — platform actions, append-only ([ADR-0019](decisions/0019-platform-audit-log-and-quotation-pdfs.md)); django-auditlog for tenant data later
 ```
 

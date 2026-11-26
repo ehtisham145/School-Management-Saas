@@ -20,7 +20,7 @@ Django, Celery and Next.js run **natively on both machines**, so hot reload stay
 | | `REDIS_URL` set (servers) | `REDIS_URL` unset (both local machines) |
 |---|---|---|
 | Cache | Redis | `LocMemCache` |
-| Celery | Real broker; run a worker | `CELERY_TASK_ALWAYS_EAGER=True` (tasks run inline) |
+| Celery | Real broker; run a worker on the `emails`, `ai` and `celery` queues | `CELERY_TASK_ALWAYS_EAGER=True` (tasks run inline) |
 | Channels layer | `channels_redis` | `InMemoryChannelLayer` |
 | Sessions | Redis-backed cache + DB | DB |
 

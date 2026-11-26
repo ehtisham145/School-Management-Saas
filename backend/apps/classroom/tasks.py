@@ -1,7 +1,34 @@
+import logging
+
 from celery import shared_task
+from celery.exceptions import SoftTimeLimitExceeded
 
 from apps.classroom.models import ParentMessage, Student
 from apps.integrations.email.adapter import send_parent_message_email
+
+logger = logging.getLogger(__name__)
+
+
+@shared_task(queue="ai", soft_time_limit=240, time_limit=300)
+def generate_exam_draft_task(school_id, draft_id):
+    # Imported here: the services module imports this one.
+    from apps.classroom.services import fail_exam_draft, write_exam_draft
+
+    try:
+        write_exam_draft(school_id, draft_id)
+    except SoftTimeLimitExceeded:
+        fail_exam_draft(school_id, draft_id, "timed_out")
+    except Exception:
+        # The teacher sees a failed draft instead of waiting for one that never comes.
+        logger.exception("exam_draft_crashed", extra={"draft": draft_id})
+        fail_exam_draft(school_id, draft_id, "service_unavailable")
+
+
+@shared_task
+def clean_up_exam_drafts_task():
+    from apps.classroom.services import clean_up_exam_drafts
+
+    clean_up_exam_drafts()
 
 
 @shared_task(queue="emails")

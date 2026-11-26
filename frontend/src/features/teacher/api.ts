@@ -1,4 +1,4 @@
-import { apiDownload, apiFetch, saveFile } from "@/lib/api";
+import { apiDownload, apiFetch, apiUpload, saveFile } from "@/lib/api";
 import type {
   Assessment,
   AssessmentInput,
@@ -6,6 +6,15 @@ import type {
   AttendanceStatus,
   Classroom,
   ClassroomInput,
+  Difficulty,
+  Exam,
+  ExamDetail,
+  ExamDraft,
+  ExamDraftInput,
+  ExamInput,
+  ExamOptions,
+  ExamPattern,
+  ExamSection,
   Gradebook,
   LessonDraft,
   LessonGenerateInput,
@@ -15,6 +24,9 @@ import type {
   Paginated,
   ParentMessage,
   ProfilePeriod,
+  QuestionKind,
+  RegeneratedQuestion,
+  SourceDocument,
   Student,
   StudentInput,
   StudentProfile,
@@ -118,3 +130,57 @@ export const listMessages = (signal?: AbortSignal) =>
   apiFetch<Paginated<ParentMessage>>(`${BASE}/messages/`, { signal });
 export const sendMessage = (body: { classroom: number; subject: string; body: string }) =>
   apiFetch<ParentMessage>(`${BASE}/messages/`, { method: "POST", body });
+
+// --- Tests made from a PDF
+
+export const getExamOptions = (signal?: AbortSignal) =>
+  apiFetch<ExamOptions>(`${BASE}/exam-options/`, { signal });
+
+export function uploadExamSource(file: File) {
+  const body = new FormData();
+  body.append("file", file);
+  return apiUpload<SourceDocument>(`${BASE}/exam-sources/`, body);
+}
+
+export const listExamPatterns = (signal?: AbortSignal) =>
+  apiFetch<ExamPattern[]>(`${BASE}/exam-patterns/`, { signal });
+export const createExamPattern = (body: { name: string; sections: ExamSection[] }) =>
+  apiFetch<ExamPattern>(`${BASE}/exam-patterns/`, { method: "POST", body });
+export const deleteExamPattern = (id: number) =>
+  apiFetch<void>(`${BASE}/exam-patterns/${id}/`, { method: "DELETE" });
+
+export const createExamDraft = (body: ExamDraftInput) =>
+  apiFetch<ExamDraft>(`${BASE}/exam-drafts/`, { method: "POST", body });
+export const getExamDraft = (id: number, signal?: AbortSignal) =>
+  apiFetch<ExamDraft>(`${BASE}/exam-drafts/${id}/`, { signal });
+export const regenerateExamQuestion = (
+  id: number,
+  body: { kind: QuestionKind; difficulty: Difficulty; source_page: number | null; avoid: string[] },
+) =>
+  apiFetch<RegeneratedQuestion>(`${BASE}/exam-drafts/${id}/regenerate/`, {
+    method: "POST",
+    body,
+  });
+
+export const listExams = (search: string, page: number, signal?: AbortSignal) => {
+  const query = new URLSearchParams({ page: String(page) });
+  if (search) query.set("search", search);
+  return apiFetch<Paginated<Exam>>(`${BASE}/exams/?${query}`, { signal });
+};
+export const getExam = (id: number, signal?: AbortSignal) =>
+  apiFetch<ExamDetail>(`${BASE}/exams/${id}/`, { signal });
+export const createExam = (body: ExamInput) =>
+  apiFetch<ExamDetail>(`${BASE}/exams/`, { method: "POST", body });
+export const updateExam = (id: number, body: ExamInput) =>
+  apiFetch<ExamDetail>(`${BASE}/exams/${id}/`, { method: "PATCH", body });
+export const deleteExam = (id: number) =>
+  apiFetch<void>(`${BASE}/exams/${id}/`, { method: "DELETE" });
+export const duplicateExam = (id: number) =>
+  apiFetch<ExamDetail>(`${BASE}/exams/${id}/duplicate/`, { method: "POST" });
+
+export async function downloadExam(exam: Pick<Exam, "id">, type: "pdf" | "docx", answers: boolean) {
+  const query = new URLSearchParams({ type });
+  if (answers) query.set("answers", "true");
+  const { blob, filename } = await apiDownload(`${BASE}/exams/${exam.id}/download/?${query}`);
+  saveFile(blob, filename ?? `test.${type}`);
+}
