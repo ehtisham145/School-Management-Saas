@@ -3,6 +3,7 @@
 from dataclasses import dataclass
 from datetime import date
 
+from django.conf import settings
 from django.utils import timezone
 
 from apps.platform.selectors import get_current_subscription
@@ -69,6 +70,12 @@ class WorkspaceAccess:
     @property
     def is_trial(self):
         return self.tier == "trial"
+
+    @property
+    def classes_enabled(self):
+        """Classes, students and everything built on them: attendance, marks, report
+        cards and parent messages. Part of the school plan, not the teacher's (ADR-0027)."""
+        return settings.TEACHER_CLASSES_ENABLED
 
     @property
     def ai_since(self):

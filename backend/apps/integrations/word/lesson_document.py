@@ -61,7 +61,9 @@ TITLES = {
         "grade": "Grade",
         "classroom": "Class",
         "date": "Date",
+        "teacher": "Teacher",
         "watermark": "Made with Lesson Lab",
+        "brand": "Lesson Lab",
     },
     "ar": {
         "objectives": "الأهداف",
@@ -73,7 +75,9 @@ TITLES = {
         "grade": "الصف",
         "classroom": "الفصل",
         "date": "التاريخ",
+        "teacher": "المعلم",
         "watermark": "أُعدّ باستخدام Lesson Lab",
+        "brand": "Lesson Lab",
     },
 }
 
@@ -127,8 +131,10 @@ def _bottom_border(paragraph):
 
 
 def build_lesson_document(plan, *, watermark=False):
-    """`plan` holds the title, subject, grade, class name, date and the five text sections."""
-    sample = " ".join(str(value) for value in plan.values() if value)
+    """`plan` holds the title, subject, grade, class name, date, teacher and the five text
+    sections."""
+    # The teacher's name says nothing about the lesson's language, so it isn't counted.
+    sample = " ".join(str(value) for key, value in plan.items() if value and key != "teacher")
     language = "ar" if ARABIC_LETTER.search(sample) else "en"
     rtl = language == "ar"
     titles = TITLES[language]
@@ -141,7 +147,7 @@ def build_lesson_document(plan, *, watermark=False):
     title = _paragraph(document, plan["title"], size=24, color=NAVY, bold=True, rtl=rtl, after=4)
     details = [
         f"{titles[key]}: {plan[key]}"
-        for key in ("subject", "grade", "classroom", "date")
+        for key in ("subject", "grade", "classroom", "date", "teacher")
         if plan.get(key)
     ]
     if details:
@@ -158,10 +164,10 @@ def build_lesson_document(plan, *, watermark=False):
         for point in points:
             _paragraph(document, point, size=12, color=INK, rtl=rtl, style="List Bullet", after=3)
 
-    if watermark:
-        footer = document.sections[0].footer.paragraphs[0]
-        _set_rtl(footer, rtl)
-        _add_run(footer, titles["watermark"], size=9, color=MUTED, rtl=rtl)
+    # Every file carries the brand; the trial's says it was made with Lesson Lab.
+    footer = document.sections[0].footer.paragraphs[0]
+    _set_rtl(footer, rtl)
+    _add_run(footer, titles["watermark" if watermark else "brand"], size=9, color=MUTED, rtl=rtl)
 
     output = BytesIO()
     document.save(output)

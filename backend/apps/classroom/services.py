@@ -30,6 +30,7 @@ from apps.classroom.models import (
     ExamQuestion,
     LessonPlan,
     Mark,
+    PaperDesign,
     ParentMessage,
     PresentationExport,
     SourceDocument,
@@ -40,6 +41,7 @@ from apps.classroom.models import (
 from apps.classroom.selectors import (
     count_exams_in_progress,
     find_source_document,
+    get_paper_design,
     get_workspace_usage,
     list_parent_emails,
 )
@@ -582,6 +584,13 @@ def regenerate_exam_question(school, draft, *, kind, difficulty, source_page=Non
     }
 
 
+def save_paper_design(school, theme):
+    """The look of every paper the workspace downloads. Fields not given keep their value."""
+    stored = {**get_paper_design(school), **theme}
+    PaperDesign.objects.update_or_create(school=school, defaults={"theme": stored})
+    return stored
+
+
 def _stored_theme(theme):
     return {**exams.DEFAULT_THEME, **(theme or {})}
 
@@ -600,7 +609,8 @@ def create_exam(school, *, questions, draft=None, classroom=None, theme=None, **
     exam = Exam.objects.create(
         school=school,
         classroom=classroom,
-        theme=_stored_theme(theme),
+        # Without a theme of its own, a test takes the workspace's paper design.
+        theme=_stored_theme(theme or get_paper_design(school)),
         source=Exam.Source.AI if draft is not None else Exam.Source.MANUAL,
         **fields,
     )

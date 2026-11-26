@@ -235,6 +235,18 @@ class ExamPattern(TenantModel):
         return self.name
 
 
+class PaperDesign(TenantModel):
+    """How every test paper and answer key of the workspace looks: color, text size,
+    columns and the name line. One per workspace, set on the Paper design page."""
+
+    theme = models.JSONField(default=dict)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=["school"], name="one_paper_design_per_workspace"),
+        ]
+
+
 class ExamDraft(TenantModel):
     """Questions the AI wrote, waiting for the teacher to review. Deleted after a day."""
 

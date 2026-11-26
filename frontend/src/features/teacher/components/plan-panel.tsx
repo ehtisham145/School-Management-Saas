@@ -3,13 +3,15 @@
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { cn } from "cn";
-import { Button } from "@/components/ui/button";
+import { Link } from "@/i18n/navigation";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { PageHeader } from "@/features/platform/components/panel-ui";
 import { requestUpgrade } from "../api";
 import type { TeacherPlanCode } from "../schemas";
 import { ErrorNote, Panel, useFormatDate, useTeacherError, useWorkspace } from "./teacher-ui";
 
 const PLANS: TeacherPlanCode[] = ["teacher", "teacher_pro"];
+type UsageKey = "ai" | "aiTests" | "presentations" | "lessons" | "classes" | "students";
 
 export function PlanPanel() {
   const t = useTranslations("Teacher.plan");
@@ -19,7 +21,7 @@ export function PlanPanel() {
   const { workspace, reload } = useWorkspace();
   const [busy, setBusy] = useState<TeacherPlanCode | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const { access, usage, limits, pending_upgrade: pending } = workspace;
+  const { access, usage, limits, pending_upgrade: pending, features } = workspace;
 
   async function choose(plan: TeacherPlanCode) {
     setBusy(plan);
@@ -34,14 +36,19 @@ export function PlanPanel() {
     }
   }
 
-  const rows = [
-    { key: "classes", used: usage.classes, limit: limits.classes },
-    { key: "students", used: usage.students, limit: limits.students },
-    { key: "lessons", used: usage.lesson_plans, limit: limits.lesson_plans },
-    { key: "presentations", used: usage.presentation_exports, limit: limits.presentation_exports },
+  const rows: { key: UsageKey; used: number; limit: number | null }[] = [
     { key: "ai", used: usage.ai_used, limit: limits.ai_lessons },
     { key: "aiTests", used: usage.ai_exams_used, limit: limits.ai_exams },
-  ] as const;
+    { key: "presentations", used: usage.presentation_exports, limit: limits.presentation_exports },
+    { key: "lessons", used: usage.lesson_plans, limit: limits.lesson_plans },
+    // Classes belong to the school plan (ADR-0027); shown only where they are on.
+    ...(features.classes
+      ? [
+          { key: "classes" as const, used: usage.classes, limit: limits.classes },
+          { key: "students" as const, used: usage.students, limit: limits.students },
+        ]
+      : []),
+  ];
 
   return (
     <>
@@ -53,15 +60,30 @@ export function PlanPanel() {
             {t("endsOn", { date: formatDate(access.ends_on) })}
           </p>
         )}
-        <dl className="grid gap-3 sm:grid-cols-4">
-          {rows.map((row) => (
-            <div key={row.key} className="rounded-control bg-bg-tint p-3">
-              <dt className="text-xs text-ink-soft">{t(`usage.${row.key}`)}</dt>
-              <dd className="mt-1 text-lg font-bold text-navy-deep tabular-nums">
-                {row.limit === null ? row.used : `${row.used} / ${row.limit}`}
-              </dd>
-            </div>
-          ))}
+        <dl className="grid gap-3 sm:grid-cols-2">
+          {rows.map((row) => {
+            const share = row.limit ? Math.min(row.used / row.limit, 1) : 0;
+            return (
+              <div key={row.key} className="flex flex-col gap-2 rounded-control bg-bg-tint p-3">
+                <div className="flex items-baseline justify-between gap-2">
+                  <dt className="text-sm text-ink">{t(`usage.${row.key}`)}</dt>
+                  <dd className="font-bold text-navy-deep tabular-nums">
+                    {row.limit === null
+                      ? t("unlimited", { used: row.used })
+                      : `${row.used} / ${row.limit}`}
+                  </dd>
+                </div>
+                {row.limit !== null && (
+                  <div aria-hidden="true" className="h-1.5 overflow-hidden rounded-full bg-bg">
+                    <div
+                      className={cn("h-full rounded-full", share >= 1 ? "bg-red-600" : "bg-orange")}
+                      style={{ inlineSize: `${share * 100}%` }}
+                    />
+                  </div>
+                )}
+              </div>
+            );
+          })}
         </dl>
       </Panel>
 
@@ -117,6 +139,18 @@ export function PlanPanel() {
         })}
       </div>
       <p className="text-sm text-ink-soft">{t("payment")}</p>
+
+      {!features.classes && (
+        <section className="flex flex-col items-start gap-3 rounded-card border border-line bg-bg p-5 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h2 className="text-lg text-navy-deep">{t("schoolTitle")}</h2>
+            <p className="mt-1 text-sm text-ink-soft">{t("schoolBody")}</p>
+          </div>
+          <Link href="/contact" className={buttonVariants({ variant: "outline", size: "sm" })}>
+            {t("schoolCta")}
+          </Link>
+        </section>
+      )}
     </>
   );
 }

@@ -144,6 +144,12 @@ The server checkout is a detached HEAD at the deployed commit, so don't `git pul
 
 Migrations must work with the code that was running before them, because a rollback leaves the database as it is. Add columns and tables in one release and remove old ones in a later one.
 
+#### Database connections
+
+The backend runs under ASGI, where Django serves each request in its own thread. Persistent connections (`CONN_MAX_AGE` above 0) are then never reused and pile up. On 2026-11-26 they filled the database container's process limit after a week: Postgres logged `could not fork new process for connection`, its health check failed and a deploy stopped. So `CONN_MAX_AGE` stays `0` (one connection per request, closed at the end), as Django's docs advise for ASGI, and the database container's `pids_limit` is 200, which leaves room for Postgres's 100 connections and its background workers. Don't raise `CONN_MAX_AGE` again; when traffic needs it, use Django's built-in connection pool (`"pool": True` with `psycopg[pool]`) in a new ADR instead.
+
+If staging's database shows as `unhealthy` again, `docker compose logs --tail 50 lessonlab-db` says why. To recover, restart it, then the services that use it: `docker compose restart lessonlab-db` and `docker compose restart lessonlab-backend lessonlab-worker lessonlab-beat`.
+
 To take Lesson Lab off this server, follow [staging-teardown.md](staging-teardown.md).
 
 ## 2. Git workflow

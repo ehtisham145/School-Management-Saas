@@ -15,6 +15,7 @@ import type {
   ExamOptions,
   ExamPattern,
   ExamSection,
+  ExamTheme,
   Gradebook,
   LessonDraft,
   LessonGenerateInput,
@@ -184,3 +185,9 @@ export async function downloadExam(exam: Pick<Exam, "id">, type: "pdf" | "docx",
   const { blob, filename } = await apiDownload(`${BASE}/exams/${exam.id}/download/?${query}`);
   saveFile(blob, filename ?? `test.${type}`);
 }
+
+/** The look of every test paper and answer key the teacher downloads. */
+export const getPaperDesign = (signal?: AbortSignal) =>
+  apiFetch<ExamTheme>(`${BASE}/paper-design/`, { signal });
+export const savePaperDesign = (body: ExamTheme) =>
+  apiFetch<ExamTheme>(`${BASE}/paper-design/`, { method: "PUT", body });

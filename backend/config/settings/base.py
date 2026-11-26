@@ -75,8 +75,15 @@ TEMPLATES = [
 
 # ---------------------------------------------------------------- Database
 DATABASES = {"default": env.db("DATABASE_URL")}
-DATABASES["default"]["CONN_MAX_AGE"] = 60
+# ASGI runs each request in its own thread, so persistent connections pile up
+# until Postgres runs out of processes. Django's docs say to disable them under ASGI.
+DATABASES["default"]["CONN_MAX_AGE"] = 0
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+# Classes, students, attendance, marks, report cards and parent messages belong to the
+# school plan. The individual teacher's app shows only the AI tools (ADR-0027). Their
+# data is kept, so turning this back on brings it back as it was.
+TEACHER_CLASSES_ENABLED = False
 AUTH_USER_MODEL = "accounts.User"
 DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL", default="Lesson Lab <info@lessonlab.me>")
 EMAIL_HOST = env("EMAIL_HOST", default="")

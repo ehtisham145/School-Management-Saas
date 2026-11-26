@@ -34,6 +34,7 @@ const KNOWN_ERRORS = [
   "ai_quota_reached",
   "ai_exam_quota_reached",
   "regenerate_limit_reached",
+  "school_plan_only",
   "service_unavailable",
 ] as const;
 
@@ -177,5 +178,29 @@ export function FormButtons({ saving, onCancel }: { saving: boolean; onCancel: (
         {saving ? t("saving") : t("save")}
       </Button>
     </div>
+  );
+}
+
+/**
+ * Classes, students and parent messages belong to the school plan (ADR-0027). An old link
+ * to those pages shows this instead, with the way to the school plan.
+ */
+export function ClassesOnly({ children }: { children: ReactNode }) {
+  const t = useTranslations("Teacher.schoolPlan");
+  const { workspace } = useWorkspace();
+  if (workspace.features.classes) return children;
+  return (
+    <section className="flex flex-col items-start gap-3 rounded-card border border-line bg-bg p-6">
+      <h1 className="text-2xl text-navy-deep">{t("title")}</h1>
+      <p className="max-w-[60ch] text-sm text-ink-soft">{t("body")}</p>
+      <div className="flex flex-wrap gap-2">
+        <Link href="/contact" className={buttonVariants({ variant: "orange", size: "sm" })}>
+          {t("cta")}
+        </Link>
+        <Link href="/teacher" className={buttonVariants({ variant: "outline", size: "sm" })}>
+          {t("back")}
+        </Link>
+      </div>
+    </section>
   );
 }

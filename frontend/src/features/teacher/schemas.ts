@@ -27,6 +27,8 @@ export type Workspace = {
   };
   profile: { subject: string; grade_levels: string } | null;
   pending_upgrade: { plan: TeacherPlanCode } | null;
+  /** Classes, students, attendance, marks and parent messages: the school plan's (ADR-0027). */
+  features: { classes: boolean };
 };
 
 export type Classroom = {
@@ -263,5 +265,10 @@ export type Exam = {
 export type ExamDetail = Exam & { questions: ExamQuestion[] };
 export type ExamInput = Omit<
   Exam,
-  "id" | "classroom_name" | "source" | "question_count" | "total_marks" | "updated_at"
-> & { questions: ExamQuestion[]; draft?: number | null };
+  "id" | "classroom_name" | "source" | "question_count" | "total_marks" | "updated_at" | "theme"
+> & {
+  questions: ExamQuestion[];
+  draft?: number | null;
+  /** Left out, a test takes the workspace's paper design. */
+  theme?: ExamTheme;
+};

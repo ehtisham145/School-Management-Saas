@@ -10,6 +10,7 @@ from apps.classroom.api.views import (
     ExamSourceView,
     ExamViewSet,
     LessonPlanViewSet,
+    PaperDesignView,
     ParentMessageViewSet,
     SetupView,
     StudentViewSet,
@@ -33,5 +34,6 @@ urlpatterns = [
     path("upgrade-request/", UpgradeRequestView.as_view(), name="classroom-upgrade-request"),
     path("exam-options/", ExamOptionsView.as_view(), name="classroom-exam-options"),
     path("exam-sources/", ExamSourceView.as_view(), name="classroom-exam-sources"),
+    path("paper-design/", PaperDesignView.as_view(), name="classroom-paper-design"),
     *router.urls,
 ]

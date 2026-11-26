@@ -85,7 +85,9 @@ services:
       start_interval: 2s
     mem_limit: 768m
     cpus: 1.0
-    pids_limit: 100
+    # Postgres runs one process per connection (up to max_connections = 100) plus its
+    # background workers, so 100 left no room and the health check couldn't connect.
+    pids_limit: 200
 
   lessonlab-redis:
     <<: *hardening

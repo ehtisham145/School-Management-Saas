@@ -95,6 +95,7 @@ If week 3 slips, move **homework** to month 2 first, then **messaging** (announc
 - [x] Individual teachers: AI lesson plans on every plan with a review step, student details (ID, father's name) added row by row, student profile with attendance and marks, DD/MM/YYYY date fields, new class cards ([ADR-0024](decisions/0024-ai-lesson-plans-on-every-teacher-plan.md))
 - [x] Individual teachers: lesson plans download as Word as well as PowerPoint ([ADR-0025](decisions/0025-lesson-plans-as-word-files.md))
 - [x] Individual teachers: AI tests from a PDF, phase 1. Upload, ready and saved patterns, AI draft checked against the PDF, review and edit, paper design, test and answer key as PDF or Word ([ADR-0026](decisions/0026-ai-tests-from-pdf.md))
+- [x] Individual teachers: simpler app for phones. Menu of AI tools only (Home, Lesson plans, PowerPoint, Virtual tests, My plan) with a bottom bar on phones; classes and parent messages move to the school plan; branded slides and Word files ([ADR-0027](decisions/0027-teacher-app-ai-tools-only.md))
 - [ ] AI tests, phase 2: online tests students take with a link and code, auto-marked into the gradebook
 - [ ] AI tests, phase 3: OCR for scanned PDFs, question bank, A/B versions of a test
 - [ ] Individual teachers: online payment, and deleting data after a trial ends (waiting on the client)

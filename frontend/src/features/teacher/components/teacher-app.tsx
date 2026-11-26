@@ -5,10 +5,12 @@ import {
   BookOpenText,
   ClipboardCheck,
   CreditCard,
-  LayoutDashboard,
+  House,
   LogOut,
   Mail,
   Menu,
+  Palette,
+  Presentation,
   UsersRound,
   X,
 } from "lucide-react";
@@ -24,14 +26,62 @@ import { getWorkspace } from "../api";
 import type { Workspace } from "../schemas";
 import { UpgradeLink, WorkspaceProvider } from "./teacher-ui";
 
+// `classes` items show only when the workspace has classes; they belong to the school plan.
 const NAV_ITEMS = [
-  { href: "/teacher", labelKey: "overview", icon: LayoutDashboard },
-  { href: "/teacher/classes", labelKey: "classes", icon: UsersRound },
-  { href: "/teacher/lessons", labelKey: "lessons", icon: BookOpenText },
-  { href: "/teacher/tests", labelKey: "tests", icon: ClipboardCheck },
-  { href: "/teacher/messages", labelKey: "messages", icon: Mail },
-  { href: "/teacher/plan", labelKey: "plan", icon: CreditCard },
+  { href: "/teacher", labelKey: "overview", icon: House, classes: false },
+  { href: "/teacher/lessons", labelKey: "lessons", icon: BookOpenText, classes: false },
+  { href: "/teacher/presentations", labelKey: "presentations", icon: Presentation, classes: false },
+  { href: "/teacher/tests", labelKey: "tests", icon: ClipboardCheck, classes: false },
+  // In the side menu only: the phone's bottom bar keeps five items.
+  {
+    href: "/teacher/paper-design",
+    labelKey: "paperDesign",
+    icon: Palette,
+    classes: false,
+    phone: false,
+  },
+  { href: "/teacher/classes", labelKey: "classes", icon: UsersRound, classes: true },
+  { href: "/teacher/messages", labelKey: "messages", icon: Mail, classes: true },
+  { href: "/teacher/plan", labelKey: "plan", icon: CreditCard, classes: false },
 ] as const;
+
+function navItems(workspace: Workspace | null) {
+  return NAV_ITEMS.filter((item) => !item.classes || workspace?.features.classes);
+}
+
+/** On phones the menu sits at the bottom, in reach of a thumb. Five items at most. */
+function BottomBar({ items, pathname }: { items: ReturnType<typeof navItems>; pathname: string }) {
+  const t = useTranslations("Teacher.nav");
+  return (
+    <nav
+      aria-label={t("label")}
+      className="fixed inset-x-0 bottom-0 z-40 border-t border-line bg-bg pb-[env(safe-area-inset-bottom)] lg:hidden"
+    >
+      <ul className="flex">
+        {items
+          .filter((item) => !item.classes && !("phone" in item && item.phone === false))
+          .map(({ href, labelKey, icon: Icon }) => {
+            const current = isCurrent(pathname, href);
+            return (
+              <li key={href} className="min-w-0 flex-1">
+                <Link
+                  href={href}
+                  aria-current={current ? "page" : undefined}
+                  className={cn(
+                    "flex min-h-16 flex-col items-center justify-center gap-1 px-1 text-[11px] font-semibold",
+                    current ? "text-orange-text" : "text-ink-soft",
+                  )}
+                >
+                  <Icon aria-hidden="true" className="size-5 shrink-0" />
+                  <span className="w-full truncate text-center">{t(`short.${labelKey}`)}</span>
+                </Link>
+              </li>
+            );
+          })}
+      </ul>
+    </nav>
+  );
+}
 
 function isCurrent(pathname: string, href: string) {
   return href === "/teacher" ? pathname === href : pathname.startsWith(href);
@@ -93,6 +143,7 @@ function TeacherShell({ children }: { children: ReactNode }) {
   }, [attempt]);
 
   const value = useMemo(() => (workspace ? { workspace, reload } : null), [workspace, reload]);
+  const items = navItems(workspace);
 
   return (
     <div className="flex min-h-dvh flex-1 bg-bg-tint">
@@ -132,7 +183,7 @@ function TeacherShell({ children }: { children: ReactNode }) {
 
         <nav aria-label={t("label")} className="flex-1 overflow-y-auto px-3 py-2">
           <ul className="flex flex-col gap-1">
-            {NAV_ITEMS.map(({ href, labelKey, icon: Icon }) => {
+            {items.map(({ href, labelKey, icon: Icon }) => {
               const current = isCurrent(pathname, href);
               return (
                 <li key={href}>
@@ -198,7 +249,8 @@ function TeacherShell({ children }: { children: ReactNode }) {
           />
         )}
 
-        <main className="mx-auto flex w-full max-w-[1120px] flex-1 flex-col gap-5 p-4 sm:p-6">
+        {/* Room at the bottom on phones, so the bottom bar never covers the page. */}
+        <main className="mx-auto flex w-full max-w-[1120px] flex-1 flex-col gap-5 p-4 pb-24 sm:p-6 sm:pb-24 lg:pb-6">
           {value ? (
             <WorkspaceProvider value={value}>{children}</WorkspaceProvider>
           ) : !failed ? (
@@ -217,6 +269,7 @@ function TeacherShell({ children }: { children: ReactNode }) {
           )}
         </main>
       </div>
+      <BottomBar items={items} pathname={pathname} />
     </div>
   );
 }

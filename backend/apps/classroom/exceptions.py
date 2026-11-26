@@ -19,6 +19,12 @@ class ProRequired(APIException):
     default_detail = "This feature is part of Teacher Pro."
 
 
+class SchoolPlanOnly(APIException):
+    status_code = 403
+    default_code = "school_plan_only"
+    default_detail = "Classes and parent messages are part of the school plan."
+
+
 class AiQuotaReached(APIException):
     status_code = 403
     default_code = "ai_quota_reached"

@@ -20,7 +20,7 @@ from django.db.models.functions import Coalesce
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 
-from apps.classroom.exams import DRAFT_LIFETIME, PENDING_TIMEOUT
+from apps.classroom.exams import DEFAULT_THEME, DRAFT_LIFETIME, PENDING_TIMEOUT
 from apps.classroom.models import (
     AIGeneration,
     Assessment,
@@ -32,6 +32,7 @@ from apps.classroom.models import (
     ExamQuestion,
     LessonPlan,
     Mark,
+    PaperDesign,
     ParentMessage,
     PresentationExport,
     SourceDocument,
@@ -365,6 +366,12 @@ def list_exams(school, *, search="", classroom=None):
     if search:
         exams = exams.filter(Q(title__icontains=search) | Q(subject__icontains=search))
     return exams
+
+
+def get_paper_design(school):
+    """The workspace's paper design, with the defaults for anything not chosen yet."""
+    theme = PaperDesign.objects.filter(school=school).values_list("theme", flat=True).first() or {}
+    return {**DEFAULT_THEME, **theme}
 
 
 def get_exam(school, exam_id):
