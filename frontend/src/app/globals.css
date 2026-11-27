@@ -164,6 +164,13 @@ html[dir="rtl"] .marquee-track--reverse {
     scroll-behavior: smooth;
     scroll-padding-top: 88px;
   }
+  /* Nothing may make the page wider than the screen, or phones scroll it sideways and
+     the floating buttons slide half off screen. `clip`, not `hidden`, so sticky headers
+     keep working. */
+  html,
+  body {
+    overflow-x: clip;
+  }
   body {
     @apply bg-bg text-ink;
     font-family: var(--font-manrope), system-ui, sans-serif;
