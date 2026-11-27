@@ -114,7 +114,8 @@ export function PhotoHero({
         className="object-cover object-center"
       />
       <div className="page-wrap relative z-[1] pt-[clamp(40px,7vw,104px)] pb-12">
-        <h1 className="hero-on-photo max-w-[min(100%,680px)] text-[clamp(34px,4.5vw,58px)] text-on-dark">
+        {/* Smaller on phones, so the longest headline fits in a few lines. */}
+        <h1 className="hero-on-photo max-w-[min(100%,680px)] text-[28px] leading-tight text-on-dark sm:text-[clamp(34px,4.5vw,58px)] sm:leading-normal">
           {children}
         </h1>
       </div>

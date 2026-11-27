@@ -151,13 +151,13 @@ export function ChatbotWidget() {
         aria-label={open ? t("close") : t("open")}
         aria-expanded={open}
         onClick={() => setOpen((value) => !value)}
-        className="fixed end-4 bottom-[82px] z-40 grid size-[54px] place-items-center rounded-full bg-orange text-on-orange shadow-whatsapp transition-transform hover:scale-[1.07] sm:end-[22px] sm:bottom-[94px] sm:size-[58px]"
+        className="fixed end-4 bottom-[76px] z-40 grid size-12 place-items-center rounded-full bg-orange text-on-orange shadow-whatsapp transition-transform hover:scale-[1.07] sm:end-[22px] sm:bottom-[94px] sm:size-[58px]"
       >
         <MessageCircle aria-hidden="true" className="size-7" />
       </button>
 
       {open && (
-        <div className="fixed end-4 bottom-[142px] z-40 flex h-[min(560px,70dvh)] w-[min(380px,calc(100vw-2rem))] flex-col overflow-hidden rounded-2xl border border-line bg-bg shadow-soft sm:end-[22px] sm:bottom-[166px]">
+        <div className="fixed end-4 bottom-[136px] z-40 flex h-[min(560px,70dvh)] w-[min(380px,calc(100vw-2rem))] flex-col overflow-hidden rounded-2xl border border-line bg-bg shadow-soft sm:end-[22px] sm:bottom-[166px]">
           <div className="flex items-center justify-between gap-2 border-b border-line bg-navy px-4 py-3 text-on-dark">
             <div className="flex items-center gap-2.5">
               <span className="grid size-9 shrink-0 place-items-center rounded-full bg-orange text-on-orange">

@@ -28,8 +28,9 @@ export function SiteHeader() {
   return (
     <header className="sticky top-0 z-30 border-b border-line bg-bg">
       <div className="page-wrap relative flex h-16 items-center justify-between gap-2 sm:h-[76px] sm:gap-4">
-        <Link href="/" onClick={closeMenu} className="block shrink-0">
-          <Logo priority className="lg:h-9 xl:h-14" />
+        {/* On the narrowest phones the logo gives way, so the menu button always fits. */}
+        <Link href="/" onClick={closeMenu} className="block min-w-0 shrink">
+          <Logo priority className="h-8 max-w-full min-[380px]:h-[38px] sm:h-14 lg:h-9 xl:h-14" />
         </Link>
 
         <nav
@@ -76,7 +77,7 @@ export function SiteHeader() {
           </Link>
         </nav>
 
-        <div className="flex items-center gap-2">
+        <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
           <LanguageMenu />
           <Link
             href="/login"

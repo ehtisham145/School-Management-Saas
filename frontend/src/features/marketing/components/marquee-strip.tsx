@@ -70,7 +70,9 @@ export function MarqueeStrip({
     <section aria-label={eyebrow} className="overflow-hidden py-10 sm:py-14">
       <div
         className={cn(
-          "marquee-group relative -mx-[6vw] w-[112vw] -rotate-[1.4deg] shadow-[0_18px_40px_-10px_rgb(15_29_49_/_45%)]",
+          // Wider than the screen so the tilted ends never show a gap; less on phones,
+          // where the same tilt would reach further past the edges.
+          "marquee-group relative -mx-[3vw] w-[106vw] -rotate-[0.8deg] shadow-[0_18px_40px_-10px_rgb(15_29_49_/_45%)] sm:-mx-[6vw] sm:w-[112vw] sm:-rotate-[1.4deg]",
           isSlow && "is-slow",
         )}
         onClick={() => setIsSlow((current) => !current)}

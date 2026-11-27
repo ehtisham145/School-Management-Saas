@@ -18,7 +18,7 @@ export async function WhatsAppFloat() {
       target="_blank"
       rel="noopener noreferrer"
       aria-label={t("whatsapp")}
-      className="fixed end-4 bottom-4 z-40 grid size-[54px] place-items-center rounded-full bg-whatsapp text-on-dark shadow-whatsapp transition-transform hover:scale-[1.07] sm:end-[22px] sm:bottom-[22px] sm:size-[58px]"
+      className="fixed end-4 bottom-4 z-40 grid size-12 place-items-center rounded-full bg-whatsapp text-on-dark shadow-whatsapp transition-transform hover:scale-[1.07] sm:end-[22px] sm:bottom-[22px] sm:size-[58px]"
     >
       <WhatsAppLogo className="size-8" />
     </a>
