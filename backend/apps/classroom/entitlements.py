@@ -22,9 +22,11 @@ class Limits:
     ai_lessons: int
     ai_exams: int
     # "trial": counted over the whole trial. "month": counted again each calendar month.
-    # Both AI lesson plans and AI tests follow it.
+    # AI lesson plans, AI tests and Lesson Lab Agent tasks all follow it.
     ai_period: str
     pro_features: bool
+    # Lesson Lab Agent (browser agent) tasks; see apps/browser_agent (ADR-0028).
+    agent_tasks: int
 
 
 TRIAL_LIMITS = Limits(
@@ -36,6 +38,7 @@ TRIAL_LIMITS = Limits(
     ai_exams=5,
     ai_period="trial",
     pro_features=False,
+    agent_tasks=5,
 )
 TEACHER_LIMITS = Limits(
     classes=5,
@@ -46,6 +49,7 @@ TEACHER_LIMITS = Limits(
     ai_exams=20,
     ai_period="month",
     pro_features=False,
+    agent_tasks=20,
 )
 TEACHER_PRO_LIMITS = Limits(
     classes=None,
@@ -56,6 +60,7 @@ TEACHER_PRO_LIMITS = Limits(
     ai_exams=60,
     ai_period="month",
     pro_features=True,
+    agent_tasks=60,
 )
 
 
@@ -79,7 +84,8 @@ class WorkspaceAccess:
 
     @property
     def ai_since(self):
-        """From when AI lesson plans and tests are counted. None counts every one ever made."""
+        """From when AI lesson plans, tests and agent tasks are counted. None counts every one
+        ever made (the trial)."""
         if self.limits.ai_period == "month":
             return timezone.localdate().replace(day=1)
         return None

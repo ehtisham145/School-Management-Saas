@@ -77,13 +77,23 @@ def test_the_workspace_tells_the_app_that_classes_are_off(teacher):
     response = teacher.client.get(f"{BASE}/workspace/")
 
     assert response.status_code == 200
-    assert response.data["features"] == {"classes": False}
+    assert response.data["features"]["classes"] is False
 
 
 def test_the_workspace_says_when_classes_are_on(teacher, settings):
     settings.TEACHER_CLASSES_ENABLED = True
 
-    assert teacher.client.get(f"{BASE}/workspace/").data["features"] == {"classes": True}
+    assert teacher.client.get(f"{BASE}/workspace/").data["features"]["classes"] is True
+
+
+def test_the_workspace_says_whether_the_agent_is_on_and_its_allowance(teacher, settings):
+    settings.BROWSER_AGENT_ENABLED = False
+    data = teacher.client.get(f"{BASE}/workspace/").data
+    assert data["features"]["agent"] is False
+    assert data["limits"]["agent_tasks"] == 20
+
+    settings.BROWSER_AGENT_ENABLED = True
+    assert teacher.client.get(f"{BASE}/workspace/").data["features"]["agent"] is True
 
 
 @pytest.mark.parametrize("workspace", ["trial", "teacher", "pro"])

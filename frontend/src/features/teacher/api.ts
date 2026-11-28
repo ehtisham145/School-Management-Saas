@@ -1,5 +1,8 @@
 import { apiDownload, apiFetch, apiUpload, saveFile } from "@/lib/api";
 import type {
+  AgentStatus,
+  AgentTask,
+  AgentTaskDetail,
   Assessment,
   AssessmentInput,
   AttendanceRoster,
@@ -191,3 +194,32 @@ export const getPaperDesign = (signal?: AbortSignal) =>
   apiFetch<ExamTheme>(`${BASE}/paper-design/`, { signal });
 export const savePaperDesign = (body: ExamTheme) =>
   apiFetch<ExamTheme>(`${BASE}/paper-design/`, { method: "PUT", body });
+
+/* ------------------------------------------------------------ Lesson Lab Agent */
+
+const AGENT = "/browser-agent";
+
+export const getAgentStatus = (signal?: AbortSignal) =>
+  apiFetch<AgentStatus>(`${AGENT}/status/`, { signal });
+export const acceptAgentConsent = (version: string) =>
+  apiFetch<void>(`${AGENT}/consent/`, { method: "POST", body: { version } });
+export const listAgentTasks = (page: number, signal?: AbortSignal) =>
+  apiFetch<Paginated<AgentTask>>(`${AGENT}/tasks/?page=${page}`, { signal });
+export const getAgentTask = (id: number, signal?: AbortSignal) =>
+  apiFetch<AgentTaskDetail>(`${AGENT}/tasks/${id}/`, { signal });
+export const startAgentTask = (body: { goal: string; start_url?: string }) =>
+  apiFetch<AgentTask>(`${AGENT}/tasks/`, { method: "POST", body });
+export const cancelAgentTask = (id: number) =>
+  apiFetch<AgentTask>(`${AGENT}/tasks/${id}/cancel/`, { method: "POST" });
+
+/**
+ * The live socket for one task. Same origin on servers (Caddy sends /ws/ to Django). The
+ * Next.js dev server can't pass sockets on, so locally NEXT_PUBLIC_WS_ORIGIN points at
+ * Django (e.g. ws://localhost:8000); without it the page just polls.
+ */
+export function agentSocketUrl(taskId: number) {
+  const origin =
+    process.env.NEXT_PUBLIC_WS_ORIGIN ??
+    `${window.location.protocol === "https:" ? "wss" : "ws"}://${window.location.host}`;
+  return `${origin}/ws/browser-agent/${taskId}/`;
+}

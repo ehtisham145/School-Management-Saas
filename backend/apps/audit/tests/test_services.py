@@ -3,7 +3,14 @@ from django.db import transaction
 from django.test import RequestFactory, override_settings
 
 from apps.audit.models import AuditEvent
-from apps.audit.services import SYSTEM, Actor, actor_from_request, client_ip, record_event
+from apps.audit.services import (
+    SYSTEM,
+    Actor,
+    actor_from_request,
+    axes_client_ip,
+    client_ip,
+    record_event,
+)
 from apps.tenancy.models import School
 
 
@@ -27,6 +34,25 @@ def test_client_ip_reads_the_proxy_header_in_production():
 @override_settings(TRUST_X_FORWARDED_FOR=True)
 def test_client_ip_ignores_a_value_that_is_not_an_address():
     assert client_ip(_request(HTTP_X_FORWARDED_FOR="<script>")) is None
+
+
+@override_settings(TRUST_X_FORWARDED_FOR=True)
+def test_axes_sees_the_real_client_behind_the_proxy():
+    caddy = "172.18.0.2"
+    first = _request(REMOTE_ADDR=caddy, HTTP_X_FORWARDED_FOR="203.0.113.9")
+    second = _request(REMOTE_ADDR=caddy, HTTP_X_FORWARDED_FOR="198.51.100.7")
+
+    # Two users behind the same proxy get two lockout keys, not Caddy's one.
+    assert axes_client_ip(first) == "203.0.113.9"
+    assert axes_client_ip(second) == "198.51.100.7"
+
+
+@override_settings(TRUST_X_FORWARDED_FOR=True)
+def test_axes_falls_back_to_the_socket_address_without_a_usable_header():
+    assert axes_client_ip(_request(REMOTE_ADDR="172.18.0.2")) == "172.18.0.2"
+    assert axes_client_ip(_request(REMOTE_ADDR="172.18.0.2", HTTP_X_FORWARDED_FOR="junk")) == (
+        "172.18.0.2"
+    )
 
 
 def test_actor_from_request_keeps_the_user(db, django_user_model):

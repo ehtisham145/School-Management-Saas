@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
 import {
   BookOpenText,
+  Bot,
   ClipboardCheck,
   CreditCard,
   House,
@@ -27,11 +28,21 @@ import type { Workspace } from "../schemas";
 import { UpgradeLink, WorkspaceProvider } from "./teacher-ui";
 
 // `classes` items show only when the workspace has classes; they belong to the school plan.
+// `agent` items show only while the Lesson Lab Agent is switched on.
 const NAV_ITEMS = [
   { href: "/teacher", labelKey: "overview", icon: House, classes: false },
   { href: "/teacher/lessons", labelKey: "lessons", icon: BookOpenText, classes: false },
   { href: "/teacher/presentations", labelKey: "presentations", icon: Presentation, classes: false },
   { href: "/teacher/tests", labelKey: "tests", icon: ClipboardCheck, classes: false },
+  // In the side menu only: the phone's bottom bar keeps five items. Home has a card for it.
+  {
+    href: "/teacher/agent",
+    labelKey: "agent",
+    icon: Bot,
+    classes: false,
+    agent: true,
+    phone: false,
+  },
   // In the side menu only: the phone's bottom bar keeps five items.
   {
     href: "/teacher/paper-design",
@@ -46,7 +57,11 @@ const NAV_ITEMS = [
 ] as const;
 
 function navItems(workspace: Workspace | null) {
-  return NAV_ITEMS.filter((item) => !item.classes || workspace?.features.classes);
+  return NAV_ITEMS.filter(
+    (item) =>
+      (!item.classes || workspace?.features.classes) &&
+      (!("agent" in item) || workspace?.features.agent),
+  );
 }
 
 /** On phones the menu sits at the bottom, in reach of a thumb. Five items at most. */

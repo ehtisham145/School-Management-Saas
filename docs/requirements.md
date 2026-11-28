@@ -47,6 +47,15 @@ A person can hold roles in more than one school (e.g. a parent with children in 
 - Public website with five pages: Home, About Us, LMS, Pricing, Contact (Arabic/English, SEO). Book a demo and Contact forms are saved and emailed to the team
 - PWA (installable, web push notifications)
 
+### AI browser agent (planned, owner decision 2026-11-28)
+- Individual teachers first, schools later. A teacher types a task in a chat; an AI agent does it in a real browser on our server on a public website and reports back with a result and an action log ([browser-agent.md](browser-agent.md), [ADR-0028](decisions/0028-browser-agent-for-individual-teachers.md))
+- All servers in Saudi Arabia. The LLM is OpenAI (key already in use), behind the AI adapter; only trimmed, masked page text is sent to it
+- The teacher types passwords, OTPs, Nafath and CAPTCHA themselves in a live view; the system and the LLM never see or store them
+- Every submit, payment, delete, send or upload needs the teacher's yes. Banks, payment pages and government identity portals are blocked by default
+- Size for peak concurrent sessions (starting guess 5–10% of registered teachers, configurable), target 1,000 teachers
+- Consent screen, privacy notice and Terms of Service text before teachers use it
+- Name: **Lesson Lab Agent** (Arabic: وكيل Lesson Lab). Allowance (owner decision 2026-11-28): **trial 5 tasks** for the whole trial, **Teacher 20 a month**, **Teacher Pro 60 a month**. Tasks that fail on our side (server error, worker lost, AI provider down, never started) don't count; everything else does (done, stopped, limit reached, blocked site)
+
 ### Phase 3 (later)
 - Online fee payments (Mada, Apple Pay, STC Pay) — only if client asks
 - Further client-requested features
@@ -86,6 +95,7 @@ Traffic: peaks during school hours (07:00–14:00 KSA), spikes at morning attend
 ## 6. Open questions for the client (TBC)
 - Pricing: the site shows **sample** prices. Confirm the real ones for every plan, and each plan's student and class limits and features
 - Individual teachers: confirm the trial limits now in use (2 classes, 30 students, 20 lesson plans, 10 PowerPoint downloads, 10 AI lesson plans; Teacher 30 and Teacher Pro 100 AI lesson plans a month), whether AI lesson plans may use OpenAI, how a teacher pays after the trial, who can register (suggested: Saudi Arabia only), and how long data is kept after a trial ends (suggested: deleted after 37 days)
+- Browser agent: which tasks teachers need (research, curriculum sites, forms) to set the default allow/block list; allowance per plan and whether the trial gets it; the pilot's monthly budget cap; sign-off that masked page text goes to OpenAI outside the Kingdom; browser VM size
 - Do any parents lack email? (fallback: school-issued username/password for parents)
 - Fee structure specifics: installments, discounts, sibling discounts, VAT on receipts?
 - Report card format — does the client have a template (Ministry of Education format)?

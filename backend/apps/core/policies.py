@@ -11,6 +11,7 @@ POLICIES = {
     "academics.view": frozenset(Role.values),
     "academics.manage": frozenset({Role.SCHOOL_ADMIN}),
     "classroom.use": frozenset({Role.TEACHER}),
+    "browser_agent.use": frozenset({Role.TEACHER}),
 }
 
 

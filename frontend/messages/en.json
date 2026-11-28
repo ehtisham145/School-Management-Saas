@@ -1426,7 +1426,9 @@
       "logout": "Sign out",
       "tests": "Virtual tests",
       "presentations": "PowerPoint presentations",
+      "agent": "Lesson Lab Agent",
       "short": {
+        "agent": "Agent",
         "overview": "Home",
         "lessons": "Lessons",
         "presentations": "PowerPoint",
@@ -1497,6 +1499,11 @@
           "title": "Make a Digital / Virtual Test with AI",
           "body": "Questions from your PDF, with an answer key, ready to print.",
           "action": "Start a test"
+        },
+        "agent": {
+          "title": "Let Lesson Lab Agent do it on the web",
+          "body": "Describe a task. The agent opens websites, finds what you need and reports back.",
+          "action": "Start a task"
         }
       },
       "recentLessons": "Recent lesson plans",
@@ -2022,6 +2029,114 @@
       "body": "Classes, students, attendance, marks, report cards and parent messages come with Lesson Lab for schools. Your teacher plan keeps the AI tools: lesson plans, PowerPoint and tests.",
       "cta": "Talk to us about the school plan",
       "back": "Back to home"
+    },
+    "agent": {
+      "title": "Lesson Lab Agent",
+      "subtitle": "Describe a task. The agent opens a browser on our server, works on public websites and reports back.",
+      "left": "{left} of {limit} tasks left {period, select, trial {in your trial} other {this month}}",
+      "noneLeft": "You have used all your tasks {period, select, trial {in your trial} other {for this month}}. Choose a plan to get more.",
+      "readOnly": "Your plan has ended. Choose a plan to use Lesson Lab Agent.",
+      "notAvailable": {
+        "title": "Lesson Lab Agent is coming soon",
+        "body": "We are getting it ready. It will appear here when it is available."
+      },
+      "goal": "What should the agent do?",
+      "goalHint": "For example: find the Grade 7 science curriculum on this website and list its units.",
+      "startUrl": "Start page",
+      "startUrlHint": "Optional. A full web address, such as https://example.com",
+      "safety": "The agent won't sign in, pay or type passwords. Banks, payment pages and government sign-in portals are blocked.",
+      "start": "Start the task",
+      "starting": "Starting...",
+      "consent": {
+        "title": "Before you start",
+        "intro": "Please read how Lesson Lab Agent works:",
+        "points": {
+          "where": "The agent works in a browser on our servers in Saudi Arabia, on public websites only.",
+          "ai": "To choose each step, a short text of the page is sent to an AI provider outside Saudi Arabia (OpenAI).",
+          "data": "Emails, phone numbers, ID numbers, card numbers and your name are replaced with placeholders before that. We keep only the list of steps (website names and actions), not the pages.",
+          "blocked": "It never signs in, pays or types passwords for you. Banks, payment pages and government sign-in portals are blocked.",
+          "responsibility": "You are responsible for the tasks you ask it to do on other websites.",
+          "check": "The answers are written by AI and can be wrong. Check anything important."
+        },
+        "accept": "I have read this and I agree",
+        "submit": "Agree and continue"
+      },
+      "task": {
+        "title": "Your task",
+        "goal": "Task",
+        "steps": "What the agent did",
+        "waiting": "Waiting for the first step...",
+        "noSteps": "No steps were taken.",
+        "answer": "Answer",
+        "foundSoFar": "What it found",
+        "aiNote": "Written by AI. Check anything important.",
+        "cancel": "Stop the task",
+        "newTask": "Start a new task"
+      },
+      "status": {
+        "queued": "Waiting to start",
+        "running": "Working...",
+        "awaiting_user": "Waiting for you",
+        "done": "Done",
+        "failed": "Didn't finish",
+        "cancelled": "Stopped",
+        "limit_reached": "Stopped at a limit"
+      },
+      "steps": {
+        "actions": {
+          "goto": "Opened {domain}",
+          "click": "Clicked on {domain}",
+          "type": "Typed in a field",
+          "select": "Chose an option",
+          "scroll": "Scrolled the page",
+          "back": "Went back",
+          "wait": "Waited for the page",
+          "extract": "Noted a finding",
+          "done": "Finished",
+          "other": "Took a step"
+        },
+        "failed": "{action}, but it didn't work on the page",
+        "invalid": "The AI's reply couldn't be used",
+        "blocked": "Blocked: {reason}",
+        "reasons": {
+          "blocked_domain": "this website is on the blocked list",
+          "domain_not_allowed": "this website isn't allowed",
+          "private_address": "not a public website",
+          "internal_name": "not a public website",
+          "port": "this address isn't allowed",
+          "personal_data_in_url": "the link would have shared your details",
+          "scheme": "not a web address",
+          "unresolvable": "the website couldn't be found",
+          "other": "not allowed"
+        }
+      },
+      "failure": {
+        "limit": "The agent reached its step or time limit. What it found so far is below.",
+        "cost": "The agent reached its cost limit for one task. What it found so far is below.",
+        "budget": "Lesson Lab Agent has reached its limit for this month. Please try again next month.",
+        "strikes": "The agent stopped because it was blocked or confused too many times. Try describing the task more clearly.",
+        "aiReply": "The AI didn't give a usable reply. Please try again.",
+        "aiDown": "The AI service isn't available right now. This didn't use up a task. Please try again later.",
+        "ours": "Something went wrong on our side. This didn't use up a task. Please try again.",
+        "cancelled": "You stopped this task.",
+        "startPage": "The start page couldn't be opened.",
+        "startBlocked": "The start page isn't allowed. Banks, payment pages, government sign-in portals and private addresses are blocked.",
+        "generic": "The task didn't finish."
+      },
+      "history": {
+        "title": "Earlier tasks",
+        "empty": "No tasks yet",
+        "emptyHint": "Tasks you start will show here.",
+        "steps": "{count, plural, one {# step} other {# steps}}"
+      },
+      "errors": {
+        "agent_quota_reached": "You have used all your Lesson Lab Agent tasks. Choose a plan to get more.",
+        "consent_required": "Please read and accept the notice first.",
+        "task_already_running": "You already have a task running. Wait for it to finish or stop it first.",
+        "browser_agent_busy": "Lesson Lab Agent is busy right now. Please try again in a few minutes.",
+        "browser_agent_budget_reached": "Lesson Lab Agent has reached its limit for this month. Please try again next month.",
+        "browser_agent_disabled": "Lesson Lab Agent isn't available yet."
+      }
     }
   }
 }

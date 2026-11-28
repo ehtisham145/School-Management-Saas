@@ -20,7 +20,7 @@ Django, Celery and Next.js run **natively on both machines**, so hot reload stay
 | | `REDIS_URL` set (servers) | `REDIS_URL` unset (both local machines) |
 |---|---|---|
 | Cache | Redis | `LocMemCache` |
-| Celery | Real broker; run a worker on the `emails`, `ai` and `celery` queues | `CELERY_TASK_ALWAYS_EAGER=True` (tasks run inline) |
+| Celery | Real broker; run a worker on the `emails`, `ai` and `celery` queues, and a separate low-concurrency worker on `browser` ([browser-agent.md §12](browser-agent.md#12-configuration-and-operations)) | `CELERY_TASK_ALWAYS_EAGER=True` (tasks run inline) |
 | Channels layer | `channels_redis` | `InMemoryChannelLayer` |
 | Sessions | Redis-backed cache + DB | DB |
 
@@ -97,6 +97,8 @@ To use the Super Admin panel at `/platform`, tick **Is platform admin** on your 
 Quotation PDFs use WeasyPrint, which needs the Pango libraries. The Docker image and CI install them. On Windows, install GTK (the MSYS2 `mingw-w64-x86_64-pango` package) to make PDFs locally; without it the app still runs, the PDF download answers 503 `pdf_unavailable` and the real-PDF test is skipped (CI sets `REQUIRE_PDF=1`, so there it must pass). `COMPANY_VAT_NUMBER`, `QUOTATION_VAT_RATE` (default 15) and `QUOTATION_VALID_DAYS` (default 30) are in `.env.example`.
 
 `LEADS_EMAIL` sets who receives Book a demo and Contact form emails (default `info@lessonlab.me`). Without `EMAIL_HOST` in `.env`, emails are printed in the Django terminal. With it, they go through SMTP (see `.env.example`). Check the settings with `python manage.py sendtestemail you@example.com`. Port 587 uses `EMAIL_USE_TLS=True`; port 465 uses `EMAIL_USE_TLS=False` and `EMAIL_USE_SSL=True`.
+
+**Browser agent prototype** ([browser-agent.md](browser-agent.md), Phase 0). After `pip install`, download Chromium once with `playwright install chromium`. The tests need no OpenAI key; the page-script tests (`test_snapshot_browser.py`) run in Chromium and are skipped when it isn't installed. CI installs it and sets `REQUIRE_BROWSER=1`, so there they must pass. To try a real task, set `BROWSER_AGENT_ENABLED=True` and `OPENAI_API_KEY` in `.env`, then run `python manage.py run_browser_task --workspace <school id> "Find the opening hours" --url https://example.com` (add `--headed` to watch the window). The workspace must be an individual teacher's. Limits are the `BROWSER_AGENT_*` settings in `.env.example`; every one is listed in [browser-agent.md §12](browser-agent.md#12-configuration-and-operations). Locally the only network guard is the URL and domain check in the controller; the sandbox and egress proxy exist only on servers, so use public sites only. The task API (`/api/browser-agent/tasks/`) also works locally, but without Redis Celery is eager, so a started task runs inside the request and the request waits for it; that is fine for trying it, and production refuses to start that way. `python manage.py check` reports a model without a price or the agent switched on without `OPENAI_API_KEY`.
 
 If the frontend build complains about pages that no longer exist, or the dev server shows old styles after CSS changes, stop it, delete the generated `frontend/.next` folder and start it again.
 

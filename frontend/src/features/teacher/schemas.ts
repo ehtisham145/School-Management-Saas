@@ -13,6 +13,8 @@ export type Workspace = {
     ai_exams: number;
     ai_period: "trial" | "month";
     pro_features: boolean;
+    /** Lesson Lab Agent tasks: the whole trial, or each month on a paid plan. */
+    agent_tasks: number;
   };
   usage: {
     classes: number;
@@ -28,7 +30,59 @@ export type Workspace = {
   profile: { subject: string; grade_levels: string } | null;
   pending_upgrade: { plan: TeacherPlanCode } | null;
   /** Classes, students, attendance, marks and parent messages: the school plan's (ADR-0027). */
-  features: { classes: boolean };
+  /** `agent`: the Lesson Lab Agent is switched on (ADR-0028). */
+  features: { classes: boolean; agent: boolean };
+};
+
+/* ------------------------------------------------------------ Lesson Lab Agent */
+
+export type AgentTaskStatus =
+  "queued" | "running" | "awaiting_user" | "done" | "failed" | "cancelled" | "limit_reached";
+
+export const ACTIVE_AGENT_STATUSES: readonly AgentTaskStatus[] = [
+  "queued",
+  "running",
+  "awaiting_user",
+];
+
+export type AgentStep = {
+  number: number;
+  action: string;
+  domain: string;
+  verdict: "ok" | "blocked" | "failed" | "invalid";
+  note: string;
+  duration_ms: number;
+};
+
+export type AgentTask = {
+  id: number;
+  goal: string;
+  start_url: string;
+  status: AgentTaskStatus;
+  answer: string;
+  failure_reason: string;
+  steps_taken: number;
+  created_at: string;
+  started_at: string | null;
+  finished_at: string | null;
+};
+
+export type AgentTaskDetail = AgentTask & { steps: AgentStep[] };
+
+export type AgentStatus = {
+  consent_version: string;
+  consent_given: boolean;
+  allowance: { used: number; limit: number; left: number; period: "trial" | "month" };
+  active_task: AgentTask | null;
+};
+
+/** What the live socket sends: the task's state and, after a step, that step. */
+export type AgentUpdate = {
+  type: "task.update";
+  task: Pick<AgentTask, "id" | "status" | "steps_taken" | "failure_reason"> & {
+    answer?: string;
+  };
+  step?: AgentStep;
 };
 
 export type Classroom = {

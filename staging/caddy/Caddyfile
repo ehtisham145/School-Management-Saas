@@ -12,7 +12,8 @@
 	encode zstd gzip
 
 	header {
-		Strict-Transport-Security "max-age=31536000"
+		# Caddy's header wins over Django's, so both read SECURE_HSTS_SECONDS (default 3600).
+		Strict-Transport-Security "max-age={$SECURE_HSTS_SECONDS:3600}"
 		# Staging must never show up in search results.
 		X-Robots-Tag "noindex, nofollow"
 		# Next.js puts small inline scripts in each page, so scripts need 'unsafe-inline'.
@@ -29,8 +30,10 @@
 	}
 
 	# Caddy sets X-Forwarded-For and X-Forwarded-Proto itself and ignores the
-	# values a client sends, so Django can trust them.
-	@backend path /api/* /admin/* /static/*
+	# values a client sends, so Django can trust them (prod.py: NUM_PROXIES=1 and
+	# AXES_CLIENT_IP_CALLABLE). That holds only while Caddy is the sole way in: the
+	# backend publishes no port. /ws/* are WebSockets; reverse_proxy upgrades them.
+	@backend path /api/* /admin/* /static/* /ws/*
 	handle @backend {
 		reverse_proxy lessonlab-backend:8000
 	}

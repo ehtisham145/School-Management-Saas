@@ -41,6 +41,12 @@ def client_ip(request):
         return None
 
 
+def axes_client_ip(request):
+    """For django-axes (AXES_CLIENT_IP_CALLABLE): the same address as client_ip(). Falls
+    back to REMOTE_ADDR when the forwarded header is missing or bad; axes needs a string."""
+    return client_ip(request) or request.META.get("REMOTE_ADDR", "") or "unknown"
+
+
 def actor_from_request(request):
     return Actor(user=request.user, ip_address=client_ip(request))
 

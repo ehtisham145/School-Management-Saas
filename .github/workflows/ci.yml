@@ -47,13 +47,17 @@ jobs:
             sudo apt-get -o Acquire::Retries=5 install -y --no-install-recommends $packages
           fi
       - run: pip install -r requirements/dev.txt
+      # Chromium for the browser agent's page-script tests (test_snapshot_browser.py).
+      - run: python -m playwright install --with-deps chromium
       - run: ruff check .
       - run: ruff format --check .
       - run: python manage.py makemigrations --check --dry-run
-      # REQUIRE_PDF makes the PDF tests fail instead of skipping when WeasyPrint can't load.
+      # REQUIRE_PDF / REQUIRE_BROWSER make the PDF and Chromium tests fail instead of
+      # skipping when WeasyPrint or Chromium can't load.
       - run: pytest
         env:
           REQUIRE_PDF: "1"
+          REQUIRE_BROWSER: "1"
 
   frontend:
     runs-on: ubuntu-latest

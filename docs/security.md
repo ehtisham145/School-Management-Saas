@@ -47,7 +47,9 @@ This system stores **children's personal data** for multiple organisations. A cr
 - [ ] CSRF protection on all state-changing requests.
 - [x] DRF throttling on auth, OTP and demo-request/contact endpoints.
 - [ ] DRF throttling on file-upload endpoints.
-- [ ] Behind Caddy, configure DRF `NUM_PROXIES` so throttling uses the real client IP and `X-Forwarded-For` can't be spoofed.
+- [x] Behind Caddy, DRF `NUM_PROXIES=1` and django-axes `AXES_CLIENT_IP_CALLABLE` (the audit log's `client_ip()`) use the real client IP, so one user's lockout or throttle doesn't hit everyone (`prod.py`). Valid only while Caddy is the sole entry point and the backend publishes no port.
+- [x] Production cookies are `Secure`, `HttpOnly` (session) and `SameSite=Lax`; HSTS is env-configurable (`SECURE_HSTS_SECONDS`, default 3600, raise after HTTPS is proven).
+- [x] WebSockets pass `AllowedHostsOriginValidator` and `AuthMiddlewareStack` (`config/asgi.py`); each consumer checks ownership.
 - [ ] Decide how long demo requests and contact messages are kept (they hold personal data).
 - [ ] No raw SQL with string formatting; ORM or parameterised queries only.
 - [ ] User-generated HTML (announcements, lesson plans) sanitised server-side (`nh3`) before storing or rendering.
@@ -86,7 +88,26 @@ This system stores **children's personal data** for multiple organisations. A cr
 - [x] Dependency scanning: Dependabot + `pip-audit` + `npm audit` in CI.
 - [x] Staging auto-deploy uses a `deploy` user whose CI key can only run `staging/deploy.sh` (forced command + `restrict`), the script accepts only a commit SHA, and the registry token is short-lived and never stored on the server ([ADR-0013](decisions/0013-staging-auto-deploy.md)). GitHub-hosted runners have changing IPs, so SSH can't be limited to one IP while deploys come from them.
 
-## 9. Before go-live checklist
+## 9. AI browser agent ([ADR-0028](decisions/0028-browser-agent-for-individual-teachers.md))
+Full threat model: [browser-agent.md §6](browser-agent.md#6-threat-model). Must all be true before any outside user runs it:
+- [x] Fresh browser context per task, destroyed when the task ends, also on errors and Celery's soft time limit; the hard limit kills the worker process and `fail_stale_tasks_task` marks such tasks failed.
+- [x] Browser tasks are never retried (`acks_late=False`, `max_retries=0`) and start only through an atomic `queued → running` claim, so a crash can't submit a form twice. They run on their own `browser` queue and worker.
+- [ ] Chromium in its own container: non-root, seccomp, read-only FS, no capabilities, CPU/RAM/time limits, no route except the egress proxy.
+- [ ] SSRF: proxy blocks loopback, `10/8`, `172.16/12`, `192.168/16`, `169.254/16` (metadata), `100.64/10`, IPv6 loopback/ULA/link-local, internal DNS names, non-`http(s)` schemes; checked after DNS resolution and on every redirect; tests try each range.
+- [ ] Browser VMs can't reach the app VM, Postgres or Redis; only the controller can, over the private network.
+- [x] Page content goes into the prompt only inside a delimited untrusted block; the teacher's goal is the only instruction. Closed action list with a strict JSON schema.
+- [x] Never in a prompt or a log: passwords, OTPs, cookies, tokens, API keys, national IDs. Password and one-time-code fields stripped from snapshots; PII masked into placeholders and unmasked only on our server at execution.
+- [ ] Login, OTP, Nafath and CAPTCHA are handed to the teacher in a live view; the LLM is paused and input events aren't logged. Never bypassed.
+- [ ] Teacher confirmation before submit, payment, delete, send, upload or any action the policy can't prove harmless.
+- [ ] Domain rules: banks, payment/checkout pages and government identity portals blocked by default; Super Admin edits the list. **Done:** default list and optional allow list in env (`BROWSER_AGENT_BLOCKED_DOMAINS` / `_ALLOWED_DOMAINS`), checked on every navigation, redirect and request, subdomains included, counted as a strike. **Left:** review the list; Super Admin editing.
+- [ ] Downloads and uploads off in v1. Later: type/size allow-list and ClamAV.
+- [ ] Hard limits: 30 steps, 10 minutes, token cap, 5 pages, per-task cost ceiling; per-user rate limit and daily cap; monthly budget kill switch. **Done:** all but the daily cap, plus 1 running task per teacher and a platform-wide cap.
+- [x] Audit log per action: user, workspace, action kind, domain, time (`BrowserStep`). No page content, no typed values, no full URLs with query strings.
+- [ ] Step logs and confirmations deleted after 7 days (`BROWSER_AGENT_RETENTION_DAYS`); screenshots never stored.
+- [ ] Consent screen, privacy notice saying masked task data is processed by an external AI provider (OpenAI), and Terms of Service saying the teacher is responsible for tasks on third-party sites. Legal review before launch.
+- [ ] Weekly rebuild of the browser image with the latest Playwright/Chromium; `pip-audit` covers `playwright`.
+
+## 10. Before go-live checklist
 - [ ] Cross-tenant tests green for all endpoints
 - [ ] Manual test with two schools and every role
 - [ ] `python manage.py check --deploy` clean

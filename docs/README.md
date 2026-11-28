@@ -13,6 +13,7 @@ One platform, many schools; each school's data is fully isolated.
 | [security.md](security.md) | Security and PDPL essentials — non-negotiable rules |
 | [roadmap.md](roadmap.md) | 4-week MVP plan, then hardening, features, scaling |
 | [development.md](development.md) | Local setup (laptop / desktop), git workflow, commits, PRs, CI, "definition of done" |
+| [browser-agent.md](browser-agent.md) | Planned AI browser agent for teachers: architecture, threat model, cost model, phases |
 | [decisions/](decisions/) | Architecture Decision Records (ADRs) — one decision per file |
 | [../design/](../design/) | Approved visual design: demo page, brand assets and the frontend brief |
 
