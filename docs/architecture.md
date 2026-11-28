@@ -148,6 +148,11 @@ classroom:      TeacherProfile, Classroom unique(name, subject), Student(first/l
                 theme, source) → ExamQuestion(position, kind, text, options, answer, marks, source_page),
                 PaperDesign(theme) one per workspace, used on every downloaded paper ([ADR-0027](decisions/0027-teacher-app-ai-tools-only.md))
                 ([ADR-0026](decisions/0026-ai-tests-from-pdf.md))
+browser_agent:  ([ADR-0028](decisions/0028-browser-agent-for-individual-teachers.md)) BrowserTask(created_by, goal, start_url, status,
+                answer, failure_reason, step/token counters, cost_usd, model),
+                BrowserStep(number unique per task, action, domain, verdict, note code, tokens — no page content),
+                AgentConsent(user, version) unique per workspace + user + version.
+                Planned: ConfirmationRequest, ReplayRecipe; platform-owned DomainRule, AgentBudget
 audit:          AuditEvent(actor, action, target, school, ip_address, details) — platform actions, append-only ([ADR-0019](decisions/0019-platform-audit-log-and-quotation-pdfs.md)); django-auditlog for tenant data later
 ```
 
@@ -167,6 +172,10 @@ Money is stored as `DecimalField(max_digits=12, decimal_places=2)` in SAR. Never
 | Clean expired OTPs, sessions | Beat, nightly |
 | DB backup → Object Storage (other KSA region) | Cron on host, nightly 02:00 KSA |
 
+| Browser agent task (`run_browser_task_job`) | Teacher starts a task. Queue `browser` (`CELERY_TASK_ROUTES`), its own low-concurrency worker; never retried, `acks_late=False`, soft/hard time limits from `BROWSER_AGENT_MAX_SECONDS` |
+| Fail abandoned browser tasks (`fail_stale_tasks_task`) | Beat, every 5 minutes |
+| Browser agent 7-day log retention (planned) | Beat, nightly |
+
 Rules: tasks are **idempotent**, take IDs (not model objects), and re-check tenant/permission inside the task. Long work → task → notify user. Never in the request.
 
 ## 7. Real-time
@@ -176,6 +185,8 @@ Rules: tasks are **idempotent**, take IDs (not model objects), and re-check tena
 - Flow: service saves `Notification` → `transaction.on_commit` → `channel_layer.group_send` → browser updates badge/list instantly.
 - Fallback: if the socket is down, the frontend polls `/api/notifications/unread-count/` every 60s.
 - Web Push (PWA, Phase 1.5) is sent from Celery for users who aren't online.
+- `config/asgi.py` sends WebSockets through `AllowedHostsOriginValidator` and `AuthMiddlewareStack` to the routes in `config/routing.py`. Caddy forwards `/ws/*` to the backend.
+- Browser agent: `/ws/browser-agent/<task>/` carries task status and steps (later also live-view frames and the teacher's input during login hand-off). Group `browser_task_<id>`, joined only by the task's owner in their active workspace; closes when the task ends or goes idle. Frames are never stored ([browser-agent.md §12](browser-agent.md#12-configuration-and-operations)).
 
 ## 8. Files, i18n and dates
 
@@ -203,6 +214,8 @@ Host cron:     nightly pg_dump → encrypted → OCI Object Storage (Jeddah) ; w
 2. On merge to `main`: build **arm64** images (buildx) → push to GHCR → SSH to VM → `docker compose pull && docker compose up -d` → `migrate` → health check.
 3. Environments: `staging` (same VM, separate compose project + DB, at first) and `production`. Deploys outside 07:00–14:00 KSA.
 
+**Browser agent hosts (planned, [browser-agent.md §2](browser-agent.md#2-architecture)):** separate OCI Riyadh VM(s) running `agent-controller` (Celery, queue `browser`), `browser-sandbox` (Chromium, no route except the proxy) and `egress-proxy` (Smokescreen). They reach the app VM only for Redis and Postgres over the private network.
+
 Secrets live in a `.env` on the VM (chmod 600) and in GitHub Actions secrets, never in git.
 
 Local development does **not** use the production compose file. Both machines run fully native (no Docker, no Redis); the settings switch to in-memory fallbacks when `REDIS_URL` is unset. See [development.md](development.md) and [ADR-0009](decisions/0009-local-development-fully-native.md).
@@ -228,7 +241,8 @@ lms/
 │   │   ├── communication/      announcements, messaging (+ consumers.py)
 │   │   ├── notifications/      in-app, email, push, websocket consumer
 │   │   ├── files/
-│   │   └── integrations/       email/, pdf/ (WeasyPrint), payments/, ai/ adapters
+│   │   ├── browser_agent/      tasks, agent loop, masking, URL policy (Phase 0); policy gate, live-view consumer later
+│   │   └── integrations/       email/, pdf/ (WeasyPrint), payments/, ai/ adapters, browser/ (Playwright)
 │   ├── templates/              emails/, pdf/
 │   ├── locale/                 ar/ en/
 │   ├── requirements/           base.txt, dev.txt, prod.txt   (pip, pinned)

@@ -41,6 +41,7 @@ Guiding principles for this project:
 | Errors | **Sentry** (free tier, PII scrubbing on) | GlitchTip self-hosted — if no data may leave KSA, even error traces |
 | Uptime | **UptimeRobot / Better Stack free** (external) | — |
 | Logs | Docker JSON logs with rotation + structured logs (structlog) | Grafana Loki — at 10K+ users |
+| Browser automation | **Playwright (Python) + Chromium** (`playwright` in `requirements/base.txt` since the Phase 0 prototype; browser VMs come in Phase 2), behind `apps/integrations/browser`; **Smokescreen** egress proxy for SSRF/domain rules. See [ADR-0028](decisions/0028-browser-agent-for-individual-teachers.md) | Browser Use (full agent loop), Steel (hosted/self-hosted browser API) — if our own loop or pooling falls short in the pilot |
 | AI (Phase 3) | **Provider adapter**, hosted LLM API (Groq/Gemini) — interim, cheap, no upfront GPU cost. See [ADR-0016](decisions/0016-interim-hosted-ai-api.md) | Self-hosted open-weight model on a dedicated GPU server, once funded — long-term target ([ADR-0014](decisions/0014-self-hosted-ai-model.md)) |
 
 ## Why each choice fits this project
@@ -100,6 +101,10 @@ Not needed until Phase 3 AI work starts. **Interim plan ([ADR-0016](decisions/00
 | **Project total once AI is live (interim)** | **~$3–130 / month** (app ~$0–5 unchanged + API add-on) |
 
 **Long-term target ([ADR-0014](decisions/0014-self-hosted-ai-model.md)):** once funded, move to a self-hosted open-weight model (7–14B params, e.g. Qwen 2.5 14B) on a rented GPU — [DCP.sa](https://dcp.sa) (Saudi Arabia, RTX 4090, per-second billing, PDPL-compliant) at ~$0.97/hr while running, roughly $16–100/month depending on usage with start/stop automation, or ~$700/month if left on 24/7 (not recommended). No training needed to start on either path — good prompts are enough; fine-tuning on the school's own sample lesson plans is a later, optional quality improvement either way.
+
+### Add-on: AI browser agent (planned)
+
+Separate from the numbers above. Browser VM(s) in OCI Riyadh plus OpenAI usage: roughly **$45–110/month at 100 teachers, $160–515 at 500, $400–1,100 at 1,000**, capped by plan allowances and a monthly kill switch. Assumptions and the full model: [browser-agent.md §8](browser-agent.md#8-capacity-and-cost).
 
 Leaves headroom inside the $20 budget. Not included: developer tooling (Claude subscription) and a `.sa` domain if the client wants one.
 If free A1 capacity is unavailable, expect **~$30–60/month** for a paid VM in KSA. Check current prices in the provider's console before buying.

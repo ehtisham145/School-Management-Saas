@@ -2,6 +2,7 @@
 
 from dataclasses import asdict
 
+from django.conf import settings
 from django.http import HttpResponse
 from django.utils import timezone
 from django.utils.text import slugify
@@ -163,7 +164,11 @@ class WorkspaceView(WorkspaceMixin, APIView):
                 "profile": profile
                 and {"subject": profile.subject, "grade_levels": profile.grade_levels},
                 "pending_upgrade": pending and {"plan": pending.plan},
-                "features": {"classes": access.classes_enabled},
+                # `agent`: the Lesson Lab Agent is switched on (BROWSER_AGENT_ENABLED).
+                "features": {
+                    "classes": access.classes_enabled,
+                    "agent": settings.BROWSER_AGENT_ENABLED,
+                },
             }
         )
 

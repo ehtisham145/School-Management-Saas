@@ -12,7 +12,7 @@ Goal: one or two real schools can run daily operations.
 - [x] Local dev fully native on both machines ([development.md](development.md), [ADR-0009](decisions/0009-local-development-fully-native.md)): Postgres 17 installed natively, no Docker, no Redis on either machine
 - [x] Django project, settings split, Postgres, ruff + pytest; Redis optional via `REDIS_URL`
 - [x] Celery app (`config/celery.py`) wired, email adapter (`apps/integrations/email`, `feature/totp-2fa`)
-- [ ] Channels ASGI routing wired
+- [x] Channels ASGI routing wired (`config/asgi.py`: origin check + session auth; first route is the browser agent's)
 - [x] `TenantModel`, `TenantMiddleware`, `TenantScopedViewSet`, cross-tenant test fixture (`feature/multi-tenancy`)
 - [x] `apps/core/policies.py` permission matrix (`can(role, action)`) + `HasPolicy` on `TenantScopedViewSet` (`feature/policies`)
 - [x] Accounts: custom `User` model (`apps/accounts`)
@@ -69,7 +69,7 @@ Goal: one or two real schools can run daily operations.
 - [ ] In-app notifications live via WebSocket; email notifications via Celery
 - [ ] Hijri + Gregorian date display everywhere
 - [ ] Audit log wired on sensitive tenant models (Super Admin actions are already logged)
-- [ ] Security checklist ([security.md](security.md) §9), backups + restore test, Sentry, uptime monitor
+- [ ] Security checklist ([security.md](security.md) §10), backups + restore test, Sentry, uptime monitor
 - [ ] **Production deploy**, onboard pilot school, training session
 
 If week 3 slips, move **homework** to month 2 first, then **messaging** (announcements stay).
@@ -107,6 +107,16 @@ If week 3 slips, move **homework** to month 2 first, then **messaging** (announc
 - [x] Privacy policy page `/privacy` (Arabic + English), linked from the footer. It is a draft until the legal review below
 - [ ] Terms, DPA template
 - [ ] Polish from pilot school feedback
+
+## AI browser agent for individual teachers (planned)
+Design, cost model and the step-by-step plan for each phase: [browser-agent.md §9](browser-agent.md#9-phases), [ADR-0028](decisions/0028-browser-agent-for-individual-teachers.md). Each step is demoed and tested before the next. No real teachers until production runs in Saudi Arabia.
+- [x] Plan: architecture, trust boundaries, threat model, capacity and cost model, phases (docs only)
+- [ ] Phase 0 — Prototype (local): `BrowserTask` model, Playwright, OpenAI agent adapter, text snapshot, masking and URL-check unit tests, admin-only trigger
+- [ ] Phase 1 — Core: task API, Celery `browser` queue, chat page with live status, action log and result, allowance and throttle, cross-tenant and role tests, feature flag off by default. **Backend written** (API, queue with no retries, WebSocket with ownership checks, throttle, per-user and platform caps, cost ceiling, monthly kill switch, domain rules, start-up guards, proxy-aware client IP); teacher page `/teacher/agent` ("Lesson Lab Agent") with consent, live steps, answer and history, and the plan allowance (trial 5, Teacher 20/month, Pro 60/month) are written too. Still needed before teachers use it: the confirmation gate and Phase 2
+- [ ] Browser worker service on staging (Chromium in its image, `-Q browser`), then verify sockets and the queue with Redis
+- [ ] Phase 2 — Safety: browser VM with sandbox and egress proxy, policy gate, confirmations, login hand-off with live view, domain rules, audit log, 7-day retention, consent, privacy notice and ToS text, prompt-injection test pages
+- [ ] Phase 3 — Pilot (20–50 teachers): budget kill switch, model routing, cost per task/teacher/model, pilot metrics page, Super Admin suspend
+- [ ] Phase 4 — Scale (1,000 teachers): replay recipes, research cache, autoscaling browser hosts, load test, weekly Chromium updates
 
 ## Phase 2 — Hardening (Month 3)
 - [ ] PostgreSQL Row-Level Security as a second isolation layer

@@ -1,7 +1,7 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { ArrowRight, BookOpenText, ClipboardCheck, Presentation } from "lucide-react";
+import { ArrowRight, BookOpenText, Bot, ClipboardCheck, Presentation } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { cn } from "cn";
 import { Link } from "@/i18n/navigation";
@@ -99,7 +99,7 @@ function ToolCard({
   action,
   tone,
 }: {
-  href: "/teacher/lessons" | "/teacher/presentations" | "/teacher/tests";
+  href: "/teacher/lessons" | "/teacher/presentations" | "/teacher/tests" | "/teacher/agent";
   icon: typeof BookOpenText;
   title: string;
   body: string;
@@ -232,7 +232,12 @@ export function OverviewPanel() {
         <>
           <section className="flex flex-col gap-3">
             <h2 className="text-lg text-navy-deep">{t("toolsTitle")}</h2>
-            <ul className="grid gap-3 md:grid-cols-3">
+            <ul
+              className={cn(
+                "grid gap-3",
+                workspace.features.agent ? "md:grid-cols-2 xl:grid-cols-4" : "md:grid-cols-3",
+              )}
+            >
               <ToolCard
                 href="/teacher/lessons"
                 icon={BookOpenText}
@@ -257,6 +262,16 @@ export function OverviewPanel() {
                 action={t("tools.test.action")}
                 tone="navy"
               />
+              {workspace.features.agent && (
+                <ToolCard
+                  href="/teacher/agent"
+                  icon={Bot}
+                  title={t("tools.agent.title")}
+                  body={t("tools.agent.body")}
+                  action={t("tools.agent.action")}
+                  tone="orange"
+                />
+              )}
             </ul>
           </section>
 

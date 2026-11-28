@@ -3,6 +3,8 @@ from pathlib import Path
 import environ
 from celery.schedules import crontab
 
+from config.settings.guards import env_decimal
+
 # settings/base.py -> settings -> config -> backend
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
@@ -37,6 +39,7 @@ LOCAL_APPS: list[str] = [
     "apps.tenancy",
     "apps.chatbot",
     "apps.classroom",
+    "apps.browser_agent",
 ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
@@ -98,6 +101,86 @@ LEADS_EMAIL = env("LEADS_EMAIL", default="info@lessonlab.me")
 
 OPENAI_API_KEY = env("OPENAI_API_KEY", default="")
 
+# Browser agent (ADR-0028, docs/browser-agent.md). Off until it is safe for outside users.
+BROWSER_AGENT_ENABLED = env.bool("BROWSER_AGENT_ENABLED", default=False)
+BROWSER_AGENT_MODEL = env("BROWSER_AGENT_MODEL", default="gpt-4o-mini")
+BROWSER_AGENT_MAX_STEPS = env.int("BROWSER_AGENT_MAX_STEPS", default=30)
+BROWSER_AGENT_MAX_SECONDS = env.int("BROWSER_AGENT_MAX_SECONDS", default=600)
+# A full page is ~3,500-4,500 tokens a step (docs/browser-agent.md §8), so 30 steps need
+# about 120k. Money is capped separately by BROWSER_AGENT_MAX_COST_USD_PER_TASK.
+BROWSER_AGENT_MAX_INPUT_TOKENS = env.int("BROWSER_AGENT_MAX_INPUT_TOKENS", default=120000)
+BROWSER_AGENT_MAX_PAGES = env.int("BROWSER_AGENT_MAX_PAGES", default=5)
+BROWSER_AGENT_MAX_STRIKES = env.int("BROWSER_AGENT_MAX_STRIKES", default=3)
+BROWSER_AGENT_MAX_PAGE_CHARS = env.int("BROWSER_AGENT_MAX_PAGE_CHARS", default=12000)
+# Reply tokens per AI call. Arabic needs room; only tokens actually written are billed.
+# A cut-off reply is tried once more with twice this.
+BROWSER_AGENT_MAX_OUTPUT_TOKENS = env.int("BROWSER_AGENT_MAX_OUTPUT_TOKENS", default=800)
+# USD per million tokens (input, output). Check the provider's price page when they change.
+# BROWSER_AGENT_MODEL must be listed here; production refuses to start otherwise.
+BROWSER_AGENT_PRICES = {
+    "gpt-4o-mini": ("0.15", "0.60"),
+    "gpt-4o": ("2.50", "10.00"),
+}
+# Money is Decimal, never float. A bad value stops start-up (config/settings/guards.py).
+BROWSER_AGENT_MAX_COST_USD_PER_TASK = env_decimal(
+    env, "BROWSER_AGENT_MAX_COST_USD_PER_TASK", default="0.20"
+)
+BROWSER_AGENT_MONTHLY_BUDGET_USD = env_decimal(
+    env, "BROWSER_AGENT_MONTHLY_BUDGET_USD", default="100"
+)
+# Concurrency, checked before a task is queued.
+BROWSER_AGENT_MAX_RUNNING_PER_USER = env.int("BROWSER_AGENT_MAX_RUNNING_PER_USER", default=1)
+BROWSER_AGENT_MAX_RUNNING_TOTAL = env.int("BROWSER_AGENT_MAX_RUNNING_TOTAL", default=10)
+# Celery limits for the browser task: soft = the agent's own limit, hard = 30 s later.
+BROWSER_AGENT_SOFT_TIME_LIMIT = BROWSER_AGENT_MAX_SECONDS
+BROWSER_AGENT_HARD_TIME_LIMIT = BROWSER_AGENT_MAX_SECONDS + 30
+# A live-view socket with no traffic for this long is closed.
+BROWSER_AGENT_WS_IDLE_SECONDS = env.int("BROWSER_AGENT_WS_IDLE_SECONDS", default=300)
+# Domains the agent never opens, with every subdomain. Starting list to review: Saudi banks,
+# payment and checkout providers, government identity portals. Setting the env var
+# replaces the whole list.
+BROWSER_AGENT_BLOCKED_DOMAINS = env.list(
+    "BROWSER_AGENT_BLOCKED_DOMAINS",
+    default=[
+        # Banks
+        "alrajhibank.com.sa",
+        "alahli.com",
+        "riyadbank.com",
+        "sab.com",
+        "alinma.com",
+        "bankalbilad.com",
+        "alfransi.com.sa",
+        "anb.com.sa",
+        "bankaljazira.com",
+        "saib.com.sa",
+        "stcbank.com.sa",
+        # Payments and checkout
+        "paypal.com",
+        "stripe.com",
+        "checkout.com",
+        "moyasar.com",
+        "hyperpay.com",
+        "tap.company",
+        "payfort.com",
+        "stcpay.com.sa",
+        "mada.com.sa",
+        "sadad.com",
+        "tabby.ai",
+        "tamara.co",
+        # Government identity
+        "absher.sa",
+        "iam.gov.sa",
+        "nafath.sa",
+    ],
+)
+# Empty means every public domain except the blocked ones.
+BROWSER_AGENT_ALLOWED_DOMAINS = env.list("BROWSER_AGENT_ALLOWED_DOMAINS", default=[])
+# Ports the agent may open. A URL without a port uses its scheme's default (80/443).
+# 8080/8443 are left out on purpose: mostly admin panels, dev servers and proxies.
+BROWSER_AGENT_ALLOWED_PORTS = env.list("BROWSER_AGENT_ALLOWED_PORTS", cast=int, default=[80, 443])
+# A DNS lookup slower than this refuses the URL instead of holding up the worker.
+BROWSER_AGENT_DNS_TIMEOUT_SECONDS = env.float("BROWSER_AGENT_DNS_TIMEOUT_SECONDS", default=3.0)
+
 # Branded emails (apps/integrations/email/branded.py). A blank value hides that footer part.
 COMPANY_NAME = "Lesson Lab"
 COMPANY_WEBSITE = env("COMPANY_WEBSITE", default=FRONTEND_URL).rstrip("/")
@@ -142,7 +225,7 @@ AUTHENTICATION_BACKENDS = [
     "axes.backends.AxesStandaloneBackend",  # must be first
     "django.contrib.auth.backends.ModelBackend",
 ]
-AXES_FAILURE_LIMIT = 15
+AXES_FAILURE_LIMIT = env.int("AXES_FAILURE_LIMIT", default=15)
 AXES_COOLOFF_TIME = 1  # hours
 AXES_LOCKOUT_PARAMETERS = ["username", "ip_address"]
 
@@ -176,6 +259,7 @@ REST_FRAMEWORK = {
         "exam_upload": "30/hour",
         "leads": "10/hour",
         "chatbot": "30/hour",
+        "browser_agent": env("BROWSER_AGENT_THROTTLE_RATE", default="10/hour"),
     },
     "EXCEPTION_HANDLER": "apps.core.exceptions.api_exception_handler",
 }
@@ -207,6 +291,12 @@ else:
     CELERY_TASK_ALWAYS_EAGER = True
 
 CELERY_TIMEZONE = TIME_ZONE
+# Browser tasks get their own queue and worker, so a slow website never holds up emails
+# or subscription jobs (docs/browser-agent.md, "Running the browser worker").
+CELERY_TASK_ROUTES = {
+    "apps.browser_agent.tasks.run_browser_task_job": {"queue": "browser"},
+    "apps.browser_agent.tasks.fail_stale_tasks_task": {"queue": "celery"},
+}
 CELERY_TASK_ACKS_LATE = True
 CELERY_BEAT_SCHEDULE = {
     # Just after midnight, Saudi time.
@@ -223,5 +313,11 @@ CELERY_BEAT_SCHEDULE = {
     "clean-up-exam-drafts": {
         "task": "apps.classroom.tasks.clean_up_exam_drafts_task",
         "schedule": crontab(minute=30),
+    },
+    # Browser tasks are never retried, so a worker that died leaves them "running".
+    # This marks them failed once they are past the hard time limit.
+    "fail-stale-browser-tasks": {
+        "task": "apps.browser_agent.tasks.fail_stale_tasks_task",
+        "schedule": crontab(minute="*/5"),
     },
 }
